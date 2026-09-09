@@ -34,10 +34,8 @@ export default function CategoryItemsScreen() {
 
   const selectedCategory = Array.isArray(category) ? category[0] : category;
 
-  // Get all menu items from all restaurants
   const allMenuItems = getAllMenuItems();
 
-  // Filter items belonging to the selected category
   const filteredItems = selectedCategory
     ? allMenuItems.filter((item) => {
         const selected = selectedCategory.trim().toLowerCase();
@@ -76,7 +74,7 @@ export default function CategoryItemsScreen() {
         </View>
       </View>
 
-      {/* SCROLLABLE CONTENT */}
+      {/* FOOD LIST */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         className="flex-1"
@@ -85,7 +83,6 @@ export default function CategoryItemsScreen() {
           paddingBottom: 140,
         }}
       >
-        {/* FOOD ITEMS */}
         {filteredItems.length > 0 ? (
           filteredItems.map((item) => {
             const restaurant = restaurants.find(
@@ -97,14 +94,13 @@ export default function CategoryItemsScreen() {
                 key={`${item.restaurantId}-${item.id}`}
                 className="mb-4 overflow-hidden rounded-2xl border border-border bg-white"
               >
-                {/* FOOD IMAGE */}
+                {/* IMAGE */}
                 <View className="h-40 w-full items-center justify-center bg-surface">
                   <Text className="text-6xl">{emoji}</Text>
                 </View>
 
-                {/* FOOD INFORMATION */}
+                {/* INFORMATION */}
                 <View className="p-4">
-                  {/* NAME + PRICE */}
                   <View className="flex-row items-start justify-between">
                     <View className="flex-1 pr-3">
                       <Text
@@ -173,9 +169,7 @@ export default function CategoryItemsScreen() {
                       name="arrow-forward"
                       size={14}
                       color="#E53935"
-                      style={{
-                        marginLeft: 4,
-                      }}
+                      style={{ marginLeft: 4 }}
                     />
                   </Pressable>
                 </View>
@@ -183,7 +177,6 @@ export default function CategoryItemsScreen() {
             );
           })
         ) : (
-          /* EMPTY STATE */
           <View className="items-center justify-center py-20">
             <View className="h-20 w-20 items-center justify-center rounded-full bg-surface">
               <Ionicons name="restaurant-outline" size={38} color="#737373" />
@@ -208,15 +201,10 @@ export default function CategoryItemsScreen() {
         )}
       </ScrollView>
 
-      {/* BOTTOM NAVIGATION */}
       <BottomNavigation />
     </View>
   );
 }
-
-/* =========================================================
-   BOTTOM NAVIGATION
-========================================================= */
 
 function BottomNavigation() {
   return (

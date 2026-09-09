@@ -22,9 +22,27 @@ export const restaurants = [
     cuisine: "Pizza • Fast Food",
     offer: false,
   },
-
   {
     id: "3",
+    name: "Brachers Inn",
+    emoji: "🍕",
+    rating: "4.5",
+    reviews: "0",
+    time: "20–30 min",
+    category: "Ghanaian • Pizza • Fast Food",
+  },
+  {
+    id: "4",
+    name: "Bloom Bakes",
+    emoji: "🍵",
+    rating: "4.5",
+    reviews: "0",
+    time: "15–25 min",
+    category: "Matcha • Drinks",
+  },
+
+  {
+    id: "5",
     name: "Roll'd Up Shawarma",
     image: require("../../assets/images/akrobite-logo.png"),
     rating: "4.4",
@@ -36,7 +54,7 @@ export const restaurants = [
   },
 
   {
-    id: "4",
+    id: "6",
     name: "Boba Buzz",
     emoji: "🧋",
     rating: "4.5",
@@ -46,32 +64,12 @@ export const restaurants = [
   },
 
   {
-    id: "5",
-    name: "Bloom Bakes",
-    emoji: "🍵",
-    rating: "4.5",
-    reviews: "0",
-    time: "15–25 min",
-    category: "Matcha • Drinks",
-  },
-
-  {
-    id: "6",
+    id: "7",
     name: "Thebloom Boba Tea",
     emoji: "🧋",
     rating: "4.5",
     reviews: "0",
     time: "15–25 min",
     category: "Bubble Tea • Drinks",
-  },
-
-  {
-    id: "7",
-    name: "Brachers Inn",
-    emoji: "🍕",
-    rating: "4.5",
-    reviews: "0",
-    time: "20–30 min",
-    category: "Ghanaian • Pizza • Fast Food",
   },
 ];

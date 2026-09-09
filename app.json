@@ -12,6 +12,7 @@
       "usesAppleSignIn": true
     },
     "android": {
+      "package": "com.benscripts419.foodmarketplace",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -23,7 +24,8 @@
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png",
-      "bundler": "metro"
+      "bundler": "metro",
+      "name": "AkroBite"
     },
     "plugins": [
       "expo-router",
@@ -37,7 +39,8 @@
       ],
       "expo-font",
       "expo-secure-store",
-      "expo-apple-authentication"
+      "expo-apple-authentication",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,

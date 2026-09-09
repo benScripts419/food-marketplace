@@ -33,6 +33,20 @@ provider settings. For Apple, configure the Apple Services ID, Team ID, Key
 ID, and private key in Supabase. Apple sign-in on iOS requires a development
 build or production build with the `usesAppleSignIn` capability; Expo Go can be
 used for limited testing on iOS.
+
+### Supabase database setup
+
+Run `supabase/migrations/001_marketplace_schema.sql` in the Supabase SQL
+Editor. Then seed the existing restaurant menus into the new tables:
+
+```bash
+npm run seed:supabase
+```
+
+The seed command reads the existing local menu catalog and upserts categories
+and items into Supabase. It uses the `EXPO_PUBLIC_SUPABASE_URL` and
+`SUPABASE_SERVICE_ROLE_KEY` values from the shell. Never add the service role
+key to `.env`, Expo variables, or the client bundle.
 In the output, you'll find options to open the app in a
 
 - [development build](https://docs.expo.dev/develop/development-builds/introduction/)

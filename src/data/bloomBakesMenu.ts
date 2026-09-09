@@ -20,12 +20,12 @@ export const bloomBakesMenu: MenuCategory[] = [
   // TEA / BOBA
   // =====================================================
   {
-    id: "bloom-tea",
+    id: "Milk Series",
     name: "Tea",
     items: [
       {
         id: "bloom-chocolate-milk-tea-500",
-        name: "Chocolate Milk Tea",
+        name: "Chocolate",
         description: "500ml",
         price: 40,
         category: "Tea",
@@ -33,7 +33,7 @@ export const bloomBakesMenu: MenuCategory[] = [
       },
       {
         id: "bloom-chocolate-milk-tea-700",
-        name: "Chocolate Milk Tea",
+        name: "Chocolate",
         description: "700ml",
         price: 50,
         category: "Tea",
@@ -42,7 +42,7 @@ export const bloomBakesMenu: MenuCategory[] = [
 
       {
         id: "bloom-blueberry-milk-tea-500",
-        name: "Blueberry Milk Tea",
+        name: "Blueberry",
         description: "500ml",
         price: 40,
         category: "Tea",
@@ -50,7 +50,7 @@ export const bloomBakesMenu: MenuCategory[] = [
       },
       {
         id: "bloom-blueberry-milk-tea-700",
-        name: "Blueberry Milk Tea",
+        name: "Blueberry",
         description: "700ml",
         price: 50,
         category: "Tea",
@@ -59,7 +59,7 @@ export const bloomBakesMenu: MenuCategory[] = [
 
       {
         id: "bloom-coconut-milk-tea-500",
-        name: "Coconut Milk Tea",
+        name: "Coconut",
         description: "500ml",
         price: 40,
         category: "Tea",
@@ -67,7 +67,7 @@ export const bloomBakesMenu: MenuCategory[] = [
       },
       {
         id: "bloom-coconut-milk-tea-700",
-        name: "Coconut Milk Tea",
+        name: "Coconut",
         description: "700ml",
         price: 50,
         category: "Tea",
@@ -76,7 +76,7 @@ export const bloomBakesMenu: MenuCategory[] = [
 
       {
         id: "bloom-vanilla-milk-tea-500",
-        name: "Vanilla Milk Tea",
+        name: "Vanilla",
         description: "500ml",
         price: 40,
         category: "Tea",
@@ -84,7 +84,7 @@ export const bloomBakesMenu: MenuCategory[] = [
       },
       {
         id: "bloom-vanilla-milk-tea-700",
-        name: "Vanilla Milk Tea",
+        name: "Vanilla",
         description: "700ml",
         price: 50,
         category: "Tea",
@@ -93,7 +93,7 @@ export const bloomBakesMenu: MenuCategory[] = [
 
       {
         id: "bloom-strawberry-milk-tea-500",
-        name: "Strawberry Milk Tea",
+        name: "Strawberry",
         description: "500ml",
         price: 40,
         category: "Tea",
@@ -101,7 +101,7 @@ export const bloomBakesMenu: MenuCategory[] = [
       },
       {
         id: "bloom-strawberry-milk-tea-700",
-        name: "Strawberry Milk Tea",
+        name: "Strawberry",
         description: "700ml",
         price: 50,
         category: "Tea",
@@ -110,7 +110,7 @@ export const bloomBakesMenu: MenuCategory[] = [
 
       {
         id: "bloom-taro-milk-tea-500",
-        name: "Taro Milk Tea",
+        name: "Taro",
         description: "500ml",
         price: 40,
         category: "Tea",
@@ -118,7 +118,7 @@ export const bloomBakesMenu: MenuCategory[] = [
       },
       {
         id: "bloom-taro-milk-tea-700",
-        name: "Taro Milk Tea",
+        name: "Taro",
         description: "700ml",
         price: 50,
         category: "Tea",
@@ -126,16 +126,16 @@ export const bloomBakesMenu: MenuCategory[] = [
       },
 
       {
-        id: "bloom-brown-sugar-fresh-milk-500",
-        name: "Brown Sugar Fresh Milk",
+        id: "bloom-matcha-milk-tea-500",
+        name: "Matcha",
         description: "500ml",
         price: 40,
         category: "Tea",
         image: menuImage,
       },
       {
-        id: "bloom-brown-sugar-fresh-milk-700",
-        name: "Brown Sugar Fresh Milk",
+        id: "bloom-matcha-milk-tea-700",
+        name: "Matcha",
         description: "700ml",
         price: 50,
         category: "Tea",
@@ -143,16 +143,67 @@ export const bloomBakesMenu: MenuCategory[] = [
       },
 
       {
-        id: "bloom-original-milk-tea-500",
-        name: "Original Milk Tea",
+        id: "bloom-mango-milk-tea-500",
+        name: "Mango",
         description: "500ml",
         price: 40,
         category: "Tea",
         image: menuImage,
       },
       {
-        id: "bloom-original-milk-tea-700",
-        name: "Original Milk Tea",
+        id: "bloom-mango-milk-tea-700",
+        name: "Mango",
+        description: "700ml",
+        price: 50,
+        category: "Tea",
+        image: menuImage,
+      },
+
+      {
+        id: "bloom-coffee-milk-tea-500",
+        name: "Coffee",
+        description: "500ml",
+        price: 40,
+        category: "Tea",
+        image: menuImage,
+      },
+      {
+        id: "bloom-coffee-milk-tea-700",
+        name: "Coffee",
+        description: "700ml",
+        price: 50,
+        category: "Tea",
+        image: menuImage,
+      },
+
+      {
+        id: "bloom-banana-milk-tea-500",
+        name: "Banana",
+        description: "500ml",
+        price: 40,
+        category: "Tea",
+        image: menuImage,
+      },
+      {
+        id: "banana-milk-tea-700",
+        name: "Banana",
+        description: "700ml",
+        price: 50,
+        category: "Tea",
+        image: menuImage,
+      },
+
+      {
+        id: "bloom-cookies-and-cream-milk-tea-500",
+        name: "Mango",
+        description: "500ml",
+        price: 40,
+        category: "Tea",
+        image: menuImage,
+      },
+      {
+        id: "bloom-cookies-and-cream-milk-tea-700",
+        name: "Cookies and Cream",
         description: "700ml",
         price: 50,
         category: "Tea",
@@ -161,7 +212,7 @@ export const bloomBakesMenu: MenuCategory[] = [
 
       {
         id: "bloom-purple-berry-milk-tea-500",
-        name: "Purple Berry Milk Tea",
+        name: "Purple Blueberry",
         description: "500ml",
         price: 40,
         category: "Tea",
@@ -169,7 +220,7 @@ export const bloomBakesMenu: MenuCategory[] = [
       },
       {
         id: "bloom-purple-berry-milk-tea-700",
-        name: "Purple Berry Milk Tea",
+        name: "Purple Purpleberry",
         description: "700ml",
         price: 50,
         category: "Tea",
@@ -231,165 +282,6 @@ export const bloomBakesMenu: MenuCategory[] = [
         description: "4 pieces",
         price: 20,
         category: "Sandwich",
-        image: menuImage,
-      },
-    ],
-  },
-
-  // =====================================================
-  // PIZZA
-  // =====================================================
-  {
-    id: "bloom-pizza",
-    name: "Pizza",
-    items: [
-      {
-        id: "bloom-all-season-pizza-small",
-        name: "All Season Pizza",
-        description: "Small",
-        price: 110,
-        category: "Pizza",
-        image: menuImage,
-      },
-      {
-        id: "bloom-all-season-pizza-medium",
-        name: "All Season Pizza",
-        description: "Medium",
-        price: 130,
-        category: "Pizza",
-        image: menuImage,
-      },
-      {
-        id: "bloom-all-season-pizza-large",
-        name: "All Season Pizza",
-        description: "Large",
-        price: 150,
-        category: "Pizza",
-        image: menuImage,
-      },
-
-      {
-        id: "bloom-chicken-pizza-small",
-        name: "Chicken Pizza",
-        description: "Small",
-        price: 100,
-        category: "Pizza",
-        image: menuImage,
-      },
-      {
-        id: "bloom-chicken-pizza-medium",
-        name: "Chicken Pizza",
-        description: "Medium",
-        price: 120,
-        category: "Pizza",
-        image: menuImage,
-      },
-      {
-        id: "bloom-chicken-pizza-large",
-        name: "Chicken Pizza",
-        description: "Large",
-        price: 140,
-        category: "Pizza",
-        image: menuImage,
-      },
-
-      {
-        id: "bloom-beef-pizza-small",
-        name: "Beef Pizza",
-        description: "Small",
-        price: 100,
-        category: "Pizza",
-        image: menuImage,
-      },
-      {
-        id: "bloom-beef-pizza-medium",
-        name: "Beef Pizza",
-        description: "Medium",
-        price: 120,
-        category: "Pizza",
-        image: menuImage,
-      },
-      {
-        id: "bloom-beef-pizza-large",
-        name: "Beef Pizza",
-        description: "Large",
-        price: 140,
-        category: "Pizza",
-        image: menuImage,
-      },
-
-      {
-        id: "bloom-sausage-pizza-small",
-        name: "Sausage Pizza",
-        description: "Small",
-        price: 90,
-        category: "Pizza",
-        image: menuImage,
-      },
-      {
-        id: "bloom-sausage-pizza-medium",
-        name: "Sausage Pizza",
-        description: "Medium",
-        price: 110,
-        category: "Pizza",
-        image: menuImage,
-      },
-      {
-        id: "bloom-sausage-pizza-large",
-        name: "Sausage Pizza",
-        description: "Large",
-        price: 130,
-        category: "Pizza",
-        image: menuImage,
-      },
-
-      {
-        id: "bloom-margarita-pizza-small",
-        name: "Margarita Pizza",
-        description: "Small",
-        price: 80,
-        category: "Pizza",
-        image: menuImage,
-      },
-      {
-        id: "bloom-margarita-pizza-medium",
-        name: "Margarita Pizza",
-        description: "Medium",
-        price: 100,
-        category: "Pizza",
-        image: menuImage,
-      },
-      {
-        id: "bloom-margarita-pizza-large",
-        name: "Margarita Pizza",
-        description: "Large",
-        price: 120,
-        category: "Pizza",
-        image: menuImage,
-      },
-
-      {
-        id: "bloom-pepperoni-pizza-small",
-        name: "Pepperoni Pizza",
-        description: "Small",
-        price: 100,
-        category: "Pizza",
-        image: menuImage,
-      },
-      {
-        id: "bloom-pepperoni-pizza-medium",
-        name: "Pepperoni Pizza",
-        description: "Medium",
-        price: 120,
-        category: "Pizza",
-        image: menuImage,
-      },
-      {
-        id: "bloom-pepperoni-pizza-large",
-        name: "Pepperoni Pizza",
-        description: "Large",
-        price: 140,
-        category: "Pizza",
         image: menuImage,
       },
     ],

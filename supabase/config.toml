@@ -1,0 +1,10 @@
+# Merge these into your existing supabase/config.toml
+
+[functions.initialize-payment]
+verify_jwt = true
+
+[functions.verify-payment]
+verify_jwt = true
+
+[functions.paystack-webhook]
+verify_jwt = false

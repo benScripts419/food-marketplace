@@ -1,6 +1,8 @@
 import { bloomBakesMenu } from "./bloomBakesMenu";
 import { brachersInnMenu } from "./brackersInnMenu";
+import { conceptMenu } from "./conceptMenu";
 import { kwayisibeaMenu } from "./kwayisibeaMenu";
+import { rolldUpMenu } from "./rolldUpMenu";
 
 export type MenuItem = {
   id: string;
@@ -19,12 +21,11 @@ export type MenuCategory = {
 
 export const restaurantMenus: Record<string, MenuCategory[]> = {
   "1": kwayisibeaMenu,
+  "2": conceptMenu,
+  "3": brachersInnMenu,
 
-  // Bloom Bakes
-  "7": bloomBakesMenu,
-
-  // Brachers Inn
-  "8": brachersInnMenu,
+  "4": bloomBakesMenu,
+  "5": rolldUpMenu,
 };
 
 export const getRestaurantMenu = (restaurantId: string): MenuCategory[] => {

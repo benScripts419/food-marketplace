@@ -70,11 +70,13 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* Hide Restaurants from the bottom navigation */}
       <Tabs.Screen
         name="restaurants"
         options={{
-          href: null,
+          title: "Restaurants",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="restaurant-outline" size={size} color={color} />
+          ),
         }}
       />
     </Tabs>

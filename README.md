@@ -80,6 +80,7 @@ food-marketplace/
 ├── tailwind.config.js      # NativeWind/Tailwind configuration
 ├── tsconfig.json           # TypeScript configuration
 └── README.md               # Project documentation
+```text
 
 # Design
 

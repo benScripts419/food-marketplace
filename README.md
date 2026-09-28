@@ -147,6 +147,7 @@ Server-side payment processing
 
 The Supabase project contains:
 
+```text
 supabase/
 ├── config.toml
 ├── migrations/
@@ -159,6 +160,8 @@ supabase/
     │
     └── paystack-webhook/
         └── index.ts
+```
+
 # Paystack Payment Flow
 
 The payment architecture follows this flow:
@@ -216,6 +219,7 @@ The webhook function must be publicly accessible because Paystack needs to call 
 
 Orders contain information such as:
 
+```text
 Order
 ├── id
 ├── user_id
@@ -228,9 +232,11 @@ Order
 ├── payment_status
 ├── payment_reference
 └── created_at
+```
 
 Individual products are stored in:
 
+```text
 order_items
 ├── id
 ├── order_id
@@ -242,6 +248,7 @@ order_items
 ├── restaurant_id
 ├── restaurant_name
 └── image
+```
 
 # Rider Delivery System
 

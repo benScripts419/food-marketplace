@@ -85,7 +85,7 @@ food-marketplace/
 # Design
 
 AkroBite uses a simple food-delivery interface focused on easy navigation and quick ordering.
-
+```text
 Primary Colors
 Color	Value
 Primary	#E53935
@@ -99,6 +99,7 @@ Surface	#F2F2F2
 Success	#16A34A
 Warning	#F59E0B
 Error	#DC2626
+```
 
 # Getting Started
 Prerequisites

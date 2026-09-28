@@ -56,67 +56,30 @@ Local Storage
 AsyncStorage
 
 # Project Structure
+
+```text
 food-marketplace/
-│
-├── assets/
-│   └── images/
-│
+├── assets/                 # Images, food assets and other static files
 ├── src/
-│   ├── app/
-│   │   ├── (tabs)/
-│   │   │   ├── index.tsx
-│   │   │   ├── restaurants.tsx
-│   │   │   ├── orders.tsx
-│   │   │   └── profile.tsx
-│   │   │
-│   │   ├── restaurant/
-│   │   │   └── [id].tsx
-│   │   │
-│   │   ├── category/
-│   │   │   └── [category].tsx
-│   │   │
-│   │   ├── cart.tsx
-│   │   ├── checkout.tsx
-│   │   ├── payment.tsx
-│   │   ├── search.tsx
-│   │   ├── categories.tsx
-│   │   │
-│   │   ├── rider/
-│   │   │   ├── ...
-│   │   │   ├── order/
-│   │   │   │   └── [id].tsx
-│   │   │   └── active-delivery.tsx
-│   │   │
-│   │   └── _layout.tsx
-│   │
-│   ├── components/
-│   │
-│   ├── context/
-│   │   └── CartContext.tsx
-│   │
-│   ├── data/
-│   │   ├── restaurantMenus.ts
-│   │   ├── bloomBakesMenu.ts
-│   │   ├── brachersInnMenu.ts
-│   │   └── kwayisibeaMenu.ts
-│   │
-│   └── lib/
-│       ├── supabase.ts
-│       └── paystack.ts
+│   ├── app/                # Expo Router screens and routes
+│   ├── components/         # Reusable UI components
+│   ├── context/            # Global application state
+│   ├── data/               # Restaurant and menu data
+│   ├── hooks/              # Reusable React hooks
+│   ├── lib/                # Supabase, Paystack and utilities
+│   ├── types/              # TypeScript types
+│   └── constants/          # Application constants and theme
 │
 ├── supabase/
-│   ├── config.toml
-│   ├── migrations/
-│   └── functions/
-│       ├── initialize-payment/
-│       ├── verify-payment/
-│       └── paystack-webhook/
+│   ├── migrations/         # Database migrations
+│   └── functions/          # Supabase Edge Functions
 │
-├── package.json
-├── tailwind.config.js
-├── tsconfig.json
-└── README.md
-
+├── .env                    # Local environment variables
+├── app.json                # Expo configuration
+├── package.json            # Project dependencies and scripts
+├── tailwind.config.js      # NativeWind/Tailwind configuration
+├── tsconfig.json           # TypeScript configuration
+└── README.md               # Project documentation
 
 # Design
 

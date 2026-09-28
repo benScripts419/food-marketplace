@@ -165,7 +165,7 @@ supabase/
 # Paystack Payment Flow
 
 The payment architecture follows this flow:
-
+```text
 Customer
    │
    ▼
@@ -194,6 +194,7 @@ Order confirmed
    │
    ▼
 Rider notification
+```
 
 The Paystack secret key is stored as a Supabase Edge Function secret.
 
@@ -253,7 +254,7 @@ order_items
 # Rider Delivery System
 
 The rider application is designed around delivery requests.
-
+```text
 New Order
     │
     ▼
@@ -286,6 +287,7 @@ On The Way
     │
     ▼
 Delivered
+```
 
 The rider order details screen displays:
 

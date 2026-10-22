@@ -340,7 +340,7 @@ export default function HomeScreen() {
               HEADER
           ========================================== */}
 
-          <View className="px-5 pt-20">
+          <View className="px-5 pt-10">
             <View className="flex-row items-center justify-between">
               <View>
                 <Text className="text-xs text-textSecondary">Welcome back</Text>

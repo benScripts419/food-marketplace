@@ -15,9 +15,10 @@ export default function CartScreen() {
     clearCart,
   } = useCart();
 
-  const deliveryFee = cartItems.length > 0 ? 10 : 0;
-  const serviceFee = cartItems.length > 0 ? 5 : 0;
-  const total = cartTotal + deliveryFee + serviceFee;
+  // The delivery fee depends on where the customer is, so it is worked out
+  // at checkout once their location is known (not here).
+  const serviceFee = cartItems.length > 0 ? 7.5 : 0;
+  const totalBeforeDelivery = cartTotal + serviceFee;
 
   // EMPTY CART
   if (cartItems.length === 0) {
@@ -213,10 +214,14 @@ export default function CartScreen() {
           <View className="mt-3 flex-row justify-between">
             <Text className="text-sm text-textSecondary">Delivery fee</Text>
 
-            <Text className="font-semibold text-text">
-              GH₵{deliveryFee.toFixed(2)}
+            <Text className="text-sm text-textSecondary">
+              Calculated at checkout
             </Text>
           </View>
+
+          <Text className="mt-1 text-[11px] leading-4 text-textSecondary">
+            It depends on your delivery location and how many items you order.
+          </Text>
 
           {/* SERVICE FEE */}
           <View className="mt-3 flex-row justify-between">
@@ -230,11 +235,13 @@ export default function CartScreen() {
           <View className="my-4 border-t border-border" />
 
           {/* TOTAL */}
-          <View className="flex-row justify-between">
-            <Text className="text-base font-bold text-text">Total</Text>
+          <View className="flex-row items-center justify-between">
+            <Text className="text-base font-bold text-text">
+              Total before delivery
+            </Text>
 
             <Text className="text-base font-bold text-primary">
-              GH₵{total.toFixed(2)}
+              GH₵{totalBeforeDelivery.toFixed(2)}
             </Text>
           </View>
         </View>
@@ -244,13 +251,9 @@ export default function CartScreen() {
       <View className="absolute bottom-0 left-0 right-0 border-t border-border bg-white px-5 pb-7 pt-3">
         <Pressable
           onPress={() => router.push("/checkout")}
-          className="h-14 flex-row items-center justify-center rounded-xl bg-primary"
+          className="h-14 items-center justify-center rounded-xl bg-primary"
         >
           <Text className="font-bold text-white">Proceed to Checkout</Text>
-
-          <Text className="ml-3 font-bold text-white">
-            GH₵{total.toFixed(2)}
-          </Text>
         </Pressable>
       </View>
     </View>

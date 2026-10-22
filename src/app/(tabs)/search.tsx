@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Image,
   Pressable,
@@ -10,42 +10,66 @@ import {
   View,
 } from "react-native";
 
-import { restaurants } from "@/data/restaurants";
+import type { Restaurant } from "@/components/restaurant/RestaurantCard";
+import { mapRestaurantRow } from "@/lib/restaurantMapper";
+import { supabase } from "@/lib/supabase";
 import { getAllMenuItems } from "../../data/restaurantMenus";
 
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
 
-  const menuItems = useMemo(() => {
-    return getAllMenuItems();
+  const menuItems = useMemo(() => getAllMenuItems(), []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadRestaurants() {
+      const { data, error } = await supabase
+        .from("restaurants")
+        .select("id, name, description, image_url, cuisine, category")
+        .order("name");
+
+      if (!isMounted) return;
+
+      if (error) {
+        console.error("Failed to load restaurants for search:", error);
+        return;
+      }
+
+      try {
+        setRestaurants((data ?? []).map(mapRestaurantRow));
+      } catch (e) {
+        console.error("Failed to map restaurants:", e);
+      }
+    }
+
+    loadRestaurants();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const filteredRestaurants = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    if (!query) {
-      return [];
-    }
+    if (!query) return [];
 
-    return restaurants.filter((restaurant) => {
-      return (
+    return restaurants.filter(
+      (restaurant) =>
         restaurant.name.toLowerCase().includes(query) ||
-        restaurant.cuisine?.toLowerCase().includes(query)
-      );
-    });
-  }, [searchQuery]);
+        restaurant.cuisine.toLowerCase().includes(query),
+    );
+  }, [searchQuery, restaurants]);
 
   const filteredFoodItems = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    if (!query) {
-      return [];
-    }
+    if (!query) return [];
 
     return menuItems.filter((item) => {
-      const restaurant = restaurants.find(
-        (restaurant) => restaurant.id === item.restaurantId,
-      );
+      const restaurant = restaurants.find((r) => r.id === item.restaurantId);
 
       return (
         item.name.toLowerCase().includes(query) ||
@@ -54,7 +78,7 @@ export default function SearchScreen() {
         restaurant?.name.toLowerCase().includes(query)
       );
     });
-  }, [searchQuery, menuItems]);
+  }, [searchQuery, menuItems, restaurants]);
 
   const hasResults =
     filteredRestaurants.length > 0 || filteredFoodItems.length > 0;
@@ -98,10 +122,7 @@ export default function SearchScreen() {
       {/* RESULTS */}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: 20,
-          paddingBottom: 100,
-        }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100 }}
       >
         {/* NO SEARCH */}
         {searchQuery.trim() === "" && (
@@ -119,7 +140,6 @@ export default function SearchScreen() {
         {/* SEARCH RESULTS */}
         {searchQuery.trim() !== "" && hasResults && (
           <View>
-            {/* RESTAURANT RESULTS */}
             {filteredRestaurants.length > 0 && (
               <View>
                 <Text className="mb-4 text-lg font-bold text-text">
@@ -135,14 +155,13 @@ export default function SearchScreen() {
               </View>
             )}
 
-            {/* FOOD RESULTS */}
             {filteredFoodItems.length > 0 && (
               <View className="mt-6">
                 <Text className="mb-4 text-lg font-bold text-text">Food</Text>
 
                 {filteredFoodItems.map((item) => {
                   const restaurant = restaurants.find(
-                    (restaurant) => restaurant.id === item.restaurantId,
+                    (r) => r.id === item.restaurantId,
                   );
 
                   return (
@@ -183,18 +202,12 @@ export default function SearchScreen() {
 /* RESTAURANT RESULT */
 /* ------------------------------------------------ */
 
-function RestaurantResult({
-  restaurant,
-}: {
-  restaurant: (typeof restaurants)[number];
-}) {
+function RestaurantResult({ restaurant }: { restaurant: Restaurant }) {
   return (
     <Pressable
       onPress={() => router.push(`/restaurant/${restaurant.id}`)}
       className="mb-4 flex-row rounded-2xl border border-border bg-white p-3"
     >
-      {/* IMAGE */}
-
       <View className="h-24 w-24 items-center justify-center overflow-hidden rounded-xl bg-surface">
         {restaurant.image ? (
           <Image
@@ -206,8 +219,6 @@ function RestaurantResult({
           <Ionicons name="restaurant-outline" size={32} color="#737373" />
         )}
       </View>
-
-      {/* DETAILS */}
 
       <View className="ml-3 flex-1 justify-center">
         <Text className="text-base font-bold text-text" numberOfLines={1}>
@@ -267,8 +278,6 @@ function FoodResult({
       }
       className="mb-4 flex-row rounded-2xl border border-border bg-white p-3"
     >
-      {/* FOOD IMAGE */}
-
       <View className="h-24 w-24 overflow-hidden rounded-xl bg-surface">
         {item.image ? (
           <Image
@@ -282,8 +291,6 @@ function FoodResult({
           </View>
         )}
       </View>
-
-      {/* DETAILS */}
 
       <View className="ml-3 flex-1">
         <Text className="text-base font-bold text-text" numberOfLines={2}>

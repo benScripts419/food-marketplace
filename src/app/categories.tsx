@@ -1,24 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, Text, View } from "react-native";
 
+import CategoryFloatingTabs from "@/components/CategoryFloatingTabs";
 import { getAllMenuItems } from "@/data/restaurantMenus";
+import { getCategoryImage } from "@/lib/categoryImages";
 
-const categoryEmojis: Record<string, string> = {
-  Pizza: "🍕",
-  Burgers: "🍔",
-  Chicken: "🍗",
-  Local: "🍲",
-  Drinks: "🥤",
-  African: "🍛",
-  "Fast Food": "🍟",
-  Desserts: "🍰",
-  Grills: "🔥",
-  Seafood: "🦐",
-  Rice: "🍚",
-  Pasta: "🍝",
-  Sandwiches: "🥪",
-};
+// --------------------------------------------------
+// CATEGORY DESCRIPTIONS
+// --------------------------------------------------
 
 const categoryDescriptions: Record<string, string> = {
   Pizza: "Cheesy pizzas and more",
@@ -34,37 +24,26 @@ const categoryDescriptions: Record<string, string> = {
   Rice: "Rice dishes and local favorites",
   Pasta: "Delicious pasta dishes",
   Sandwiches: "Fresh sandwiches and wraps",
+  Shawarma: "Tasty shawarma and wraps",
+  Sushi: "Fresh and delicious sushi",
+  Bakery: "Freshly baked treats",
+  Breakfast: "Delicious breakfast meals",
+  Tea: "Refreshing tea and beverages",
+  Boba: "Delicious bubble tea drinks",
 };
 
+// --------------------------------------------------
+// CATEGORIES SCREEN
+// --------------------------------------------------
+
 export default function CategoriesScreen() {
-  /*
+  /**
    * Get all menu items from all restaurants.
-   *
-   * This means the categories are generated from your
-   * actual restaurant menus instead of being hard-coded.
    */
   const allMenuItems = getAllMenuItems();
 
-  /*
+  /**
    * Extract unique categories from the restaurant menus.
-   *
-   * Example:
-   *
-   * Kwayisibea:
-   *   Local
-   *   African
-   *   Chicken
-   *
-   * Concept:
-   *   Pizza
-   *   Fast Food
-   *
-   * Result:
-   *   Local
-   *   African
-   *   Chicken
-   *   Pizza
-   *   Fast Food
    */
   const categories = Array.from(
     new Set(
@@ -77,7 +56,10 @@ export default function CategoriesScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      {/* HEADER */}
+      {/* ==========================================
+          HEADER
+      ========================================== */}
+
       <View className="px-5 pb-4 pt-14">
         <View className="flex-row items-center">
           <Pressable
@@ -97,26 +79,27 @@ export default function CategoriesScreen() {
         </View>
       </View>
 
-      {/* CATEGORY LIST */}
+      {/* ==========================================
+          CATEGORY LIST
+      ========================================== */}
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: 20,
-          paddingBottom: 110,
+          paddingBottom: 140,
         }}
       >
         {categories.length > 0 ? (
           <View className="flex-row flex-wrap justify-between">
             {categories.map((category) => {
-              /*
-               * Count how many foods belong to this category.
-               */
+              // Count items belonging to this category
               const itemCount = allMenuItems.filter(
                 (item) =>
                   item.category.trim().toLowerCase() === category.toLowerCase(),
               ).length;
 
-              const emoji = categoryEmojis[category] ?? "🍽️";
+              const categoryImage = getCategoryImage(category);
 
               const description =
                 categoryDescriptions[category] ??
@@ -135,17 +118,40 @@ export default function CategoriesScreen() {
                   }
                   className="mb-4 w-[48%] rounded-2xl border border-border bg-white p-4"
                 >
-                  {/* CATEGORY ICON */}
-                  <View className="h-20 w-20 items-center justify-center rounded-full bg-surface">
-                    <Text className="text-5xl">{emoji}</Text>
+                  {/* ==========================================
+                      CATEGORY IMAGE
+                  ========================================== */}
+
+                  <View className="h-20 w-20 overflow-hidden rounded-full bg-surface">
+                    {categoryImage ? (
+                      <Image
+                        source={categoryImage}
+                        className="h-full w-full"
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View className="h-full w-full items-center justify-center">
+                        <Ionicons
+                          name="restaurant-outline"
+                          size={38}
+                          color="#737373"
+                        />
+                      </View>
+                    )}
                   </View>
 
-                  {/* CATEGORY NAME */}
+                  {/* ==========================================
+                      CATEGORY NAME
+                  ========================================== */}
+
                   <Text className="mt-4 text-base font-bold text-text">
                     {category}
                   </Text>
 
-                  {/* DESCRIPTION */}
+                  {/* ==========================================
+                      DESCRIPTION
+                  ========================================== */}
+
                   <Text
                     className="mt-1 text-xs leading-5 text-textSecondary"
                     numberOfLines={2}
@@ -153,12 +159,18 @@ export default function CategoriesScreen() {
                     {description}
                   </Text>
 
-                  {/* ITEM COUNT */}
+                  {/* ==========================================
+                      ITEM COUNT
+                  ========================================== */}
+
                   <Text className="mt-2 text-xs text-textSecondary">
                     {itemCount} {itemCount === 1 ? "item" : "items"}
                   </Text>
 
-                  {/* EXPLORE */}
+                  {/* ==========================================
+                      EXPLORE
+                  ========================================== */}
+
                   <View className="mt-4 flex-row items-center">
                     <Text className="text-xs font-semibold text-primary">
                       Explore
@@ -178,7 +190,10 @@ export default function CategoriesScreen() {
             })}
           </View>
         ) : (
-          /* NO CATEGORIES */
+          // ==========================================
+          // NO CATEGORIES
+          // ==========================================
+
           <View className="items-center justify-center py-20">
             <View className="h-20 w-20 items-center justify-center rounded-full bg-surface">
               <Ionicons name="restaurant-outline" size={38} color="#737373" />
@@ -189,76 +204,13 @@ export default function CategoriesScreen() {
             </Text>
 
             <Text className="mt-2 px-8 text-center text-sm leading-5 text-textSecondary">
-              Restaurant menus haven't been added yet.
+              Restaurant menus haven&apos;t been added yet.
             </Text>
           </View>
         )}
       </ScrollView>
 
-      {/* BOTTOM NAVIGATION */}
-      <BottomNavigation />
+      <CategoryFloatingTabs activeTab="Home" />
     </View>
-  );
-}
-
-function BottomNavigation() {
-  return (
-    <View className="absolute bottom-0 left-0 right-0 flex-row border-t border-border bg-white px-4 pb-7 pt-3">
-      <NavItem
-        icon="home-outline"
-        label="Home"
-        onPress={() => router.push("/")}
-      />
-
-      <NavItem
-        icon="search-outline"
-        label="Search"
-        onPress={() => router.push("/search")}
-      />
-
-      <NavItem
-        icon="receipt-outline"
-        label="Orders"
-        onPress={() => router.push("/orders")}
-      />
-
-      <NavItem
-        icon="cart-outline"
-        label="Cart"
-        onPress={() => router.push("/cart")}
-      />
-
-      <NavItem
-        icon="person-outline"
-        label="Profile"
-        onPress={() => router.push("/profile")}
-      />
-    </View>
-  );
-}
-
-function NavItem({
-  icon,
-  label,
-  active = false,
-  onPress,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  active?: boolean;
-  onPress?: () => void;
-}) {
-  return (
-    <Pressable onPress={onPress} className="flex-1 items-center justify-center">
-      <Ionicons name={icon} size={21} color={active ? "#E53935" : "#737373"} />
-
-      <Text
-        className={`mt-1 text-[10px] ${
-          active ? "font-bold text-primary" : "text-textSecondary"
-        }`}
-      >
-        {label}
-      </Text>
-    </Pressable>
   );
 }

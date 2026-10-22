@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "foodmarketplace",
+    "scheme": "food-marketplace",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
@@ -40,11 +40,18 @@
       "expo-font",
       "expo-secure-store",
       "expo-apple-authentication",
-      "expo-image"
+      "expo-image",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8c500273-d7fd-4ecc-8cfc-5f44ba94a02d"
+      }
     }
   }
 }

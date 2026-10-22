@@ -1,23 +1,104 @@
 import { useCart } from "@/context/CartContext";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 
-type DeliveryOption = "standard" | "express";
+import { quoteCartDelivery } from "@/lib/cartDeliveryFee";
+import {
+  loadCustomerDetails,
+  saveCustomerDetails,
+  validateCustomerDetails,
+  type CustomerDetailErrors,
+  type CustomerDetails,
+} from "@/lib/customerDetails";
+
+import {
+  loadDeliveryLocation,
+  type DeliveryLocation,
+} from "@/lib/deliveryLocation";
 
 export default function CheckoutScreen() {
-  const [deliveryOption, setDeliveryOption] =
-    useState<DeliveryOption>("standard");
+  const [deliveryLocation, setDeliveryLocation] =
+    useState<DeliveryLocation | null>(null);
 
-  const { cartTotal, cartItems } = useCart();
+  const [locationError, setLocationError] = useState<string | null>(null);
 
-  const subtotal = cartTotal;
-  const deliveryFee = deliveryOption === "standard" ? 10 : 20;
-  const serviceFee = 5;
-  const total = subtotal + deliveryFee + serviceFee;
+  const [details, setDetails] = useState<CustomerDetails>({
+    name: "",
+    phone: "",
+    altPhone: "",
+  });
+  const [detailErrors, setDetailErrors] = useState<CustomerDetailErrors>({});
 
-  // Prevent checkout with an empty cart
+  // Fill in the details the customer used last time.
+  useEffect(() => {
+    let active = true;
+
+    void loadCustomerDetails().then((saved) => {
+      if (active && saved) setDetails(saved);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+
+      void loadDeliveryLocation()
+        .then((location) => {
+          if (active) {
+            setDeliveryLocation(location);
+            setLocationError(null);
+          }
+        })
+        .catch((error: unknown) => {
+          console.error("Could not load checkout delivery location:", error);
+
+          if (active) {
+            setDeliveryLocation(null);
+            setLocationError(
+              error instanceof Error
+                ? error.message
+                : "Could not load your delivery location.",
+            );
+          }
+        });
+
+      return () => {
+        active = false;
+      };
+    }, []),
+  );
+
+  const { cartItems, cartSubtotal, promotionDiscount, cartTotal } = useCart();
+
+  // Delivery fee depends on where the customer is (their GPS location),
+  // which restaurant(s) they're ordering from, and how many items.
+  const deliveryQuote = useMemo(
+    () => quoteCartDelivery(cartItems, deliveryLocation),
+    [cartItems, deliveryLocation],
+  );
+
+  const deliveryFee = deliveryQuote.ok ? deliveryQuote.fee : 0;
+
+  // Only explain a pricing problem once a location exists
+  // (before that, the address card already asks for one).
+  const deliveryProblem =
+    deliveryLocation && !deliveryQuote.ok ? deliveryQuote.message : null;
+  const addressMessage = deliveryProblem ?? locationError;
+
+  const serviceFee = 7.5;
+  const total = cartTotal + deliveryFee + serviceFee;
+
+  const updateDetail = (field: keyof CustomerDetails, value: string) => {
+    setDetails((current) => ({ ...current, [field]: value }));
+    setDetailErrors((current) => ({ ...current, [field]: undefined }));
+  };
+
   if (cartItems.length === 0) {
     return (
       <View className="flex-1 items-center justify-center bg-white px-5">
@@ -33,9 +114,48 @@ export default function CheckoutScreen() {
     );
   }
 
+  const continueToPayment = () => {
+    // Check the contact details first so their errors always show.
+    const validation = validateCustomerDetails(details);
+    setDetailErrors(validation.ok ? {} : validation.errors);
+
+    if (
+      !deliveryLocation ||
+      !Number.isFinite(deliveryLocation.latitude) ||
+      !Number.isFinite(deliveryLocation.longitude)
+    ) {
+      setLocationError(
+        "Please select your GPS delivery location before continuing.",
+      );
+      return;
+    }
+
+    if (!deliveryQuote.ok) {
+      setLocationError(deliveryQuote.message);
+      return;
+    }
+
+    if (!validation.ok) return;
+
+    void saveCustomerDetails(validation.details);
+
+    router.push({
+      pathname: "/payment",
+      params: {
+        deliveryOption: "standard",
+        // The payment screen must use these instead of recalculating the fee,
+        // and must save the customer details on the order.
+        deliveryFee: String(deliveryQuote.fee),
+        deliveryTown: deliveryQuote.town,
+        customerName: validation.details.name,
+        customerPhone: validation.details.phone,
+        customerAltPhone: validation.details.altPhone,
+      },
+    });
+  };
+
   return (
     <View className="flex-1 bg-white">
-      {/* HEADER */}
       <View className="px-5 pb-4 pt-14">
         <View className="flex-row items-center">
           <Pressable
@@ -51,12 +171,14 @@ export default function CheckoutScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
           paddingHorizontal: 20,
-          paddingBottom: 130,
+          paddingBottom: 150,
         }}
       >
         {/* DELIVERY ADDRESS */}
+
         <View className="mt-3">
           <Text className="mb-3 text-sm font-bold text-text">
             Delivery Address
@@ -69,98 +191,123 @@ export default function CheckoutScreen() {
               </View>
 
               <View className="ml-3 flex-1">
-                <Text className="text-sm font-bold text-text">Home</Text>
-
-                <Text className="mt-1 text-xs leading-4 text-textSecondary">
-                  15 Third Close, East Legon
-                  {"\n"}
-                  Accra, Ghana
+                <Text className="text-sm font-bold text-text">
+                  {deliveryLocation ? "Drop-off point" : "No location selected"}
                 </Text>
+
+                <Text
+                  className="mt-1 text-xs leading-4 text-textSecondary"
+                  numberOfLines={4}
+                >
+                  {deliveryLocation?.address ??
+                    "Share your GPS location and enter your address so the rider can find you."}
+                </Text>
+
+                {deliveryLocation && (
+                  <Text className="mt-2 text-xs text-textSecondary">
+                    GPS: {deliveryLocation.latitude.toFixed(6)},{" "}
+                    {deliveryLocation.longitude.toFixed(6)}
+                  </Text>
+                )}
               </View>
 
-              <Pressable onPress={() => router.push("/location")}>
-                <Text className="text-xs font-bold text-primary">Change</Text>
+              <Pressable
+                onPress={() =>
+                  router.push({
+                    pathname: "/location",
+                    params: {
+                      returnTo: "checkout",
+                    },
+                  })
+                }
+              >
+                <Text className="text-xs font-bold text-primary">
+                  {deliveryLocation ? "Change" : "Add"}
+                </Text>
               </Pressable>
             </View>
+
+            {addressMessage ? (
+              <Text className="ml-12 mt-2 text-xs text-primary">
+                {addressMessage}
+              </Text>
+            ) : null}
           </View>
         </View>
 
-        {/* DELIVERY OPTION */}
+        {/* CONTACT DETAILS */}
+
         <View className="mt-6">
-          <Text className="mb-3 text-sm font-bold text-text">
-            Delivery Option
+          <Text className="mb-1 text-sm font-bold text-text">
+            Contact Details
+          </Text>
+          <Text className="mb-3 text-xs leading-4 text-textSecondary">
+            Our rider will call you when they arrive. Please use a number that
+            is switched on and can receive calls.
           </Text>
 
-          {/* STANDARD */}
-          <Pressable
-            onPress={() => setDeliveryOption("standard")}
-            className={`mb-3 rounded-xl border p-4 ${
-              deliveryOption === "standard" ? "border-primary" : "border-border"
-            }`}
-          >
-            <View className="flex-row items-center">
-              <View
-                className={`h-5 w-5 items-center justify-center rounded-full border-2 ${
-                  deliveryOption === "standard"
-                    ? "border-primary"
-                    : "border-border"
-                }`}
-              >
-                {deliveryOption === "standard" && (
-                  <View className="h-2.5 w-2.5 rounded-full bg-primary" />
-                )}
-              </View>
+          <View className="rounded-xl border border-border bg-white p-4">
+            <Text className="mb-1 text-xs font-semibold text-text">
+              Full name
+            </Text>
+            <TextInput
+              value={details.name}
+              onChangeText={(value: string) => updateDetail("name", value)}
+              placeholder="e.g. Kwame Mensah"
+              placeholderTextColor="#A3A3A3"
+              autoComplete="name"
+              textContentType="name"
+              autoCapitalize="words"
+              className="h-12 rounded-xl border border-border px-4 text-sm text-text"
+            />
+            {detailErrors.name ? (
+              <Text className="mt-1 text-xs text-primary">
+                {detailErrors.name}
+              </Text>
+            ) : null}
 
-              <View className="ml-3 flex-1">
-                <Text className="text-sm font-semibold text-text">
-                  Standard Delivery
-                </Text>
+            <Text className="mb-1 mt-4 text-xs font-semibold text-text">
+              Phone number
+            </Text>
+            <TextInput
+              value={details.phone}
+              onChangeText={(value: string) => updateDetail("phone", value)}
+              placeholder="e.g. 024 123 4567"
+              placeholderTextColor="#A3A3A3"
+              keyboardType="phone-pad"
+              autoComplete="tel"
+              textContentType="telephoneNumber"
+              maxLength={17}
+              className="h-12 rounded-xl border border-border px-4 text-sm text-text"
+            />
+            {detailErrors.phone ? (
+              <Text className="mt-1 text-xs text-primary">
+                {detailErrors.phone}
+              </Text>
+            ) : null}
 
-                <Text className="mt-1 text-xs text-textSecondary">
-                  20–30 min
-                </Text>
-              </View>
-
-              <Text className="text-xs font-bold text-text">GH₵10.00</Text>
-            </View>
-          </Pressable>
-
-          {/* EXPRESS */}
-          <Pressable
-            onPress={() => setDeliveryOption("express")}
-            className={`rounded-xl border p-4 ${
-              deliveryOption === "express" ? "border-primary" : "border-border"
-            }`}
-          >
-            <View className="flex-row items-center">
-              <View
-                className={`h-5 w-5 items-center justify-center rounded-full border-2 ${
-                  deliveryOption === "express"
-                    ? "border-primary"
-                    : "border-border"
-                }`}
-              >
-                {deliveryOption === "express" && (
-                  <View className="h-2.5 w-2.5 rounded-full bg-primary" />
-                )}
-              </View>
-
-              <View className="ml-3 flex-1">
-                <Text className="text-sm font-semibold text-text">
-                  Express Delivery
-                </Text>
-
-                <Text className="mt-1 text-xs text-textSecondary">
-                  10–15 min
-                </Text>
-              </View>
-
-              <Text className="text-xs font-bold text-text">GH₵20.00</Text>
-            </View>
-          </Pressable>
+            <Text className="mb-1 mt-4 text-xs font-semibold text-text">
+              Alternative number (optional)
+            </Text>
+            <TextInput
+              value={details.altPhone}
+              onChangeText={(value: string) => updateDetail("altPhone", value)}
+              placeholder="Another number the rider can try"
+              placeholderTextColor="#A3A3A3"
+              keyboardType="phone-pad"
+              maxLength={17}
+              className="h-12 rounded-xl border border-border px-4 text-sm text-text"
+            />
+            {detailErrors.altPhone ? (
+              <Text className="mt-1 text-xs text-primary">
+                {detailErrors.altPhone}
+              </Text>
+            ) : null}
+          </View>
         </View>
 
         {/* ORDER SUMMARY */}
+
         <View className="mt-6">
           <Text className="mb-3 text-sm font-bold text-text">
             Order Summary
@@ -171,17 +318,47 @@ export default function CheckoutScreen() {
               <Text className="text-xs text-textSecondary">Subtotal</Text>
 
               <Text className="text-xs text-text">
-                GH₵{subtotal.toFixed(2)}
+                GH₵{cartSubtotal.toFixed(2)}
               </Text>
             </View>
+
+            {promotionDiscount > 0 && (
+              <View className="mt-3 flex-row items-center justify-between">
+                <Text className="text-xs font-semibold text-success">
+                  Promotion discount 🎉
+                </Text>
+
+                <Text className="text-xs font-bold text-success">
+                  -GH₵{promotionDiscount.toFixed(2)}
+                </Text>
+              </View>
+            )}
+
+            {promotionDiscount > 0 && (
+              <View className="mt-3 flex-row items-center justify-between">
+                <Text className="text-xs font-semibold text-text">
+                  Food total
+                </Text>
+
+                <Text className="text-xs font-semibold text-text">
+                  GH₵{cartTotal.toFixed(2)}
+                </Text>
+              </View>
+            )}
 
             <View className="mt-3 flex-row items-center justify-between">
               <Text className="text-xs text-textSecondary">Delivery Fee</Text>
 
               <Text className="text-xs text-text">
-                GH₵{deliveryFee.toFixed(2)}
+                {deliveryQuote.ok ? `GH₵${deliveryFee.toFixed(2)}` : "—"}
               </Text>
             </View>
+
+            {deliveryQuote.ok ? (
+              <Text className="mt-1 text-[10px] text-textSecondary">
+                Delivery to {deliveryQuote.town}
+              </Text>
+            ) : null}
 
             <View className="mt-3 flex-row items-center justify-between">
               <Text className="text-xs text-textSecondary">Service Fee</Text>
@@ -194,9 +371,17 @@ export default function CheckoutScreen() {
             <View className="my-4 border-t border-border" />
 
             <View className="flex-row items-center justify-between">
-              <Text className="text-sm font-bold text-text">Total</Text>
+              <View>
+                <Text className="text-sm font-bold text-text">Total</Text>
 
-              <Text className="text-base font-bold text-text">
+                {promotionDiscount > 0 && (
+                  <Text className="mt-1 text-[10px] text-success">
+                    You saved GH₵{promotionDiscount.toFixed(2)}
+                  </Text>
+                )}
+              </View>
+
+              <Text className="text-base font-bold text-primary">
                 GH₵{total.toFixed(2)}
               </Text>
             </View>
@@ -205,17 +390,13 @@ export default function CheckoutScreen() {
       </ScrollView>
 
       {/* CONTINUE TO PAYMENT */}
+
       <View className="absolute bottom-0 left-0 right-0 border-t border-border bg-white px-5 pb-7 pt-3">
         <Pressable
-          onPress={() =>
-            router.push({
-              pathname: "/payment",
-              params: {
-                deliveryOption,
-              },
-            })
-          }
-          className="h-14 flex-row items-center justify-center rounded-xl bg-primary"
+          onPress={continueToPayment}
+          className={`h-14 flex-row items-center justify-center rounded-xl ${
+            deliveryQuote.ok ? "bg-primary" : "bg-gray-300"
+          }`}
         >
           <Text className="text-sm font-bold text-white">
             Continue to Payment

@@ -17,11 +17,12 @@ export type MenuCategory = {
 // so ../../ reaches the project root.
 const kwMixedSalad = require("../../assets/images/food/mixed-salad.jpg");
 const greekSalad = require("../../assets/images/food/greek-salad.jpg");
-const chickenCeasarSalad = require("../../assets/images/food/chicken-ceasar-salad.jpg");
-const chickenSalad = require("../../assets/images/food/chicken-salad.jpg");
-const exoticCoselaw = require("../../assets/images/food/exotic-coselaw.png");
+const chickenCeasarSalad = require("../../assets/images/food/chicken-ceasar-salad.jpeg");
+const chickenSalad = require("../../assets/images/food/mixed-salad.jpg");
+const exoticCoselaw = require("../../assets/images/food/exotic-coselaw.jpg");
+
 const vegetableRice = require("../../assets/images/food/vegetable-rice.jpg");
-const eggFriedRice = require("../../assets/images/food/egg-fried-rice.jpg");
+const friedRiceOnly = require("../../assets/images/food/friedrice-only.jpg");
 const assortedFriedRice = require("../../assets/images/food/assorted-fried-rice.jpg");
 const assortedJollofRice = require("../../assets/images/food/assorted-jollof-rice.jpg");
 const jollofRice = require("../../assets/images/food/jollof-rice.jpg");
@@ -31,10 +32,28 @@ const mashedPotatoes = require("../../assets/images/food/mashed-potatoes.jpg");
 const fufu = require("../../assets/images/food/fufu.jpg");
 const banku = require("../../assets/images/food/banku.jpg");
 const friedPlantain = require("../../assets/images/food/fried-plantain.jpg");
-const kelewele = require("../../assets/images/food/kelewele.jpg");
+const kelewele = require("../../assets/images/food/kelewele.jpeg");
 const omoTuo = require("../../assets/images/food/omo-tuo.jpg");
 const yamChips = require("../../assets/images/food/yam-chips.jpg");
 const akple = require("../../assets/images/food/akple.jpg");
+const allSeason = require("../../assets/images/food/all-season.png");
+const hawaiiPizza = require("../../assets/images/food/hawaii-pizza.png");
+const seafoodPizza = require("../../assets/images/food/seafood-pizza.jpeg");
+const chickenPizza = require("../../assets/images/food/chicken-pizza.png");
+const pepperoniPizza = require("../../assets/images/food/pepperoni-pizza.jpeg");
+const chickenKiev = require("../../assets/images/food/chicken-kiev.jpeg");
+const chickenCurry = require("../../assets/images/food/chicken-curry.jpeg");
+const chickenCordon = require("../../assets/images/food/chicken-cordon.jpeg");
+const chickenWings = require("../../assets/images/food/chicken-wings.jpeg");
+const honeyChickenWings = require("../../assets/images/food/honey-chicken-wings.jpg");
+const chickenPieces = require("../../assets/images/food/chicken-pieces.jpeg");
+const grilledChicken = require("../../assets/images/food/grilled-chicken.jpg");
+const spaghettiBolognese = require("../../assets/images/food/spaghetti-bolognese.jpeg");
+const spaghettiCarbonara = require("../../assets/images/food/spaghetti-carbonara.jpg");
+const penneArrabiata = require("../../assets/images/food/penne-arrabiata.jpeg");
+const tilapiaLightsoup = require("../../assets/images/food/tilapia-lightsoup.jpeg");
+const assortedOkro = require("../../assets/images/food/assorted-okro.jpeg");
+
 
 const foodImage = require("@/assets/images/food/mixed-salad.jpg");
 
@@ -94,13 +113,15 @@ export const kwayisibeaMenu: MenuCategory[] = [
       {
         id: "side-orders-1",
         name: "Egg Fried Rice",
+        description: "Only",
         price: 30,
         category: "Side Orders",
-        image: eggFriedRice,
+        image: friedRiceOnly,
       },
       {
         id: "side-orders-2",
         name: "Assorted Fried Rice",
+        description: "Beef, Sausage, and Chicken",
         price: 150,
         category: "Side Orders",
         image: assortedFriedRice,
@@ -108,6 +129,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
       {
         id: "side-orders-3",
         name: "Jollof Rice",
+        description: "Only",
         price: 30,
         category: "Side Orders",
         image: jollofRice,
@@ -115,6 +137,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
       {
         id: "side-orders-4",
         name: "Assorted Jollof Rice",
+        description: "Beef, Sausage, and Chicken",
         price: 150,
         category: "Side Orders",
         image: assortedJollofRice,
@@ -122,6 +145,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
       {
         id: "side-orders-5",
         name: "Steamed Rice",
+        description: "Only",
         price: 30,
         category: "Side Orders",
         image: steamedRice,
@@ -129,6 +153,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
       {
         id: "side-orders-6",
         name: "Vegetable Rice",
+        description: "Only",
         price: 30,
         category: "Side Orders",
         image: vegetableRice,
@@ -137,6 +162,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
       {
         id: "side-orders-7",
         name: "French Fries",
+        description: "Only",
         price: 40,
         category: "Side Orders",
         image: frenchFries,
@@ -144,6 +170,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
       {
         id: "side-orders-8",
         name: "Mashed Potatoes",
+        description: "Only",
         price: 40,
         category: "Side Orders",
         image: mashedPotatoes,
@@ -151,20 +178,23 @@ export const kwayisibeaMenu: MenuCategory[] = [
       {
         id: "side-orders-9",
         name: "Kelewele",
-        price: 40,
+        description: "Only",
+        price: 30,
         category: "Side Orders",
         image: kelewele,
       },
       {
         id: "side-orders-10",
         name: "Fufu",
-        price: 40,
+        description: "Only",
+        price: 30,
         category: "Side Orders",
         image: fufu,
       },
       {
         id: "side-orders-11",
         name: "Banku",
+        description: "Only",
         price: 20,
         category: "Side Orders",
         image: banku,
@@ -172,6 +202,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
       {
         id: "side-orders-12",
         name: "Omo Tuo",
+        description: "Only",
         price: 30,
         category: "Side Orders",
         image: omoTuo,
@@ -179,6 +210,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
       {
         id: "side-orders-13",
         name: "Yam Chips",
+        description: "Only",
         price: 30,
         category: "Side Orders",
         image: yamChips,
@@ -186,6 +218,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
       {
         id: "side-orders-14",
         name: "Akple",
+        description: "Only",
         price: 30,
         category: "Side Orders",
         image: akple,
@@ -193,6 +226,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
       {
         id: "side-orders-15",
         name: "Konkonte",
+        description: "Only",
         price: 30,
         category: "Side Orders",
         image: foodImage,
@@ -200,6 +234,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
       {
         id: "side-orders-16",
         name: "Fried Plantain",
+        description: "Only",
         price: 30,
         category: "Side Orders",
         image: friedPlantain,
@@ -216,7 +251,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         description: "Stuffed chicken with parsley garlic butter.",
         price: 90,
         category: "Poultry",
-        image: foodImage,
+        image: chickenKiev,
       },
       {
         id: "kw-poultry-2",
@@ -224,7 +259,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         description: "Chicken pieces in coconut curry sauce.",
         price: 90,
         category: "Poultry",
-        image: foodImage,
+        image: chickenCurry,
       },
       {
         id: "kw-poultry-3",
@@ -232,28 +267,28 @@ export const kwayisibeaMenu: MenuCategory[] = [
         description: "Ham and cheese stuffed in chicken.",
         price: 100,
         category: "Poultry",
-        image: foodImage,
+        image: chickenCordon,
       },
       {
         id: "kw-poultry-4",
         name: "Spicy Chicken Wings",
         price: 80,
         category: "Poultry",
-        image: foodImage,
+        image: chickenWings,
       },
       {
         id: "kw-poultry-5",
         name: "Honey Chicken Wings",
         price: 80,
         category: "Poultry",
-        image: foodImage,
+        image: honeyChickenWings,
       },
       {
         id: "kw-poultry-6",
         name: "Spicy Chicken Pieces",
         price: 90,
         category: "Poultry",
-        image: foodImage,
+        image: chickenPieces,
       },
       {
         id: "kw-poultry-7",
@@ -261,7 +296,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         description: "Well-Seasoned oven grilled chicken.",
         price: 90,
         category: "Poultry",
-        image: foodImage,
+        image: grilledChicken,
       },
     ],
   },
@@ -281,20 +316,20 @@ export const kwayisibeaMenu: MenuCategory[] = [
         name: "Tilapia Light Soup",
         price: 130,
         category: "Local Corner",
-        image: foodImage,
+        image: tilapiaLightsoup,
       },
       {
         id: "kw-local-3",
         name: "Assorted Fish and Meat Okro Stew",
         price: 100,
         category: "Local Corner",
-        image: foodImage,
+        image: assortedOkro,
       },
       {
         id: "kw-local-4",
         name: "Goat Light Soup",
         price: 130,
-        category: "130",
+        category: "Local Corner",
         image: foodImage,
       },
       {
@@ -446,15 +481,15 @@ export const kwayisibeaMenu: MenuCategory[] = [
         name: "Margherita Pizza",
         description: "Cheese, tomato, oregano and olive oil.",
         price: 100,
-        category: "Pizzas",
+        category: "Pizza",
         image: foodImage,
       },
       {
         id: "kw-pizza-2",
         name: "Chicken Pizza",
         price: 130,
-        category: "Pizzas",
-        image: foodImage,
+        category: "Pizza",
+        image: chickenPizza,
       },
       {
         id: "kw-pizza-3",
@@ -462,40 +497,40 @@ export const kwayisibeaMenu: MenuCategory[] = [
         description:
           "Chicken, beef, tuna, sausage, mushroom, special herbs and cheese.",
         price: 150,
-        category: "Pizzas",
-        image: foodImage,
+        category: "Pizza",
+        image: allSeason,
       },
       {
         id: "kw-pizza-4",
         name: "Seafood Pizza",
         description: "Shrimps, squid and cheese.",
         price: 200,
-        category: "Pizzas",
-        image: foodImage,
+        category: "Pizza",
+        image: seafoodPizza,
       },
       {
         id: "kw-pizza-5",
         name: "Tuna Pizza",
         description: "Tuna flakes, cheese and olive oil.",
         price: 130,
-        category: "Pizzas",
-        image: foodImage,
+        category: "Pizza",
+        image: chickenPizza,
       },
       {
         id: "kw-pizza-6",
         name: "Hawaii Pizza",
         description: "Ham, pineapple and cheese.",
         price: 100,
-        category: "Pizzas",
-        image: foodImage,
+        category: "Pizza",
+        image: hawaiiPizza,
       },
       {
         id: "kw-pizza-7",
         name: "Pepperoni Pizza",
         description: "Pepperoni, cheese and black olives.",
         price: 150,
-        category: "Pizzas",
-        image: foodImage,
+        category: "Pizza",
+        image: pepperoniPizza,
       },
     ],
   },
@@ -591,7 +626,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         description: "Spaghetti in bacon and egg creamy sauce.",
         price: 150,
         category: "Italian Pastas",
-        image: foodImage,
+        image: spaghettiCarbonara,
       },
       {
         id: "italian-pasta-2",
@@ -599,7 +634,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         description: "Spaghetti in minced meat sauce.",
         price: 100,
         category: "Italian Pastas",
-        image: foodImage,
+        image: spaghettiBolognese,
       },
       {
         id: "italian-pasta-3",
@@ -607,7 +642,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         description: "Boiled Penne pasta in spicy tomato basil sauce.",
         price: 70,
         category: "Italian Pastas",
-        image: foodImage,
+        image: penneArrabiata,
       },
     ],
   },

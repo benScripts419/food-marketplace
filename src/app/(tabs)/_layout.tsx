@@ -1,31 +1,83 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+import type { ComponentProps } from "react";
+import { Platform } from "react-native";
+import FloatingTabBar, {
+  type FloatingTabItem,
+} from "@/components/FloatingTabBar";
+
+type BottomTabBarProps = Parameters<
+  NonNullable<ComponentProps<typeof Tabs>["tabBar"]>
+>[0];
+
+const HIDDEN = ["favorites"];
+
+function renderFloatingTabBar({
+  state,
+  descriptors,
+  navigation,
+}: BottomTabBarProps) {
+  const items: FloatingTabItem[] = state.routes.flatMap((route, index) => {
+    const { options } = descriptors[route.key];
+    if (HIDDEN.includes(route.name) || (options as any).href === null) {
+      return [];
+    }
+
+    const title = options.title ?? route.name;
+    const iconName =
+      route.name === "index"
+        ? "home-outline"
+        : route.name === "search"
+          ? "search-outline"
+          : route.name === "restaurants"
+            ? "restaurant-outline"
+            : route.name === "cart"
+              ? "cart-outline"
+              : route.name === "orders"
+                ? "receipt-outline"
+                : "person-outline";
+    const focused = state.index === index;
+
+    return [
+      {
+        key: route.key,
+        title: title as FloatingTabItem["title"],
+        icon: iconName,
+        focused,
+        onPress: () => {
+          const event = navigation.emit({
+            type: "tabPress",
+            target: route.key,
+            canPreventDefault: true,
+          });
+          if (!focused && !event.defaultPrevented) {
+            navigation.navigate(route.name as never);
+          }
+        },
+      },
+    ];
+  });
+
+  return <FloatingTabBar items={items} />;
+}
 
 export default function TabsLayout() {
   return (
     <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: "#E53935",
-        tabBarInactiveTintColor: "#737373",
-        tabBarStyle: {
-          height: 65,
-          paddingTop: 8,
-          paddingBottom: 8,
-          backgroundColor: "#FFFFFF",
-          borderTopColor: "#E5E5E5",
-        },
-        tabBarLabelStyle: {
-          fontSize: 11,
-        },
-      }}
+      initialRouteName="index"
+      tabBar={
+        Platform.OS === "web"
+          ? () => null
+          : (props) => renderFloatingTabBar(props)
+      }
+      screenOptions={{ headerShown: false }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: "Home",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+            <Ionicons name="home-outline" size={size} color={color} />
           ),
         }}
       />
@@ -41,14 +93,16 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
-        name="orders"
+        name="restaurants"
         options={{
-          title: "Orders",
+          title: "Restaurants",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="receipt-outline" size={size} color={color} />
+            <Ionicons name="restaurant-outline" size={size} color={color} />
           ),
         }}
       />
+
+      <Tabs.Screen name="favorites" options={{ href: null }} />
 
       <Tabs.Screen
         name="cart"
@@ -61,21 +115,21 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
-        name="profile"
+        name="orders"
         options={{
-          title: "Profile",
+          title: "Orders",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={size} color={color} />
+            <Ionicons name="receipt-outline" size={size} color={color} />
           ),
         }}
       />
 
       <Tabs.Screen
-        name="restaurants"
+        name="profile"
         options={{
-          title: "Restaurants",
+          title: "Profile",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="restaurant-outline" size={size} color={color} />
+            <Ionicons name="person-outline" size={size} color={color} />
           ),
         }}
       />

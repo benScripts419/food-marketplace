@@ -1,34 +1,29 @@
 import "../../global.css";
 
-import WebSiteFooter from "@/components/web-site-footer";
 import WebSiteHeader from "@/components/web-site-header";
 import { CartProvider } from "@/context/CartContext";
-import { Stack, usePathname } from "expo-router";
+import { FavoritesProvider } from "@/context/FavoritesContext";
+import { WebAuthProvider } from "@/context/WebAuthContext";
+import AuthRedirect from "../components/AuthRedirect";
+import { Stack } from "expo-router";
 import { View } from "react-native";
 
 export default function WebRootLayout() {
-  const pathname = usePathname();
-  const isPublicScreen = [
-    "/",
-    "/onboarding",
-    "/login",
-    "/signup",
-    "/forgot-password",
-  ].includes(pathname);
-
   return (
     <CartProvider>
-      <View className="flex-1 bg-[#fffdf9]">
-        <WebSiteHeader />
-        <View className={`flex-1 ${isPublicScreen ? "" : "pt-[72px]"}`}>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-            }}
-          />
-        </View>
-        {!isPublicScreen ? <WebSiteFooter /> : null}
-      </View>
+      <FavoritesProvider>
+        <WebAuthProvider>
+          <AuthRedirect />
+
+          <View className="min-h-screen w-full flex-1 bg-background">
+            <WebSiteHeader />
+
+            <View className="w-full min-w-0 flex-1">
+              <Stack screenOptions={{ headerShown: false }} />
+            </View>
+          </View>
+        </WebAuthProvider>
+      </FavoritesProvider>
     </CartProvider>
   );
 }

@@ -1,5 +1,5 @@
+import { router } from "expo-router";
 import { useState } from "react";
-
 import {
   Image,
   KeyboardAvoidingView,
@@ -12,206 +12,300 @@ import {
 } from "react-native";
 
 import { useSocialAuth } from "@/hooks/use-social-auth";
-import { router } from "expo-router";
+import { supabase } from "@/lib/supabase";
 
 export default function LoginScreen() {
   const [emailOrPhone, setEmailOrPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loggingIn, setLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+
   const {
     error: socialAuthError,
     loadingProvider,
-    signInWithApple,
     signInWithGoogle,
   } = useSocialAuth();
 
-  const handleLogin = () => {
-    // Authentication will be connected later.
-    router.replace("/(tabs)");
+  const busy = loggingIn || loadingProvider !== null;
+
+  const handleSocialLogin = async () => {
+    if (busy) return;
+
+    setLoginError(null);
+
+    const signedIn = await signInWithGoogle();
+
+    if (signedIn) {
+      router.replace("/(tabs)");
+    }
   };
 
-  const handleSocialLogin = async (provider: "google" | "apple") => {
-    const signedIn =
-      provider === "google"
-        ? await signInWithGoogle()
-        : await signInWithApple();
+  const handleLogin = async () => {
+    if (busy) return;
 
-    if (signedIn) router.replace("/(tabs)");
+    setLoginError(null);
+
+    const email = emailOrPhone.trim().toLowerCase();
+
+    if (!email || !password) {
+      setLoginError("Enter your email and password.");
+      return;
+    }
+
+    if (!email.includes("@")) {
+      setLoginError("Phone login isn't available yet. Please use your email.");
+      return;
+    }
+
+    setLoggingIn(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        if (error.message === "Invalid login credentials") {
+          setLoginError(
+            "Incorrect email or password. Check your details and try again.",
+          );
+        } else if (
+          error.message.toLowerCase().includes("email not confirmed")
+        ) {
+          setLoginError("Please verify your email address before logging in.");
+        } else {
+          setLoginError(error.message);
+        }
+
+        return;
+      }
+
+      if (!data.session) {
+        setLoginError("Login did not create a session. Please try again.");
+        return;
+      }
+
+      router.replace("/(tabs)");
+    } catch (error) {
+      console.error("Email login failed:", error);
+
+      setLoginError(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again.",
+      );
+    } finally {
+      setLoggingIn(false);
+    }
   };
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-white pt-20"
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      className="flex-1 bg-gray-50"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
-        contentContainerClassName="flex-grow items-center px-4 pb-10 pt-8 sm:px-6 sm:pt-[45px]"
-        showsVerticalScrollIndicator={false}
+        className="flex-1"
+        contentContainerClassName="flex-grow items-center justify-center px-4 py-8 sm:px-6 sm:py-12 lg:px-8"
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <View className="w-full max-w-[560px]">
+        <View className="w-full max-w-[460px] rounded-2xl border border-gray-100 bg-white px-5 py-7 shadow-sm sm:px-9 sm:py-9 lg:px-10">
           {/* Logo */}
-
-          <View className="mb-[38px] items-center">
+          <View className="mb-5 w-full items-center">
             <Image
               source={require("../../assets/images/akrobite-logo.png")}
-              className="h-14 w-40 sm:h-16 sm:w-44 md:h-20 md:w-52"
               resizeMode="contain"
+              style={{
+                width: 136,
+                height: 44,
+                maxWidth: "100%",
+                flexGrow: 0,
+                flexShrink: 0,
+              }}
+              accessibilityLabel="AkroBite logo"
             />
           </View>
 
-          {/* Header */}
-
-          <View className="mb-[25px]">
-            <Text className="mb-[6px] text-[27px] font-bold text-text">
+          {/* Heading */}
+          <View className="mb-7">
+            <Text className="mb-2 text-2xl font-bold text-text sm:text-3xl">
               Welcome back!
             </Text>
 
-            <Text className="text-[15px] text-textSecondary">
-              Login to continue
+            <Text className="text-sm leading-6 text-textSecondary sm:text-base">
+              Log in to discover restaurants and order your favourite meals.
             </Text>
           </View>
 
-          {/* Email / Phone */}
-
-          <View className="mb-[18px]">
-            <Text className="mb-2 text-sm font-semibold text-text">
-              Email or phone number
-            </Text>
+          {/* Email */}
+          <View className="mb-5">
+            <Text className="mb-2 text-sm font-semibold text-text">Email</Text>
 
             <TextInput
-              className="h-[52px] rounded-[10px] border border-border bg-white px-[15px] text-[15px] text-text"
+              className="h-12 w-full rounded-lg border border-border bg-white px-4 text-base text-text outline-none focus:border-primary"
               value={emailOrPhone}
               onChangeText={setEmailOrPhone}
-              placeholder="Enter your email or phone"
+              placeholder="Enter your email"
               placeholderTextColor="#737373"
               autoCapitalize="none"
+              autoCorrect={false}
               keyboardType="email-address"
+              autoComplete="email"
+              textContentType="emailAddress"
+              editable={!busy}
+              returnKeyType="next"
+              accessibilityLabel="Email address"
             />
           </View>
 
           {/* Password */}
-
-          <View className="mb-[18px]">
+          <View className="mb-3">
             <Text className="mb-2 text-sm font-semibold text-text">
               Password
             </Text>
 
-            <View className="h-[52px] flex-row items-center rounded-[10px] border border-border">
+            <View className="h-12 w-full flex-row items-center rounded-lg border border-border bg-white focus-within:border-primary">
               <TextInput
-                className="h-full flex-1 px-[15px] text-[15px] text-text"
+                className="h-full min-w-0 flex-1 px-4 text-base text-text outline-none"
                 value={password}
                 onChangeText={setPassword}
                 placeholder="Enter your password"
                 placeholderTextColor="#737373"
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="current-password"
+                textContentType="password"
+                editable={!busy}
+                returnKeyType="done"
+                onSubmitEditing={() => void handleLogin()}
+                accessibilityLabel="Password"
               />
 
               <Pressable
-                className="h-full items-center justify-center px-[14px]"
-                onPress={() => setShowPassword(!showPassword)}
+                className="h-full justify-center px-4"
+                onPress={() => setShowPassword((previous) => !previous)}
+                disabled={busy}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  showPassword ? "Hide password" : "Show password"
+                }
               >
-                <Text className="text-lg">{showPassword ? "🙈" : "👁"}</Text>
+                <Text className="text-base text-textSecondary">
+                  {showPassword ? "Hide" : "Show"}
+                </Text>
               </Pressable>
             </View>
           </View>
 
           {/* Forgot password */}
-
           <Pressable
-            className="mb-[22px] self-end"
+            className="mb-6 self-end py-2"
             onPress={() => router.push("/forgot-password")}
+            disabled={busy}
+            accessibilityRole="link"
           >
-            <Text className="text-[13px] font-semibold text-primary">
+            <Text className="text-sm font-semibold text-primary">
               Forgot password?
             </Text>
           </Pressable>
 
           {/* Login button */}
-
           <Pressable
-            className="h-[52px] w-full items-center justify-center rounded-[9px] bg-primary active:bg-primaryDark"
-            onPress={handleLogin}
+            className={`h-12 w-full items-center justify-center rounded-lg ${
+              busy ? "bg-gray-400" : "bg-primary"
+            }`}
+            disabled={busy}
+            onPress={() => void handleLogin()}
+            accessibilityRole="button"
           >
-            <Text className="text-[15px] font-bold text-white">Login</Text>
+            <Text className="text-base font-bold text-white">
+              {loggingIn ? "Logging in..." : "Login"}
+            </Text>
           </Pressable>
 
-          {/* Divider */}
-
-          <View className="my-6 flex-row items-center">
-            <View className="h-px flex-1 bg-border" />
-
-            <Text className="mx-3 text-xs text-textSecondary">
-              or continue with
-            </Text>
-
-            <View className="h-px flex-1 bg-border" />
-          </View>
-
-          {/* Social buttons */}
-
-          <View className="flex-row items-center justify-center gap-6">
-            <Pressable
-              className="items-center justify-center"
-              disabled={loadingProvider !== null}
-              onPress={() => void handleSocialLogin("google")}
+          {/* Email login error */}
+          {loginError ? (
+            <Text
+              className="mt-3 text-center text-sm leading-5 text-red-600"
+              accessibilityRole="alert"
             >
-              <Image
-                source={require("../../assets/images/google-logo.png")}
-                className="h-10 w-10 rounded-lg border border-border sm:h-11 sm:w-11 md:h-12 md:w-12"
-                resizeMode="contain"
-              />
-
-              <Text className="mt-[8px] text-[11px] text-textSecondary">
-                Google
-              </Text>
-            </Pressable>
-
-            <Pressable
-              className="items-center justify-center"
-              disabled={loadingProvider !== null}
-              onPress={() => void handleSocialLogin("apple")}
-            >
-              <Image
-                source={require("../../assets/images/apple-logo.png")}
-                className="h-10 w-10 rounded-lg border border-border sm:h-11 sm:w-11 md:h-12 md:w-12"
-                resizeMode="contain"
-              />
-
-              <Text className="mt-[8px] text-[11px] text-textSecondary">
-                Apple
-              </Text>
-            </Pressable>
-          </View>
-
-          {loadingProvider ? (
-            <Text className="mt-4 text-center text-sm text-textSecondary">
-              Connecting to {loadingProvider === "google" ? "Google" : "Apple"}
-              ...
+              {loginError}
             </Text>
           ) : null}
 
+          {/* Divider */}
+          <View className="my-6 flex-row items-center">
+            <View className="h-px flex-1 bg-border" />
+            <Text className="mx-3 text-xs text-textSecondary">
+              OR CONTINUE WITH
+            </Text>
+            <View className="h-px flex-1 bg-border" />
+          </View>
+
+          {/* Google sign-in */}
+          <Pressable
+            className={`h-12 w-full flex-row items-center justify-center rounded-lg border border-border bg-white ${
+              busy ? "opacity-50" : ""
+            }`}
+            disabled={busy}
+            onPress={() => void handleSocialLogin()}
+            accessibilityRole="button"
+            accessibilityLabel="Sign in with Google"
+          >
+            <Image
+              source={require("../../assets/images/google-logo.png")}
+              resizeMode="contain"
+              style={{
+                width: 20,
+                height: 20,
+                flexGrow: 0,
+                flexShrink: 0,
+                marginRight: 10,
+              }}
+            />
+
+            <Text className="text-sm font-semibold text-text sm:text-base">
+              {loadingProvider === "google"
+                ? "Connecting to Google..."
+                : "Sign in with Google"}
+            </Text>
+          </Pressable>
+
+          {/* Google sign-in status */}
           {socialAuthError ? (
-            <Text className="mt-4 text-center text-sm text-primary">
+            <Text
+              className="mt-3 text-center text-sm leading-5 text-red-600"
+              accessibilityRole="alert"
+            >
               {socialAuthError}
             </Text>
           ) : null}
 
           {/* Sign up */}
-
-          <View className="mt-[30px] flex-row justify-center">
+          <View className="mt-7 flex-row flex-wrap justify-center">
             <Text className="text-sm text-textSecondary">
               Don't have an account?
             </Text>
 
-            <Pressable onPress={() => router.push("/signup")}>
-              <Text className="ml-[5px] text-sm font-bold text-primary">
-                Sign up
-              </Text>
+            <Pressable
+              className="ml-1"
+              onPress={() => router.push("/signup")}
+              disabled={busy}
+              accessibilityRole="link"
+            >
+              <Text className="text-sm font-bold text-primary">Sign up</Text>
             </Pressable>
           </View>
         </View>
+
+        {/* Footer note */}
+        <Text className="mt-6 text-center text-xs text-textSecondary">
+          © {new Date().getFullYear()} AkroBite. All rights reserved.
+        </Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );

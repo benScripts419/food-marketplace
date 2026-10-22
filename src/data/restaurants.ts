@@ -24,7 +24,7 @@ export const restaurants = [
   },
   {
     id: "3",
-    name: "Brachers Inn",
+    name: "Brackers Inn",
     emoji: "🍕",
     rating: "4.5",
     reviews: "0",
@@ -55,7 +55,7 @@ export const restaurants = [
 
   {
     id: "6",
-    name: "Boba Buzz",
+    name: "Lizjay's Eatery",
     emoji: "🧋",
     rating: "4.5",
     reviews: "0",
@@ -65,11 +65,20 @@ export const restaurants = [
 
   {
     id: "7",
-    name: "Thebloom Boba Tea",
+    name: "50 Cent",
+    rating: "4.5",
+    reviews: "0",
+    time: "15–25 min",
+    category: "Fast Food",
+  },
+
+  {
+    id: "8",
+    name: "Pam's Check Check",
     emoji: "🧋",
     rating: "4.5",
     reviews: "0",
     time: "15–25 min",
-    category: "Bubble Tea • Drinks",
+    category: "Fast Food",
   },
 ];

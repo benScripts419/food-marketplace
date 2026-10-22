@@ -1,8 +1,18 @@
 import { createClient } from "@supabase/supabase-js";
 
-import { bloomBakesMenu } from "../src/data/bloomBakesMenu";
-import { brachersInnMenu } from "../src/data/brackersInnMenu";
-import { kwayisibeaMenu } from "../src/data/kwayisibeaMenu";
+import type { MenuCategory } from "../src/data/restaurantMenus";
+
+// Menu modules require images for the app, but the seed only needs their data.
+type AssetModule = { exports: unknown };
+const requireWithExtensions = require as typeof require & {
+  extensions: Record<string, (module: AssetModule) => void>;
+};
+
+for (const extension of [".jpg", ".jpeg", ".png", ".JPEG"]) {
+  requireWithExtensions.extensions[extension] = (module) => {
+    module.exports = null;
+  };
+}
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -17,17 +27,71 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
 
-const menus = [
-  { restaurantId: "1", categories: kwayisibeaMenu },
-  { restaurantId: "7", categories: bloomBakesMenu },
-  { restaurantId: "8", categories: brachersInnMenu },
-];
-
 async function seed() {
-  for (const { restaurantId, categories } of menus) {
+  const [
+    { fiftyCentMenu },
+    { bloomBakesMenu },
+    { brackersInnMenu },
+    { conceptMenu },
+    { kwayisibeaMenu },
+    { lizjaysMenu },
+    { rolldUpMenu },
+  ] = await Promise.all([
+    import("../src/data/50centMenu"),
+    import("../src/data/bloomBakesMenu"),
+    import("../src/data/brackersInnMenu"),
+    import("../src/data/conceptMenu"),
+    import("../src/data/kwayisibeaMenu"),
+    import("../src/data/lizjaysMenu"),
+    import("../src/data/rolldUpMenu"),
+  ]);
+  const menus: { aliases: string[]; categories: MenuCategory[] }[] = [
+    { aliases: ["Kwayisibea Hotel"], categories: kwayisibeaMenu },
+    { aliases: ["Concept"], categories: conceptMenu },
+    { aliases: ["Brackers Inn"], categories: brackersInnMenu },
+    { aliases: ["Bloom Bakes"], categories: bloomBakesMenu },
+    { aliases: ["Roll'd Up Shawarma"], categories: rolldUpMenu },
+    {
+      aliases: ["Lizjay's Eatery", "Boba Buzz"],
+      categories: lizjaysMenu,
+    },
+    { aliases: ["50 Cent", "Thebloom Boba Tea"], categories: fiftyCentMenu },
+  ];
+
+  const restaurantNames = menus.flatMap((menu) => menu.aliases);
+  const { data: restaurantRows, error: restaurantError } = await supabase
+    .from("restaurants")
+    .select("id, name")
+    .in("name", restaurantNames);
+
+  if (restaurantError) throw restaurantError;
+
+  const restaurantByName = new Map(
+    (restaurantRows ?? []).map((restaurant) => [restaurant.name, restaurant]),
+  );
+
+  const missingRestaurants = menus.filter(
+    ({ aliases }) =>
+      !aliases.some((name) => restaurantByName.has(name)),
+  );
+  if (missingRestaurants.length > 0) {
+    throw new Error(
+      `Missing Supabase restaurants: ${missingRestaurants
+        .map(({ aliases }) => aliases.join(" / "))
+        .join(", ")}.`,
+    );
+  }
+
+  for (const { aliases, categories } of menus) {
+    const restaurant = aliases
+      .map((name) => restaurantByName.get(name))
+      .find((row) => row !== undefined);
+
+    if (!restaurant) throw new Error("Restaurant lookup unexpectedly failed.");
+
     const categoryRows = categories.map((category, sortOrder) => ({
-      id: `${restaurantId}-${category.id}`,
-      restaurant_id: restaurantId,
+      id: `${restaurant.id}-${category.id}`,
+      restaurant_id: restaurant.id,
       name: category.name,
       sort_order: sortOrder,
     }));
@@ -41,8 +105,8 @@ async function seed() {
     const itemRows = categories.flatMap((category) =>
       category.items.map((item) => ({
         id: item.id,
-        restaurant_id: restaurantId,
-        category_id: `${restaurantId}-${category.id}`,
+        restaurant_id: restaurant.id,
+        category_id: `${restaurant.id}-${category.id}`,
         name: item.name,
         description: item.description ?? null,
         price: item.price,
@@ -62,6 +126,6 @@ async function seed() {
 }
 
 seed().catch((error) => {
-  console.error(error);
+  console.error("Failed to seed Supabase menus:", error);
   process.exitCode = 1;
 });

@@ -3,78 +3,80 @@ import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
-import { fetchRestaurants } from "@/data/supabaseRestaurants";
+import { supabase } from "@/lib/supabase";
 
+import { mapRestaurantRow } from "@/lib/restaurantMapper";
 import RestaurantCard, {
   type Restaurant,
 } from "../../components/restaurant/RestaurantCard";
 
-const localRestaurants: Restaurant[] = [
-  {
-    id: "1",
-    name: "Kwayisibea Hotel",
-    image: require("../../../assets/images/akrobite-logo.png"),
+const restaurantDisplayData: Record<
+  string,
+  Omit<Restaurant, "id" | "name" | "cuisine" | "image">
+> = {
+  "Kwayisibea Hotel": {
     rating: "4.6",
     reviews: "238",
     time: "20–30 min",
     fee: "GH₵10",
-    cuisine: "Local • African • Grills",
     offer: true,
   },
-  {
-    id: "2",
-    name: "Concept",
-    image: require("../../../assets/images/akrobite-logo.png"),
+
+  Concept: {
     rating: "4.5",
     reviews: "125",
     time: "25–35 min",
     fee: "GH₵15",
-    cuisine: "Pizza • Fast Food",
     offer: false,
   },
-  {
-    id: "3",
-    name: "Brackers Inn",
-    image: require("../../../assets/images/akrobite-logo.png"),
-    rating: "4.7",
-    reviews: "96",
-    time: "30–40 min",
-    fee: "GH₵15",
-    cuisine: "Sushi • Japanese",
+
+  "Brackers Inn": {
+    rating: "4.5",
+    reviews: "0",
+    time: "20–30 min",
+    fee: "GH₵0",
     offer: false,
   },
-  {
-    id: "4",
-    name: "Bloom Bakes",
-    image: require("../../../assets/images/akrobite-logo.png"),
-    rating: "4.3",
-    reviews: "164",
-    time: "30–40 min",
-    fee: "GH₵12",
-    cuisine: "Chicken • Grills",
+
+  "Bloom Bakes": {
+    rating: "4.5",
+    reviews: "0",
+    time: "15–25 min",
+    fee: "GH₵0",
     offer: false,
   },
-  {
-    id: "5",
-    name: "Roll'd",
-    image: require("../../../assets/images/akrobite-logo.png"),
+
+  "Roll'd Up Shawarma": {
     rating: "4.4",
     reviews: "210",
     time: "20–30 min",
     fee: "GH₵8",
-    cuisine: "Shawarma",
     offer: true,
   },
-];
+
+  "Boba Buzz": {
+    rating: "4.5",
+    reviews: "0",
+    time: "15–25 min",
+    fee: "GH₵0",
+    offer: false,
+  },
+
+  "Thebloom Boba Tea": {
+    rating: "4.5",
+    reviews: "0",
+    time: "15–25 min",
+    fee: "GH₵0",
+    offer: false,
+  },
+};
 
 const filters = ["All", "Offers", "Delivery Time", "Rating"] as const;
 
 type RestaurantFilter = (typeof filters)[number];
 
 export default function RestaurantsScreen() {
-  const [restaurantData, setRestaurantData] =
-    useState<Restaurant[]>(localRestaurants);
-
+  const [restaurantData, setRestaurantData] = useState<Restaurant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<RestaurantFilter>("All");
@@ -82,26 +84,32 @@ export default function RestaurantsScreen() {
   useEffect(() => {
     let isMounted = true;
 
-    fetchRestaurants()
-      .then((remoteRestaurants) => {
-        if (isMounted && remoteRestaurants.length > 0) {
-          setRestaurantData(remoteRestaurants);
-        }
-      })
-      .catch((error) => {
-        if (isMounted) {
-          setLoadError(
-            error instanceof Error
-              ? error.message
-              : "Unable to load restaurants.",
-          );
-        }
-      })
-      .finally(() => {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      });
+    async function loadRestaurants() {
+      setIsLoading(true);
+      setLoadError(null);
+
+      const { data, error } = await supabase
+        .from("restaurants")
+        .select("id, name, description, image_url, cuisine, category")
+        .order("name");
+
+      if (!isMounted) return;
+
+      if (error) {
+        console.error("Failed to load restaurants:", error);
+        setLoadError(error.message);
+        setRestaurantData([]);
+        setIsLoading(false);
+        return;
+      }
+
+      const mappedRestaurants = (data ?? []).map(mapRestaurantRow);
+
+      setRestaurantData(mappedRestaurants);
+      setIsLoading(false);
+    }
+
+    loadRestaurants();
 
     return () => {
       isMounted = false;
@@ -151,7 +159,7 @@ export default function RestaurantsScreen() {
         {/* TITLE + LOCATION */}
         <View className="mt-3">
           <Text className="text-2xl font-bold text-text sm:text-[26px]">
-            Restaurants
+            Restaurants & Food Joints
           </Text>
 
           <Pressable
@@ -227,9 +235,13 @@ export default function RestaurantsScreen() {
               Loading restaurants...
             </Text>
           ) : loadError ? (
-            <Text className="mb-3 text-sm text-textSecondary">
-              Showing available restaurants offline.
-            </Text>
+            <View className="mb-4 rounded-lg bg-red-50 p-3">
+              <Text className="text-sm font-medium text-red-600">
+                Unable to load restaurants.
+              </Text>
+
+              <Text className="mt-1 text-xs text-red-500">{loadError}</Text>
+            </View>
           ) : (
             <Text className="mb-3 text-sm text-textSecondary">
               {visibleRestaurants.length} restaurants found
@@ -237,77 +249,32 @@ export default function RestaurantsScreen() {
           )}
 
           {/* RESTAURANT CARDS */}
-          {visibleRestaurants.map((restaurant) => (
-            <RestaurantCard
-              key={restaurant.id}
-              restaurant={restaurant}
-              onPress={() => router.push(`/restaurant/${restaurant.id}`)}
-            />
-          ))}
+          {!isLoading &&
+            !loadError &&
+            visibleRestaurants.map((restaurant) => (
+              <RestaurantCard
+                key={restaurant.id}
+                restaurant={restaurant}
+                onPress={() => router.push(`/restaurant/${restaurant.id}`)}
+              />
+            ))}
+
+          {/* EMPTY STATE */}
+          {!isLoading && !loadError && visibleRestaurants.length === 0 && (
+            <View className="items-center py-16">
+              <Ionicons name="restaurant-outline" size={48} color="#737373" />
+
+              <Text className="mt-3 text-base font-semibold text-text">
+                No restaurants found
+              </Text>
+
+              <Text className="mt-1 text-center text-sm text-textSecondary">
+                Try selecting another filter.
+              </Text>
+            </View>
+          )}
         </View>
       </ScrollView>
     </View>
-  );
-}
-
-function BottomNavigation() {
-  return (
-    <View className="absolute bottom-0 left-0 right-0 flex-row border-t border-border bg-white px-4 pb-7 pt-3">
-      <NavItem
-        icon="home-outline"
-        label="Home"
-        onPress={() => router.push("/")}
-      />
-
-      <NavItem
-        icon="search-outline"
-        label="Search"
-        onPress={() => router.push("/search")}
-      />
-
-      <NavItem
-        icon="receipt-outline"
-        label="Orders"
-        onPress={() => router.push("/orders")}
-      />
-
-      <NavItem
-        icon="cart-outline"
-        label="Cart"
-        onPress={() => router.push("/cart")}
-      />
-
-      <NavItem
-        icon="person-outline"
-        label="Profile"
-        onPress={() => router.push("/profile")}
-      />
-    </View>
-  );
-}
-
-function NavItem({
-  icon,
-  label,
-  active = false,
-  onPress,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  active?: boolean;
-  onPress?: () => void;
-}) {
-  return (
-    <Pressable onPress={onPress} className="flex-1 items-center justify-center">
-      <Ionicons name={icon} size={21} color={active ? "#E53935" : "#737373"} />
-
-      <Text
-        className={`mt-1 text-[10px] ${
-          active ? "font-bold text-primary" : "text-textSecondary"
-        }`}
-      >
-        {label}
-      </Text>
-    </Pressable>
   );
 }

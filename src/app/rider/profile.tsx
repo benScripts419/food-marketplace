@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
+import { supabase } from "@/lib/supabase";
 
 export default function RiderProfileScreen() {
   return (
@@ -102,7 +103,10 @@ export default function RiderProfileScreen() {
               <Ionicons name="chevron-forward" size={18} color="#737373" />
             </Pressable>
 
-            <Pressable className="flex-row items-center p-4">
+            <Pressable
+              onPress={() => router.push("/rider/payment-details")}
+              className="flex-row items-center p-4"
+            >
               <Ionicons name="card-outline" size={21} color="#737373" />
 
               <View className="ml-3 flex-1">
@@ -182,7 +186,10 @@ export default function RiderProfileScreen() {
         {/* LOGOUT */}
         <View className="mt-7 px-5">
           <Pressable
-            onPress={() => router.replace("/rider")}
+            onPress={async () => {
+              await supabase.auth.signOut();
+              router.replace("/rider");
+            }}
             className="h-14 items-center justify-center rounded-xl border border-primary bg-white"
           >
             <Text className="font-bold text-primary">Log Out</Text>

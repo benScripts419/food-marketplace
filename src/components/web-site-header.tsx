@@ -1,84 +1,213 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, usePathname } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { useState } from "react";
+import { Pressable, Text, View, Image } from "react-native";
 
-const links = [
-  { label: "Home", path: "/(tabs)" as const },
-  { label: "Restaurants", path: "/restaurants" as const },
-  { label: "Search", path: "/search" as const },
-  { label: "Orders", path: "/orders" as const },
+import { useWebAuth } from "@/context/WebAuthContext";
+
+const tabs = [
+  { label: "Home", path: "/(tabs)" as const, href: "/" },
+  { label: "Search", path: "/(tabs)/search" as const, href: "/search" },
+  {
+    label: "Restaurants",
+    path: "/(tabs)/restaurants" as const,
+    href: "/restaurants",
+  },
+  { label: "Cart", path: "/(tabs)/cart" as const, href: "/cart" },
+  { label: "Orders", path: "/(tabs)/orders" as const, href: "/orders" },
+  { label: "Profile", path: "/(tabs)/profile" as const, href: "/profile" },
 ];
 
 export default function WebSiteHeader() {
   const pathname = usePathname();
+  const { user, displayName, loading } = useWebAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  if (
-    pathname === "/" ||
-    pathname === "/onboarding" ||
-    pathname === "/login" ||
-    pathname === "/signup" ||
-    pathname === "/forgot-password"
-  ) {
-    return null;
-  }
+  const navigate = (
+    path: (typeof tabs)[number]["path"] | "/login" | "/signup",
+  ) => {
+    setMenuOpen(false);
+    router.push(path);
+  };
 
-  return (
-    <View className="absolute left-0 right-0 top-0 z-50 border-b border-[#eee7dd] bg-[#fffdf9]">
-      <View className="mx-auto w-full max-w-[1280px] flex-row items-center justify-between px-5 py-4 lg:px-12">
+  const isActive = (href: string) =>
+    pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
+
+  const renderTabs = (mobile = false) =>
+    tabs.map((tab) => {
+      const active = isActive(tab.href);
+
+      return (
         <Pressable
-          onPress={() => router.replace("/(tabs)")}
-          className="flex-row items-center"
+          key={tab.label}
+          onPress={() => navigate(tab.path)}
+          accessibilityRole="link"
+          accessibilityState={{ selected: active }}
+          className={
+            mobile
+              ? `w-full flex-row items-center rounded-xl px-4 py-3 ${
+                  active ? "bg-red-50" : ""
+                }`
+              : "px-3 py-2"
+          }
         >
-          <View className="h-9 w-9 items-center justify-center rounded-full bg-primary">
-            <Ionicons name="restaurant" size={17} color="#FFFFFF" />
-          </View>
-          <Text className="ml-2.5 text-base font-bold tracking-wide text-text">
-            AkroBite
+          <Text
+            className={`text-sm font-semibold ${
+              active ? "text-primary" : "text-textSecondary"
+            }`}
+          >
+            {tab.label}
+          </Text>
+
+          {mobile && active && (
+            <View className="ml-auto">
+              <Ionicons name="checkmark-circle" size={18} color="#E53935" />
+            </View>
+          )}
+
+          {!mobile && active && (
+            <View className="mx-3 mt-1 h-0.5 rounded-full bg-primary" />
+          )}
+        </Pressable>
+      );
+    });
+
+  const renderAuthActions = (mobile = false) => {
+    if (loading) return null;
+
+    if (user) {
+      return (
+        <Pressable
+          onPress={() => navigate("/(tabs)/profile")}
+          accessibilityRole="link"
+          accessibilityLabel="Open your profile"
+          className={`h-10 items-center justify-center rounded-xl border border-primary px-4 ${
+            mobile ? "w-full" : ""
+          }`}
+        >
+          <Text className="text-sm font-bold text-primary" numberOfLines={1}>
+            {mobile
+              ? `My Profile${displayName ? ` · ${displayName}` : ""}`
+              : displayName || "Profile"}
           </Text>
         </Pressable>
+      );
+    }
 
-        <View className="hidden flex-row items-center gap-7 sm:flex">
-          {links.map((link) => {
-            const active =
-              pathname === link.path || pathname.startsWith(`${link.path}/`);
+    return (
+      <>
+        <Pressable
+          onPress={() => navigate("/login")}
+          accessibilityRole="link"
+          className={`h-10 items-center justify-center rounded-xl border border-primary px-4 ${
+            mobile ? "flex-1" : ""
+          }`}
+        >
+          <Text className="text-sm font-bold text-primary">Sign in</Text>
+        </Pressable>
 
-            return (
-              <Pressable
-                key={link.label}
-                onPress={() => router.push(link.path)}
-                className="py-2"
-              >
-                <Text
-                  className={`text-sm font-semibold ${active ? "text-primary" : "text-textSecondary"}`}
-                >
-                  {link.label}
-                </Text>
-              </Pressable>
-            );
-          })}
+        <Pressable
+          onPress={() => navigate("/signup")}
+          accessibilityRole="link"
+          className={`h-10 items-center justify-center rounded-xl bg-primary px-4 ${
+            mobile ? "flex-1" : ""
+          }`}
+        >
+          <Text className="text-sm font-bold text-white">Sign up</Text>
+        </Pressable>
+      </>
+    );
+  };
+
+  return (
+    <View className="z-50 w-full border-b border-border bg-white">
+      <View className="mx-auto w-full max-w-[1280px] px-4 py-3 sm:px-6 lg:px-10">
+        {/* Desktop header */}
+        <View className="hidden flex-row items-center justify-between md:flex">
+          <Pressable
+            onPress={() => router.replace("/(tabs)")}
+            accessibilityRole="link"
+            accessibilityLabel="AkroBite home"
+          >
+            <Image
+              source={require("../../assets/images/akrobite-logo.png")}
+              resizeMode="contain"
+              style={{
+                width: 80,
+                height: 80,
+                flexGrow: 0,
+                flexShrink: 0,
+                marginRight: 10,
+              }}
+            />
+          </Pressable>
+
+          <View className="flex-row items-center">{renderTabs()}</View>
+
+          <View className="flex-row items-center gap-2">
+            {renderAuthActions()}
+          </View>
         </View>
 
-        <View className="flex-row items-center gap-2">
-          <Pressable
-            onPress={() => router.push("/restaurants")}
-            className="h-10 w-10 items-center justify-center rounded-full bg-[#f4eee5]"
-            accessibilityLabel="Open restaurants"
-          >
-            <Ionicons name="restaurant-outline" size={19} color="#171717" />
-          </Pressable>
-          <Pressable
-            onPress={() => router.push("/cart")}
-            className="h-10 w-10 items-center justify-center rounded-full bg-[#f4eee5]"
-            accessibilityLabel="Open cart"
-          >
-            <Ionicons name="cart-outline" size={19} color="#171717" />
-          </Pressable>
-          <Pressable
-            onPress={() => router.push("/login")}
-            className="hidden h-10 flex-row items-center justify-center rounded-lg bg-primary px-4 sm:flex"
-          >
-            <Text className="text-sm font-bold text-white">Sign in</Text>
-          </Pressable>
+        {/* Mobile header */}
+        <View className="md:hidden">
+          <View className="min-h-11 flex-row items-center justify-between gap-3">
+            <Pressable
+              onPress={() => {
+                setMenuOpen(false);
+                router.replace("/(tabs)");
+              }}
+              accessibilityRole="link"
+              accessibilityLabel="AkroBite home"
+            >
+              <Image
+                source={require("../../assets/images/akrobite-logo.png")}
+                resizeMode="contain"
+                style={{
+                  width: 20,
+                  height: 20,
+                  flexGrow: 0,
+                  flexShrink: 0,
+                  marginRight: 10,
+                }}
+              />
+            </Pressable>
+
+            <View className="flex-1" />
+
+            <Pressable
+              onPress={() => setMenuOpen((previous) => !previous)}
+              accessibilityRole="button"
+              accessibilityLabel={
+                menuOpen ? "Close navigation menu" : "Open navigation menu"
+              }
+              accessibilityState={{ expanded: menuOpen }}
+              className="h-11 w-11 items-center justify-center rounded-xl border border-border"
+            >
+              <Ionicons
+                name={menuOpen ? "close" : "menu"}
+                size={26}
+                color="#171717"
+              />
+            </Pressable>
+          </View>
+
+          {/* Expandable mobile navigation */}
+          {menuOpen && (
+            <View className="mt-3 rounded-2xl border border-border bg-white p-3">
+              <Text className="mb-2 px-4 pt-2 text-xs font-bold uppercase tracking-widest text-textSecondary">
+                Navigation
+              </Text>
+
+              <View className="gap-1">{renderTabs(true)}</View>
+
+              {!loading && (
+                <View className="mt-3 flex-row gap-2 border-t border-border pt-3">
+                  {renderAuthActions(true)}
+                </View>
+              )}
+            </View>
+          )}
         </View>
       </View>
     </View>

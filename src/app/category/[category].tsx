@@ -1,30 +1,31 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 
+import CategoryFloatingTabs from "@/components/CategoryFloatingTabs";
 import { getAllMenuItems } from "@/data/restaurantMenus";
-import { restaurants } from "@/data/restaurants";
+import { supabase } from "@/lib/supabase";
 
 const categoryAliases: Record<string, string[]> = {
   pizza: ["pizza", "pizzas"],
   burgers: ["burger", "burgers"],
   chicken: ["chicken", "poultry"],
   local: ["local", "local corner", "ghanaian food"],
-  drinks: ["drink", "drinks", "beverages"],
+  drinks: ["drink", "drinks", "beverages", "Tea"],
   african: ["african", "african food"],
-  "fast food": ["fast food", "fast-food"],
+  "fast food": ["fast food", "fast-food", "Fast Food"],
   desserts: ["dessert", "desserts"],
 };
 
-const categoryEmojis: Record<string, string> = {
-  Pizza: "🍕",
-  Burgers: "🍔",
-  Chicken: "🍗",
-  Local: "🍲",
-  Drinks: "🥤",
-  African: "🍛",
-  "Fast Food": "🍟",
-  Desserts: "🍰",
+type Restaurant = {
+  id: string;
+  name: string;
+  description?: string | null;
+  image_url?: string | null;
+  cuisine?: string | null;
+  category?: string | null;
+  rating?: string | null;
 };
 
 export default function CategoryItemsScreen() {
@@ -34,7 +35,36 @@ export default function CategoryItemsScreen() {
 
   const selectedCategory = Array.isArray(category) ? category[0] : category;
 
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [loadingRestaurants, setLoadingRestaurants] = useState(true);
+  const [restaurantSelection, setRestaurantSelection] = useState<{
+    category?: string;
+    restaurant: string | null;
+  }>({ category: selectedCategory, restaurant: null });
+
   const allMenuItems = getAllMenuItems();
+
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      setLoadingRestaurants(true);
+
+      const { data, error } = await supabase
+        .from("restaurants")
+        .select("id, name, description, image_url, cuisine, category");
+
+      if (error) {
+        console.error("Error fetching restaurants:", error);
+        Alert.alert("Error", "Unable to load restaurants. Please try again.");
+        setLoadingRestaurants(false);
+        return;
+      }
+
+      setRestaurants(data ?? []);
+      setLoadingRestaurants(false);
+    };
+
+    fetchRestaurants();
+  }, []);
 
   const filteredItems = selectedCategory
     ? allMenuItems.filter((item) => {
@@ -47,7 +77,40 @@ export default function CategoryItemsScreen() {
       })
     : [];
 
-  const emoji = categoryEmojis[selectedCategory ?? ""] ?? "🍽️";
+  const restaurantOptions = Array.from(
+    new Set(filteredItems.map((item) => item.restaurantName)),
+  );
+  const selectedRestaurant =
+    restaurantSelection.category === selectedCategory
+      ? restaurantSelection.restaurant
+      : null;
+  const visibleItems = selectedRestaurant
+    ? filteredItems.filter((item) => item.restaurantName === selectedRestaurant)
+    : filteredItems;
+
+  const handleViewItem = (restaurantName: string, itemId: string) => {
+    const restaurant = restaurants.find(
+      (restaurant) =>
+        restaurant.name.trim().toLowerCase() ===
+        restaurantName.trim().toLowerCase(),
+    );
+
+    if (!restaurant) {
+      Alert.alert(
+        "Restaurant unavailable",
+        `${restaurantName} could not be found.`,
+      );
+      return;
+    }
+
+    router.push({
+      pathname: "/restaurant/[id]",
+      params: {
+        id: restaurant.id,
+        itemId,
+      },
+    });
+  };
 
   return (
     <View className="flex-1 bg-white">
@@ -67,12 +130,69 @@ export default function CategoryItemsScreen() {
             </Text>
 
             <Text className="mt-1 text-sm text-textSecondary">
-              {filteredItems.length}{" "}
-              {filteredItems.length === 1 ? "item" : "items"} available
+              {visibleItems.length}{" "}
+              {visibleItems.length === 1 ? "item" : "items"} available
             </Text>
           </View>
         </View>
       </View>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        className="max-h-12 flex-grow-0"
+        contentContainerStyle={{
+          alignItems: "center",
+          paddingHorizontal: 20,
+          paddingBottom: 8,
+        }}
+      >
+        <Pressable
+          onPress={() =>
+            setRestaurantSelection({
+              category: selectedCategory,
+              restaurant: null,
+            })
+          }
+          className={`mr-2 rounded-full px-4 py-2 ${
+            selectedRestaurant === null ? "bg-primary" : "bg-surface"
+          }`}
+        >
+          <Text
+            className={`text-xs font-semibold ${
+              selectedRestaurant === null ? "text-white" : "text-text"
+            }`}
+          >
+            All restaurants
+          </Text>
+        </Pressable>
+        {restaurantOptions.map((restaurantName) => {
+          const isSelected = selectedRestaurant === restaurantName;
+          return (
+            <Pressable
+              key={restaurantName}
+              onPress={() =>
+                setRestaurantSelection({
+                  category: selectedCategory,
+                  restaurant: restaurantName,
+                })
+              }
+              className={`mr-2 rounded-full px-4 py-2 ${
+                isSelected ? "bg-primary" : "bg-surface"
+              }`}
+            >
+              <Text
+                className={`text-xs font-semibold ${
+                  isSelected ? "text-white" : "text-text"
+                }`}
+                numberOfLines={1}
+              >
+                {restaurantName}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
 
       {/* FOOD LIST */}
       <ScrollView
@@ -83,21 +203,32 @@ export default function CategoryItemsScreen() {
           paddingBottom: 140,
         }}
       >
-        {filteredItems.length > 0 ? (
-          filteredItems.map((item) => {
+        {loadingRestaurants ? (
+          <View className="items-center justify-center py-20">
+            <Text className="text-sm text-textSecondary">
+              Loading restaurants...
+            </Text>
+          </View>
+        ) : visibleItems.length > 0 ? (
+          visibleItems.map((item) => {
             const restaurant = restaurants.find(
-              (restaurant) => restaurant.id === item.restaurantId,
+              (restaurant) =>
+                restaurant.name.trim().toLowerCase() ===
+                item.restaurantName.trim().toLowerCase(),
             );
 
             return (
               <View
-                key={`${item.restaurantId}-${item.id}`}
+                key={`${item.restaurantName}-${item.id}`}
                 className="mb-4 overflow-hidden rounded-2xl border border-border bg-white"
               >
                 {/* IMAGE */}
-                <View className="h-40 w-full items-center justify-center bg-surface">
-                  <Text className="text-6xl">{emoji}</Text>
-                </View>
+                <Image
+                  source={item.image}
+                  className="h-40 w-full bg-surface"
+                  resizeMode="cover"
+                  accessibilityLabel={item.name}
+                />
 
                 {/* INFORMATION */}
                 <View className="p-4">
@@ -134,7 +265,7 @@ export default function CategoryItemsScreen() {
                     />
 
                     <Text className="ml-2 text-xs font-semibold text-text">
-                      {restaurant?.name ?? "Restaurant"}
+                      {restaurant?.name ?? item.restaurantName}
                     </Text>
 
                     {restaurant?.rating && (
@@ -150,15 +281,7 @@ export default function CategoryItemsScreen() {
 
                   {/* VIEW ITEM */}
                   <Pressable
-                    onPress={() =>
-                      router.push({
-                        pathname: "/restaurant/[id]",
-                        params: {
-                          id: item.restaurantId,
-                          itemId: item.id,
-                        },
-                      })
-                    }
+                    onPress={() => handleViewItem(item.restaurantName, item.id)}
                     className="mt-4 flex-row items-center self-start"
                   >
                     <Text className="text-xs font-bold text-primary">
@@ -201,69 +324,7 @@ export default function CategoryItemsScreen() {
         )}
       </ScrollView>
 
-      <BottomNavigation />
+      <CategoryFloatingTabs activeTab="Restaurants" />
     </View>
-  );
-}
-
-function BottomNavigation() {
-  return (
-    <View className="absolute bottom-0 left-0 right-0 flex-row border-t border-border bg-white px-4 pb-7 pt-3">
-      <NavItem
-        icon="home-outline"
-        label="Home"
-        onPress={() => router.push("/")}
-      />
-
-      <NavItem
-        icon="search-outline"
-        label="Search"
-        onPress={() => router.push("/search")}
-      />
-
-      <NavItem
-        icon="receipt-outline"
-        label="Orders"
-        onPress={() => router.push("/orders")}
-      />
-
-      <NavItem
-        icon="cart-outline"
-        label="Cart"
-        onPress={() => router.push("/cart")}
-      />
-
-      <NavItem
-        icon="person-outline"
-        label="Profile"
-        onPress={() => router.push("/profile")}
-      />
-    </View>
-  );
-}
-
-function NavItem({
-  icon,
-  label,
-  active = false,
-  onPress,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  active?: boolean;
-  onPress?: () => void;
-}) {
-  return (
-    <Pressable onPress={onPress} className="flex-1 items-center justify-center">
-      <Ionicons name={icon} size={21} color={active ? "#E53935" : "#737373"} />
-
-      <Text
-        className={`mt-1 text-[10px] ${
-          active ? "font-bold text-primary" : "text-textSecondary"
-        }`}
-      >
-        {label}
-      </Text>
-    </Pressable>
   );
 }

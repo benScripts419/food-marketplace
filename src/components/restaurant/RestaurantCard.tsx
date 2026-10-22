@@ -1,5 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image, Pressable, Text, View } from "react-native";
+import { Alert, Image, Pressable, Text, View } from "react-native";
+
+import { useFavorites } from "@/context/FavoritesContext";
 
 export type Restaurant = {
   id: string;
@@ -22,6 +24,9 @@ export default function RestaurantCard({
   restaurant,
   onPress,
 }: RestaurantCardProps) {
+  const { isFavorite, toggleFavorite, favoritesLoaded } = useFavorites();
+  const favorite = isFavorite(restaurant.id);
+
   return (
     <Pressable
       onPress={onPress}
@@ -54,10 +59,29 @@ export default function RestaurantCard({
           </Text>
 
           <Pressable
-            onPress={(event) => event.stopPropagation()}
+            onPress={(event) => {
+              event.stopPropagation();
+              void toggleFavorite(restaurant.id).catch((error: unknown) => {
+                Alert.alert(
+                  "Could not update favorites",
+                  error instanceof Error ? error.message : "Please try again.",
+                );
+              });
+            }}
+            disabled={!favoritesLoaded}
+            accessibilityRole="button"
+            accessibilityLabel={
+              favorite
+                ? `Remove ${restaurant.name} from favorites`
+                : `Add ${restaurant.name} to favorites`
+            }
             className="h-7 w-7 items-center justify-center"
           >
-            <Ionicons name="heart-outline" size={19} color="#737373" />
+            <Ionicons
+              name={favorite ? "heart" : "heart-outline"}
+              size={19}
+              color={favorite ? "#E53935" : "#737373"}
+            />
           </Pressable>
         </View>
 

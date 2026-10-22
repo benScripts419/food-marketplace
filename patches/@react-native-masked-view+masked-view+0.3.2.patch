@@ -1,0 +1,13 @@
+diff --git a/node_modules/@react-native-masked-view/masked-view/js/MaskedView.js b/node_modules/@react-native-masked-view/masked-view/js/MaskedView.js
+index b336b7a..b6b7199 100644
+--- a/node_modules/@react-native-masked-view/masked-view/js/MaskedView.js
++++ b/node_modules/@react-native-masked-view/masked-view/js/MaskedView.js
+@@ -71,7 +71,7 @@ export default class MaskedView extends React.Component<MaskedViewProps> {
+ 
+     return (
+       <RNCMaskedView {...otherViewProps}>
+-        <View pointerEvents="none" style={StyleSheet.absoluteFill}>
++        <View style={[StyleSheet.absoluteFill, { pointerEvents: 'none' }]}>
+           {maskElement}
+         </View>
+         {children}

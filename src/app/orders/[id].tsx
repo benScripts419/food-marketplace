@@ -121,6 +121,24 @@ export default function OrderDetailsScreen() {
           </View>
         </View>
 
+        {order.cancellationReason === "unavailable" ? (
+          <View className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4">
+            <Text className="text-sm font-bold text-primary">
+              This order is currently unavailable
+            </Text>
+            <Text className="mt-1 text-sm leading-5 text-textSecondary">
+              {order.refundStatus === "pending" ||
+              order.refundStatus === "processed"
+                ? "A full refund has been initiated to your original payment method. Processing time depends on your payment provider."
+                : order.refundStatus === "failed"
+                  ? "We could not start your refund automatically. Please contact AkroBite support for help."
+                  : order.refundStatus === "unknown"
+                    ? "We could not confirm the refund request status. AkroBite support will follow up."
+                  : "Your full refund is being initiated."}
+            </Text>
+          </View>
+        ) : null}
+
         {/* ITEMS */}
         <View className="mt-6">
           <Text className="text-lg font-bold text-text">Items</Text>

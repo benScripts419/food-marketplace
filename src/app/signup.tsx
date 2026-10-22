@@ -12,6 +12,8 @@ import {
 } from "react-native";
 
 import { useSocialAuth } from "@/hooks/use-social-auth";
+import { Alert, ActivityIndicator } from "react-native";
+import { registerCustomer } from "@/services/auth";
 
 export default function SignupScreen() {
   const [fullName, setFullName] = useState("");
@@ -28,10 +30,73 @@ export default function SignupScreen() {
     signInWithGoogle,
   } = useSocialAuth();
 
-  const handleSignup = () => {
-    // Authentication will be connected later.
-    // For now, continue to location selection.
-    router.replace("/location");
+  const handleSignup = async () => {
+    if (isSubmitting) return;
+
+    if (!fullName.trim()) {
+      Alert.alert("Missing information", "Please enter your full name.");
+      return;
+    }
+
+    if (!emailOrPhone.trim()) {
+      Alert.alert("Missing information", "Please enter your email address.");
+      return;
+    }
+
+    if (!emailOrPhone.includes("@")) {
+      Alert.alert(
+        "Email registration",
+        "Please enter a valid email address. Phone signup is not supported yet.",
+      );
+      return;
+    }
+
+    if (password.length < 8) {
+      Alert.alert(
+        "Invalid password",
+        "Your password must be at least 8 characters.",
+      );
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert("Password mismatch", "Your passwords do not match.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const result = await registerCustomer(fullName, emailOrPhone, password);
+
+      if (result.verificationRequired) {
+        Alert.alert(
+          "Verify your email",
+          "Your account has been created. Check your email for the verification link before signing in.",
+          [
+            {
+              text: "OK",
+              onPress: () => router.replace("/login"),
+            },
+          ],
+        );
+        return;
+      }
+
+      // Account created and authenticated: open Home.
+      router.replace("/(tabs)");
+    } catch (error) {
+      console.error("AkroBite signup error:", error);
+
+      Alert.alert(
+        "Signup failed",
+        error instanceof Error
+          ? error.message
+          : "Unable to create your account. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSocialSignup = async (provider: "google" | "apple") => {
@@ -40,8 +105,12 @@ export default function SignupScreen() {
         ? await signInWithGoogle()
         : await signInWithApple();
 
-    if (signedIn) router.replace("/location");
+    if (signedIn) {
+      router.replace("/(tabs)");
+    }
   };
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   return (
     <KeyboardAvoidingView
@@ -167,6 +236,9 @@ export default function SignupScreen() {
                 placeholderTextColor="#737373"
                 secureTextEntry={!showConfirmPassword}
                 autoCapitalize="none"
+                autoCorrect={false}
+                contextMenuHidden={true}
+                selectTextOnFocus={false}
               />
 
               <Pressable
@@ -194,10 +266,15 @@ export default function SignupScreen() {
           <Pressable
             className="h-[52px] w-full items-center justify-center rounded-[9px] bg-primary active:bg-primaryDark"
             onPress={handleSignup}
+            disabled={isSubmitting}
           >
-            <Text className="text-[15px] font-bold text-white">
-              Create Account
-            </Text>
+            {isSubmitting ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text className="text-[15px] font-bold text-white">
+                Create Account
+              </Text>
+            )}
           </Pressable>
 
           {/* Social signup */}

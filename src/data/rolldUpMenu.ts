@@ -3,6 +3,7 @@ export type MenuItem = {
   name: string;
   price: number;
   category: string;
+  subCategory?: string;
   image: any;
 };
 
@@ -24,20 +25,87 @@ export const rolldUpMenu: MenuCategory[] = [
         name: "Chicken Pack",
         price: 40,
         category: "shawarma",
+        subCategory: "Chicken Pack",
         image: kwMixedSalad,
       },
       {
         id: "rolld-up-2",
-        name: "Beef Pack",
+        name: "Chicken Pack",
         price: 50,
         category: "shawarma",
+        subCategory: "Chicken Pack",
         image: kwMixedSalad,
       },
       {
         id: "rolld-up-3",
+        name: "Chicken Pack",
+        price: 60,
+        category: "shawarma",
+        subCategory: "Chicken Pack",
+        image: kwMixedSalad,
+      },
+      {
+        id: "rolld-up-4",
+        name: "Chicken Pack",
+        price: 70,
+        category: "shawarma",
+        subCategory: "Chicken Pack",
+        image: kwMixedSalad,
+      },
+      {
+        id: "rolld-up-5",
+        name: "Chicken Pack",
+        price: 80,
+        category: "shawarma",
+        subCategory: "Chicken Pack",
+        image: kwMixedSalad,
+      },
+      {
+        id: "rolld-up-6",
+        name: "Beef Pack",
+        price: 50,
+        category: "shawarma",
+        subCategory: "Beef Pack",
+        image: kwMixedSalad,
+      },
+      {
+        id: "rolld-up-7",
+        name: "Beef Pack",
+        price: 60,
+        category: "shawarma",
+        subCategory: "Beef Pack",
+        image: kwMixedSalad,
+      },
+      {
+        id: "rolld-up-8",
+        name: "Beef Pack",
+        price: 70,
+        category: "shawarma",
+        subCategory: "Beef Pack",
+        image: kwMixedSalad,
+      },
+      {
+        id: "rolld-up-9",
+        name: "Beef Pack",
+        price: 80,
+        category: "shawarma",
+        subCategory: "Beef Pack",
+        image: kwMixedSalad,
+      },
+      {
+        id: "rolld-up-10",
+        name: "Beef Pack",
+        price: 90,
+        category: "shawarma",
+        subCategory: "Beef Pack",
+        image: kwMixedSalad,
+      },
+      {
+        id: "rolld-up-11",
         name: "Combo Pack",
         price: 100,
         category: "shawarma",
+        subCategory: "Combo Pack",
         image: kwMixedSalad,
       },
     ],

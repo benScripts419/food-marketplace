@@ -1,11 +1,23 @@
+import { supabase } from "@/lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   createContext,
-  ReactNode,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
+  type ReactNode,
 } from "react";
+
+const CART_STORAGE_KEY = "@akrobite_cart";
+const FREE_SELECTIONS_STORAGE_KEY = "@akrobite_free_item_selections";
+
+// Roll'd Up restaurant UUID
+const ROLLD_UP_RESTAURANT_ID = "0a7aae53-94c5-428c-88c5-3e6cd88ee911";
+
+// Wednesday = 3
+const PROMOTION_DAY = 3;
 
 export type CartItem = {
   id: string;
@@ -19,86 +31,163 @@ export type CartItem = {
   restaurantName: string;
 };
 
-export type Order = {
-  id: string;
+type FreeItemSelection = {
+  itemId: string;
   restaurantId: string;
+};
+
+type OrderItem = {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+};
+
+type Order = {
+  id: string;
+  status: string;
+  cancellationReason: string | null;
+  refundStatus: string | null;
+  paymentStatus: string | null;
+  adminConfirmed: boolean;
+  createdAt: string;
   restaurantName: string;
-  items: CartItem[];
+  items: OrderItem[];
   subtotal: number;
   deliveryFee: number;
   serviceFee: number;
   total: number;
-  status:
-    | "pending"
-    | "confirmed"
-    | "preparing"
-    | "ready"
-    | "picked_up"
-    | "on_the_way"
-    | "delivered"
-    | "cancelled";
-  createdAt: string;
+};
+
+type OrderRow = {
+  id: string;
+  status: string;
+  cancellation_reason: string | null;
+  refund_status: string | null;
+  payment_status: string | null;
+  admin_confirmed_at: string | null;
+  created_at: string;
+  subtotal: number;
+  delivery_fee: number;
+  service_fee: number;
+  total: number;
+  order_items:
+    | {
+        id: string;
+        name: string | null;
+        item_name: string | null;
+        quantity: number;
+        price: number | null;
+        unit_price: number | null;
+        restaurant_name: string | null;
+      }[]
+    | null;
 };
 
 type CartContextType = {
   cartItems: CartItem[];
-  orders: Order[];
+  cartCount: number;
+  cartSubtotal: number;
+  promotionDiscount: number;
+  cartTotal: number;
+
+  isPromotionActive: boolean;
+
+  // Promotion prompt
+  freeItemPromptVisible: boolean;
+  pendingFreeItemSelection: boolean;
+
+  freeItemSelections: FreeItemSelection[];
 
   addToCart: (item: Omit<CartItem, "quantity">) => void;
 
+  selectFreeItem: (item: Omit<CartItem, "quantity">) => void;
+
+  dismissFreeItemPrompt: () => void;
+
   removeFromCart: (id: string, restaurantId: string) => void;
-
   increaseQuantity: (id: string, restaurantId: string) => void;
-
   decreaseQuantity: (id: string, restaurantId: string) => void;
-
-  placeOrder: (deliveryFee: number, serviceFee: number) => Order | null;
 
   clearCart: () => void;
 
-  cartTotal: number;
-  cartCount: number;
+  orders: Order[];
+  refreshOrders: () => Promise<void>;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const CART_STORAGE_KEY = "@akrobite_cart";
-const ORDERS_STORAGE_KEY = "@akrobite_orders";
+type CartProviderProps = {
+  children: ReactNode;
+};
 
-export function CartProvider({ children }: { children: ReactNode }) {
+export function CartProvider({ children }: CartProviderProps) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
 
-  // LOAD CART + ORDERS
+  const [freeItemSelections, setFreeItemSelections] = useState<
+    FreeItemSelection[]
+  >([]);
+
+  const [freeItemPromptVisible, setFreeItemPromptVisible] = useState(false);
+
+  // --------------------------------------------------
+  // LOAD STORED CART
+  // --------------------------------------------------
+
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const storedCart = await AsyncStorage.getItem(CART_STORAGE_KEY);
+    let mounted = true;
 
-        const storedOrders = await AsyncStorage.getItem(ORDERS_STORAGE_KEY);
+    const loadStoredData = async () => {
+      try {
+        const [storedCart, storedFreeSelections] = await Promise.all([
+          AsyncStorage.getItem(CART_STORAGE_KEY),
+          AsyncStorage.getItem(FREE_SELECTIONS_STORAGE_KEY),
+        ]);
+
+        if (!mounted) return;
 
         if (storedCart) {
-          setCartItems(JSON.parse(storedCart));
+          try {
+            const parsedCart: CartItem[] = JSON.parse(storedCart);
+
+            if (Array.isArray(parsedCart)) {
+              setCartItems(parsedCart);
+            }
+          } catch (error) {
+            console.error("Failed to parse stored cart:", error);
+          }
         }
 
-        if (storedOrders) {
-          setOrders(JSON.parse(storedOrders));
+        if (storedFreeSelections) {
+          try {
+            const parsedSelections: FreeItemSelection[] =
+              JSON.parse(storedFreeSelections);
+
+            if (Array.isArray(parsedSelections)) {
+              setFreeItemSelections(parsedSelections);
+            }
+          } catch (error) {
+            console.error("Failed to parse stored free selections:", error);
+          }
         }
       } catch (error) {
-        console.error("Failed to load cart/orders:", error);
-      } finally {
-        setIsLoaded(true);
+        console.error("Failed to load cart data:", error);
       }
     };
 
-    loadData();
+    loadStoredData();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
+  // --------------------------------------------------
   // SAVE CART
-  useEffect(() => {
-    if (!isLoaded) return;
+  // --------------------------------------------------
 
+  useEffect(() => {
     const saveCart = async () => {
       try {
         await AsyncStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
@@ -108,80 +197,332 @@ export function CartProvider({ children }: { children: ReactNode }) {
     };
 
     saveCart();
-  }, [cartItems, isLoaded]);
+  }, [cartItems]);
 
-  // SAVE ORDERS
+  // --------------------------------------------------
+  // SAVE FREE SELECTIONS
+  // --------------------------------------------------
+
   useEffect(() => {
-    if (!isLoaded) return;
-
-    const saveOrders = async () => {
+    const saveFreeSelections = async () => {
       try {
-        await AsyncStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
+        await AsyncStorage.setItem(
+          FREE_SELECTIONS_STORAGE_KEY,
+          JSON.stringify(freeItemSelections),
+        );
       } catch (error) {
-        console.error("Failed to save orders:", error);
+        console.error("Failed to save free-item selections:", error);
       }
     };
 
-    saveOrders();
-  }, [orders, isLoaded]);
+    saveFreeSelections();
+  }, [freeItemSelections]);
 
+  // --------------------------------------------------
+  // PROMOTION ACTIVE
+  // --------------------------------------------------
+
+  const isPromotionActive = useMemo(() => {
+    return new Date().getUTCDay() === PROMOTION_DAY;
+  }, []);
+
+  const getFreeSelectionCount = useCallback(
+    (selections: FreeItemSelection[], restaurantId: string) => {
+      return selections.filter(
+        (selection) => selection.restaurantId === restaurantId,
+      ).length;
+    },
+    [],
+  );
+
+  const getPaidItemCount = useCallback(
+    (
+      items: CartItem[],
+      selections: FreeItemSelection[],
+      restaurantId: string,
+    ) => {
+      return items
+        .filter((item) => item.restaurantId === restaurantId)
+        .reduce((total, item) => {
+          const freeQuantity = selections.filter(
+            (selection) =>
+              selection.restaurantId === restaurantId &&
+              selection.itemId === item.id,
+          ).length;
+
+          return total + Math.max(0, item.quantity - freeQuantity);
+        }, 0);
+    },
+    [],
+  );
+
+  // --------------------------------------------------
+  // PAID ROLL'D UP ITEMS
+  // --------------------------------------------------
+
+  const paidQualifyingItemCount = useMemo(() => {
+    return getPaidItemCount(
+      cartItems,
+      freeItemSelections,
+      ROLLD_UP_RESTAURANT_ID,
+    );
+  }, [cartItems, freeItemSelections, getPaidItemCount]);
+
+  // --------------------------------------------------
+  // FREE ITEMS ALREADY SELECTED
+  // --------------------------------------------------
+
+  const selectedFreeItemCount = useMemo(() => {
+    return getFreeSelectionCount(freeItemSelections, ROLLD_UP_RESTAURANT_ID);
+  }, [freeItemSelections, getFreeSelectionCount]);
+
+  // --------------------------------------------------
+  // NUMBER OF FREE ITEMS UNLOCKED
+  //
+  // 3 paid = 1 free
+  // 6 paid = 2 free
+  // 9 paid = 3 free
+  // --------------------------------------------------
+
+  const freeItemsUnlocked = useMemo(() => {
+    if (!isPromotionActive) {
+      return 0;
+    }
+
+    return Math.floor(paidQualifyingItemCount / 3);
+  }, [paidQualifyingItemCount, isPromotionActive]);
+
+  // --------------------------------------------------
+  // IS THERE A FREE ITEM WAITING TO BE SELECTED?
+  // --------------------------------------------------
+
+  const pendingFreeItemSelection = useMemo(() => {
+    return selectedFreeItemCount < freeItemsUnlocked;
+  }, [selectedFreeItemCount, freeItemsUnlocked]);
+
+  // --------------------------------------------------
+  // DISMISS PROMPT
+  // --------------------------------------------------
+
+  const dismissFreeItemPrompt = useCallback(() => {
+    setFreeItemPromptVisible(false);
+  }, []);
+
+  // --------------------------------------------------
   // ADD TO CART
-  const addToCart = (item: Omit<CartItem, "quantity">) => {
-    setCartItems((currentItems) => {
-      const existingItem = currentItems.find(
-        (cartItem) =>
-          cartItem.id === item.id &&
-          cartItem.restaurantId === item.restaurantId,
-      );
+  //
+  // IMPORTANT:
+  // This checks whether the new item causes the user
+  // to reach 3, 6, 9, etc.
+  // --------------------------------------------------
 
-      if (existingItem) {
-        return currentItems.map((cartItem) =>
-          cartItem.id === item.id && cartItem.restaurantId === item.restaurantId
-            ? {
-                ...cartItem,
-                quantity: cartItem.quantity + 1,
-              }
-            : cartItem,
+  const addToCart = useCallback(
+    (item: Omit<CartItem, "quantity">) => {
+      setCartItems((currentItems) => {
+        const isRollDUp = item.restaurantId === ROLLD_UP_RESTAURANT_ID;
+
+        const currentPaidCount = isRollDUp
+          ? getPaidItemCount(
+              currentItems,
+              freeItemSelections,
+              ROLLD_UP_RESTAURANT_ID,
+            )
+          : 0;
+
+        const newPaidCount = currentPaidCount + 1;
+
+        const previousUnlocked = Math.floor(currentPaidCount / 3);
+        const newUnlocked = Math.floor(newPaidCount / 3);
+
+        const hasNewFreeItem =
+          isRollDUp && isPromotionActive && newUnlocked > previousUnlocked;
+
+        const existingItem = currentItems.find(
+          (cartItem) =>
+            cartItem.id === item.id &&
+            cartItem.restaurantId === item.restaurantId,
         );
+
+        const updatedItems = existingItem
+          ? currentItems.map((cartItem) =>
+              cartItem.id === item.id &&
+              cartItem.restaurantId === item.restaurantId
+                ? {
+                    ...cartItem,
+                    quantity: cartItem.quantity + 1,
+                  }
+                : cartItem,
+            )
+          : [
+              ...currentItems,
+              {
+                ...item,
+                quantity: 1,
+              },
+            ];
+
+        if (hasNewFreeItem) {
+          setTimeout(() => {
+            setFreeItemPromptVisible(true);
+          }, 100);
+        }
+
+        return updatedItems;
+      });
+    },
+    [freeItemSelections, getPaidItemCount, isPromotionActive],
+  );
+
+  // --------------------------------------------------
+  // SELECT FREE ITEM
+  // --------------------------------------------------
+
+  const selectFreeItem = useCallback(
+    (item: Omit<CartItem, "quantity">) => {
+      if (!isPromotionActive) {
+        return;
       }
 
-      return [
-        ...currentItems,
-        {
-          ...item,
-          quantity: 1,
-        },
-      ];
-    });
-  };
+      if (item.restaurantId !== ROLLD_UP_RESTAURANT_ID) {
+        return;
+      }
 
-  // REMOVE FROM CART
-  const removeFromCart = (id: string, restaurantId: string) => {
+      const currentPaidCount = getPaidItemCount(
+        cartItems,
+        freeItemSelections,
+        ROLLD_UP_RESTAURANT_ID,
+      );
+      const unlockedCount = Math.floor(currentPaidCount / 3);
+      const selectedCount = getFreeSelectionCount(
+        freeItemSelections,
+        ROLLD_UP_RESTAURANT_ID,
+      );
+
+      if (selectedCount >= unlockedCount) {
+        return;
+      }
+
+      setFreeItemSelections((currentSelections) => [
+        ...currentSelections,
+        {
+          itemId: item.id,
+          restaurantId: item.restaurantId,
+        },
+      ]);
+
+      setCartItems((currentItems) => {
+        const existingItem = currentItems.find(
+          (cartItem) =>
+            cartItem.id === item.id &&
+            cartItem.restaurantId === item.restaurantId,
+        );
+
+        if (existingItem) {
+          return currentItems.map((cartItem) =>
+            cartItem.id === item.id &&
+            cartItem.restaurantId === item.restaurantId
+              ? {
+                  ...cartItem,
+                  quantity: cartItem.quantity + 1,
+                }
+              : cartItem,
+          );
+        }
+
+        return [
+          ...currentItems,
+          {
+            ...item,
+            quantity: 1,
+          },
+        ];
+      });
+
+      setFreeItemPromptVisible(false);
+    },
+    [
+      cartItems,
+      freeItemSelections,
+      getFreeSelectionCount,
+      getPaidItemCount,
+      isPromotionActive,
+    ],
+  );
+
+  // --------------------------------------------------
+  // REMOVE ITEM
+  // --------------------------------------------------
+
+  const removeFromCart = useCallback((id: string, restaurantId: string) => {
     setCartItems((currentItems) =>
       currentItems.filter(
         (item) => !(item.id === id && item.restaurantId === restaurantId),
       ),
     );
-  };
 
-  // INCREASE QUANTITY
-  const increaseQuantity = (id: string, restaurantId: string) => {
-    setCartItems((currentItems) =>
-      currentItems.map((item) =>
-        item.id === id && item.restaurantId === restaurantId
-          ? {
-              ...item,
-              quantity: item.quantity + 1,
-            }
-          : item,
+    setFreeItemSelections((currentSelections) =>
+      currentSelections.filter(
+        (selection) =>
+          !(selection.itemId === id && selection.restaurantId === restaurantId),
       ),
     );
-  };
+  }, []);
 
+  // --------------------------------------------------
+  // INCREASE QUANTITY
+  // --------------------------------------------------
+
+  const increaseQuantity = useCallback(
+    (id: string, restaurantId: string) => {
+      setCartItems((currentItems) => {
+        const currentItem = currentItems.find(
+          (item) => item.id === id && item.restaurantId === restaurantId,
+        );
+
+        if (!currentItem) {
+          return currentItems;
+        }
+
+        const isRollDUp = restaurantId === ROLLD_UP_RESTAURANT_ID;
+
+        if (isRollDUp && isPromotionActive) {
+          const currentPaidCount = getPaidItemCount(
+            currentItems,
+            freeItemSelections,
+            ROLLD_UP_RESTAURANT_ID,
+          );
+
+          const newPaidCount = currentPaidCount + 1;
+          const previousUnlocked = Math.floor(currentPaidCount / 3);
+          const newUnlocked = Math.floor(newPaidCount / 3);
+
+          if (newUnlocked > previousUnlocked) {
+            setTimeout(() => {
+              setFreeItemPromptVisible(true);
+            }, 100);
+          }
+        }
+
+        return currentItems.map((item) =>
+          item.id === id && item.restaurantId === restaurantId
+            ? {
+                ...item,
+                quantity: item.quantity + 1,
+              }
+            : item,
+        );
+      });
+    },
+    [freeItemSelections, getPaidItemCount, isPromotionActive],
+  );
+
+  // --------------------------------------------------
   // DECREASE QUANTITY
-  const decreaseQuantity = (id: string, restaurantId: string) => {
-    setCartItems((currentItems) =>
-      currentItems
+  // --------------------------------------------------
+
+  const decreaseQuantity = useCallback((id: string, restaurantId: string) => {
+    setCartItems((currentItems) => {
+      const updatedItems = currentItems
         .map((item) =>
           item.id === id && item.restaurantId === restaurantId
             ? {
@@ -190,92 +531,283 @@ export function CartProvider({ children }: { children: ReactNode }) {
               }
             : item,
         )
-        .filter((item) => item.quantity > 0),
-    );
-  };
+        .filter((item) => item.quantity > 0);
 
-  // PLACE ORDER
-  const placeOrder = (
-    deliveryFee: number,
-    serviceFee: number,
-  ): Order | null => {
-    if (cartItems.length === 0) {
-      return null;
-    }
+      const cartItem = updatedItems.find(
+        (item) => item.id === id && item.restaurantId === restaurantId,
+      );
 
-    const restaurantId = cartItems[0].restaurantId;
+      setFreeItemSelections((currentSelections) => {
+        const selectionsForItem = currentSelections.filter(
+          (selection) =>
+            selection.itemId === id && selection.restaurantId === restaurantId,
+        );
 
-    const restaurantName = cartItems[0].restaurantName;
+        if (!cartItem) {
+          return currentSelections.filter(
+            (selection) =>
+              !(
+                selection.itemId === id &&
+                selection.restaurantId === restaurantId
+              ),
+          );
+        }
 
-    const subtotal = cartItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
+        const newQuantity = cartItem.quantity;
+
+        if (newQuantity <= 0) {
+          return currentSelections.filter(
+            (selection) =>
+              !(
+                selection.itemId === id &&
+                selection.restaurantId === restaurantId
+              ),
+          );
+        }
+
+        if (selectionsForItem.length > newQuantity) {
+          let selectionsToKeep = newQuantity;
+
+          return currentSelections.filter((selection) => {
+            if (
+              selection.itemId === id &&
+              selection.restaurantId === restaurantId
+            ) {
+              if (selectionsToKeep > 0) {
+                selectionsToKeep--;
+                return true;
+              }
+
+              return false;
+            }
+
+            return true;
+          });
+        }
+
+        return currentSelections;
+      });
+
+      return updatedItems;
+    });
+  }, []);
+
+  // --------------------------------------------------
+  // CLEAR CART
+  // --------------------------------------------------
+
+  const clearCart = useCallback(() => {
+    setCartItems([]);
+    setFreeItemSelections([]);
+    setFreeItemPromptVisible(false);
+  }, []);
+
+  // --------------------------------------------------
+  // CART COUNT
+  // --------------------------------------------------
+
+  const cartCount = useMemo(() => {
+    return cartItems.reduce((total, item) => total + item.quantity, 0);
+  }, [cartItems]);
+
+  // --------------------------------------------------
+  // SUBTOTAL
+  // --------------------------------------------------
+
+  const cartSubtotal = useMemo(() => {
+    return cartItems.reduce(
+      (total, item) => total + item.price * item.quantity,
       0,
     );
+  }, [cartItems]);
 
-    const total = subtotal + deliveryFee + serviceFee;
+  // --------------------------------------------------
+  // PROMOTION DISCOUNT
+  // --------------------------------------------------
 
-    const newOrder: Order = {
-      id: `ORD-${Date.now()}`,
-      restaurantId,
-      restaurantName,
-      items: [...cartItems],
-      subtotal,
-      deliveryFee,
-      serviceFee,
-      total,
-      status: "pending",
-      createdAt: new Date().toISOString(),
-    };
+  const promotionDiscount = useMemo(() => {
+    if (!isPromotionActive) {
+      return 0;
+    }
 
-    // ADD ORDER TO ORDERS STATE
-    setOrders((currentOrders) => [newOrder, ...currentOrders]);
+    let discount = 0;
 
-    // CLEAR CART AFTER SUCCESSFUL ORDER
-    setCartItems([]);
+    freeItemSelections.forEach((selection) => {
+      const cartItem = cartItems.find(
+        (item) =>
+          item.id === selection.itemId &&
+          item.restaurantId === selection.restaurantId,
+      );
 
-    // RETURN THE CREATED ORDER
-    return newOrder;
-  };
+      if (cartItem) {
+        discount += cartItem.price;
+      }
+    });
 
-  // CLEAR CART
-  const clearCart = () => {
-    setCartItems([]);
-  };
+    return discount;
+  }, [cartItems, freeItemSelections, isPromotionActive]);
 
-  // CART TOTAL
-  const cartTotal = cartItems.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0,
+  // --------------------------------------------------
+  // TOTAL
+  // --------------------------------------------------
+
+  const cartTotal = useMemo(() => {
+    return Math.max(0, cartSubtotal - promotionDiscount);
+  }, [cartSubtotal, promotionDiscount]);
+
+  // --------------------------------------------------
+  // ORDERS
+  // --------------------------------------------------
+
+  const refreshOrders = useCallback(async () => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const user = session?.user;
+
+      if (!user) {
+        setOrders([]);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("orders")
+        .select("*, order_items(*)")
+        .eq("customer_id", user.id)
+        .order("created_at", {
+          ascending: false,
+        });
+
+      if (error) {
+        console.error("Failed to load orders:", error);
+        setOrders([]);
+        return;
+      }
+
+      const orderRows = (data ?? []) as OrderRow[];
+      setOrders(
+        orderRows.map((row) => {
+          const items = (row.order_items ?? []).map((item) => ({
+            id: item.id,
+            name: item.name ?? item.item_name ?? "Menu item",
+            quantity: Number(item.quantity),
+            price: Number(item.price ?? item.unit_price ?? 0),
+          }));
+          const restaurantNames = [
+            ...new Set(
+              (row.order_items ?? [])
+                .map((item) => item.restaurant_name)
+                .filter((name): name is string => Boolean(name)),
+            ),
+          ];
+
+          return {
+            id: row.id,
+            status: row.status,
+            cancellationReason: row.cancellation_reason,
+            refundStatus: row.refund_status,
+            paymentStatus: row.payment_status,
+            adminConfirmed: Boolean(row.admin_confirmed_at),
+            createdAt: row.created_at,
+            restaurantName: restaurantNames.join(", ") || "Your order",
+            items,
+            subtotal: Number(row.subtotal),
+            deliveryFee: Number(row.delivery_fee),
+            serviceFee: Number(row.service_fee),
+            total: Number(row.total),
+          };
+        }),
+      );
+    } catch (error) {
+      console.error("Unexpected error loading orders:", error);
+      setOrders([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshOrders();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
+        void refreshOrders();
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [refreshOrders]);
+  // --------------------------------------------------
+  // CONTEXT VALUE
+  // --------------------------------------------------
+
+  const value = useMemo<CartContextType>(
+    () => ({
+      cartItems,
+      cartCount,
+      cartSubtotal,
+      promotionDiscount,
+      cartTotal,
+
+      isPromotionActive,
+
+      freeItemPromptVisible,
+      pendingFreeItemSelection,
+
+      freeItemSelections,
+
+      addToCart,
+      selectFreeItem,
+      dismissFreeItemPrompt,
+
+      removeFromCart,
+      increaseQuantity,
+      decreaseQuantity,
+
+      clearCart,
+
+      orders,
+      refreshOrders,
+    }),
+    [
+      cartItems,
+      cartCount,
+      cartSubtotal,
+      promotionDiscount,
+      cartTotal,
+
+      isPromotionActive,
+
+      freeItemPromptVisible,
+      pendingFreeItemSelection,
+
+      freeItemSelections,
+
+      addToCart,
+      selectFreeItem,
+      dismissFreeItemPrompt,
+
+      removeFromCart,
+      increaseQuantity,
+      decreaseQuantity,
+
+      clearCart,
+
+      orders,
+      refreshOrders,
+    ],
   );
 
-  // CART COUNT
-  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
-
-  return (
-    <CartContext.Provider
-      value={{
-        cartItems,
-        orders,
-        addToCart,
-        removeFromCart,
-        increaseQuantity,
-        decreaseQuantity,
-        placeOrder,
-        clearCart,
-        cartTotal,
-        cartCount,
-      }}
-    >
-      {children}
-    </CartContext.Provider>
-  );
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
-export function useCart() {
+export function useCart(): CartContextType {
   const context = useContext(CartContext);
 
   if (!context) {
-    throw new Error("useCart must be used inside CartProvider");
+    throw new Error("useCart must be used inside a CartProvider");
   }
 
   return context;

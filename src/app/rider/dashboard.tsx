@@ -624,7 +624,7 @@ export default function RiderDashboard() {
           </Text>
 
           <Pressable
-            onPress={() => router.push("/rider/orders")}
+            onPress={() => router.push("/rider/deliveries")}
             className="mb-3 flex-row items-center justify-center rounded-2xl border border-border bg-white p-4"
           >
             <Ionicons name="bicycle-outline" size={22} color="#E53935" />

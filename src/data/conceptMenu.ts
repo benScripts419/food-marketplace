@@ -31,9 +31,16 @@ const potatoSalad = require("../../assets/images/food/potato-salad.jpeg");
 const chickenSalad = require("../../assets/images/food/concept-chicken-salad.jpeg");
 const greekSalad = require("../../assets/images/food/greek-salad.jpg");
 const sandwichWithFries = require("../../assets/images/food/sandwich-fries.jpg");
-const burgerWithFries = require("../../assets/images/food/greek-salad.jpg");
+const burgerWithFries = require("../../assets/images/food/burger-with-fries.jpg");
 const sandwich = require("../../assets/images/food/sandwich.jpg");
 const chickenWings = require("../../assets/images/food/chicken-wings.jpeg");
+const tunaSalad = require("../../assets/images/food/tuna-salad.jpg");
+const steamVegies = require("../../assets/images/food/steam-vegies.jpg");
+const chefSpecial = require("../../assets/images/food/chef-special.jpg");
+const chickenSandwich = require("../../assets/images/food/chicken-sandwich.jpg");
+const clubSandwich = require("../../assets/images/food/club-sandwich.jpg");
+const porkPieces = require("../../assets/images/food/pork-pieces.jpg");
+
 
 export const conceptMenu: MenuCategory[] = [
   // ==============================================
@@ -74,21 +81,21 @@ export const conceptMenu: MenuCategory[] = [
     items: [
       {
         id: "concept-salads-1",
-        name: "Tuna",
+        name: "Tuna Salad",
         price: 70,
         category: "Starter",
-        image: kwMixedSalad,
+        image: tunaSalad,
       },
       {
         id: "concept-salads-2",
-        name: "Chicken",
+        name: "Chicken Salad",
         price: 80,
         category: "Starter",
         image: chickenSalad,
       },
       {
         id: "concept-salads-3",
-        name: "Greek",
+        name: "Greek Salad",
         price: 85,
         category: "Starter",
         image: greekSalad,
@@ -98,11 +105,11 @@ export const conceptMenu: MenuCategory[] = [
         name: "Steam Vegies",
         price: 60,
         category: "Starter",
-        image: kwMixedSalad,
+        image: steamVegies,
       },
       {
         id: "concept-salads-5",
-        name: "Potato",
+        name: "Potato Salad",
         price: 85,
         category: "Starter",
         image: potatoSalad,
@@ -112,7 +119,7 @@ export const conceptMenu: MenuCategory[] = [
         name: "Chef Special",
         price: 100,
         category: "Starter",
-        image: kwMixedSalad,
+        image: chefSpecial,
       },
     ],
   },
@@ -139,7 +146,7 @@ export const conceptMenu: MenuCategory[] = [
         price: 70,
         category: "Desserts",
         subCategory: "Club",
-        image: sandwich,
+        image: clubSandwich,
       },
       {
         id: "concept-wrap-and-stack-3",
@@ -148,11 +155,12 @@ export const conceptMenu: MenuCategory[] = [
         price: 60,
         category: "Desserts",
         subCategory: "Chicken",
-        image: sandwich,
+        image: chickenSandwich,
       },
       {
         id: "concept-wrap-and-stack-4",
         name: "Shawarma",
+        description: "Beef",
         price: 90,
         category: "Desserts",
         subCategory: "Beef",
@@ -161,10 +169,11 @@ export const conceptMenu: MenuCategory[] = [
       {
         id: "concept-wrap-and-stack-5",
         name: "Sandwich",
+        description: "Chicken",
         price: 60,
         category: "Desserts",
         subCategory: "Chicken",
-        image: kwMixedSalad,
+        image: chickenSandwich,
       },
     ],
   },
@@ -275,7 +284,7 @@ export const conceptMenu: MenuCategory[] = [
         name: "Pork",
         price: 90,
         category: "Main",
-        image: kwMixedSalad,
+        image: porkPieces,
       },
       {
         id: "concept-main-3",

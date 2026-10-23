@@ -15,7 +15,7 @@ export default function WebRootLayout() {
         <WebAuthProvider>
           <AuthRedirect />
 
-          <View className="min-h-screen w-full flex-1 bg-background">
+          <View className="min-h-[100vh] w-full flex-1 bg-background">
             <WebSiteHeader />
 
             <View className="w-full min-w-0 flex-1">

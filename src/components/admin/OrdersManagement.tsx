@@ -346,7 +346,13 @@ function sendBySms(rider: Rider, message: string) {
     return;
   }
 
-  const separator = Platform.OS === "ios" ? "&" : "?";
+  const isIos =
+    Platform.OS === "ios" ||
+    (Platform.OS === "web" &&
+      typeof navigator !== "undefined" &&
+      /iPhone|iPad|iPod/i.test(navigator.userAgent));
+
+  const separator = isIos ? "&" : "?";
 
   void openUrl(
     `sms:${rider.phone}${separator}body=${encodeURIComponent(message)}`,

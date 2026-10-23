@@ -9,6 +9,7 @@ import RiderContacts, {
 } from "@/components/admin/RiderContacts";
 import RiderPayoutAccounts from "@/components/admin/RiderPayoutAccounts";
 import { supabase } from "@/lib/supabase";
+import AdminGate from "@/components/admin/AdminGate";
 
 type AdminTab = "orders" | "restaurants" | "riders" | "settings";
 
@@ -23,7 +24,7 @@ const tabs: {
   { id: "settings", label: "Settings", icon: "settings-outline" },
 ];
 
-export default function AdminScreen() {
+function AdminContent() {
   const [activeTab, setActiveTab] = useState<AdminTab>("orders");
   const [riders, setRiders] = useState<RiderContact[]>([]);
   const [ridersError, setRidersError] = useState<string | null>(null);
@@ -204,5 +205,13 @@ export default function AdminScreen() {
         )}
       </ScrollView>
     </View>
+  );
+}
+
+export default function AdminScreen() {
+  return (
+    <AdminGate>
+      <AdminContent />
+    </AdminGate>
   );
 }

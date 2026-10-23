@@ -701,24 +701,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // --------------------------------------------------
-    // 10. Create order
-    // --------------------------------------------------
-
-    const { data: customerProfile, error: customerProfileError } =
-      await supabaseAdmin
-        .from("profiles")
-        .select("phone")
-        .eq("id", user.id)
-        .maybeSingle();
-
-    if (customerProfileError) {
-      console.error("Customer contact lookup error:", customerProfileError);
-      return jsonResponse(
-        { error: "Failed to load your contact details for this order." },
-        500,
-      );
-    }
 
     const { data: order, error: orderError } = await supabaseAdmin
       .from("orders")

@@ -15,7 +15,10 @@ export default function WebRootLayout() {
         <WebAuthProvider>
           <AuthRedirect />
 
-          <View className="min-h-[100vh] w-full flex-1 bg-background">
+          <View
+            className="w-full flex-1 bg-background"
+            style={{ height: "100vh" as any, overflow: "hidden" }}
+          >
             <WebSiteHeader />
 
             <View className="w-full min-w-0 flex-1">

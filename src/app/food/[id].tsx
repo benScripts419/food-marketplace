@@ -218,7 +218,12 @@ export default function FoodDetailScreen() {
 
       {/* BOTTOM CART BAR */}
 
-      <View className="absolute bottom-0 left-0 right-0 border-t border-border bg-white px-5 pb-7 pt-3">
+      <View
+        className="absolute bottom-0 left-0 right-0 border-t border-border bg-white px-5 pt-3"
+        style={{
+          paddingBottom: "max(28px, env(safe-area-inset-bottom))" as any,
+        }}
+      >
         <View className="flex-row items-center">
           {/* QUANTITY */}
 

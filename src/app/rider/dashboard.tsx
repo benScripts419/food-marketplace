@@ -670,7 +670,12 @@ export default function RiderDashboard() {
       </ScrollView>
 
       {/* BOTTOM NAVIGATION */}
-      <View className="absolute bottom-0 left-0 right-0 flex-row border-t border-border bg-white px-4 pb-7 pt-3">
+      <View
+        className="absolute bottom-0 left-0 right-0 flex-row border-t border-border bg-white px-4 pt-3"
+        style={{
+          paddingBottom: "max(28px, env(safe-area-inset-bottom))" as any,
+        }}
+      >
         <Pressable className="flex-1 items-center">
           <Ionicons name="home" size={21} color="#E53935" />
           <Text className="mt-1 text-[10px] font-bold text-primary">Home</Text>

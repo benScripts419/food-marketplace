@@ -265,7 +265,7 @@ export default function RiderOrderDetailsScreen() {
         }
       }
 
-      router.replace("/rider/orders");
+      router.replace("/rider/deliveries");
     } catch (error) {
       console.error("Unexpected decline error:", error);
       Alert.alert("Error", "Something went wrong while declining.");
@@ -586,7 +586,12 @@ export default function RiderOrderDetailsScreen() {
 
       {/* ACCEPT / DECLINE */}
 
-      <View className="absolute bottom-0 left-0 right-0 flex-row border-t border-border bg-white px-5 pb-7 pt-3">
+      <View
+        className="absolute bottom-0 left-0 right-0 flex-row border-t border-border bg-white px-5 pt-3"
+        style={{
+          paddingBottom: "max(28px, env(safe-area-inset-bottom))" as any,
+        }}
+      >
         {canAccept ? (
           <Pressable
             onPress={declineDelivery}

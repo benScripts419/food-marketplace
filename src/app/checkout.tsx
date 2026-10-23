@@ -391,7 +391,12 @@ export default function CheckoutScreen() {
 
       {/* CONTINUE TO PAYMENT */}
 
-      <View className="absolute bottom-0 left-0 right-0 border-t border-border bg-white px-5 pb-7 pt-3">
+      <View
+        className="absolute bottom-0 left-0 right-0 border-t border-border bg-white px-5 pt-3"
+        style={{
+          paddingBottom: "max(28px, env(safe-area-inset-bottom))" as any,
+        }}
+      >
         <Pressable
           onPress={continueToPayment}
           className={`h-14 flex-row items-center justify-center rounded-xl ${

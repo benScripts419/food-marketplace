@@ -570,7 +570,12 @@ export default function DeliveryRequestScreen() {
       </ScrollView>
 
       {/* CONTINUE */}
-      <View className="absolute bottom-0 left-0 right-0 border-t border-border bg-white px-5 pb-7 pt-3">
+      <View
+        className="absolute bottom-0 left-0 right-0 border-t border-border bg-white px-5 pt-3"
+        style={{
+          paddingBottom: "max(28px, env(safe-area-inset-bottom))" as any,
+        }}
+      >
         <Pressable
           onPress={continueToConfirm}
           className={`h-14 items-center justify-center rounded-xl ${

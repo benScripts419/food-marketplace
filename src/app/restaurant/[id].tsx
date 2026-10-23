@@ -857,7 +857,12 @@ export default function RestaurantDetailScreen() {
       {/* -------------------------------------------------- */}
 
       {cartCount > 0 && !isFreeSelectionMode ? (
-        <View className="absolute bottom-5 left-5 right-5">
+        <View
+          className="absolute bottom-5 left-5 right-5"
+          style={{
+            paddingBottom: "max(28px, env(safe-area-inset-bottom))" as any,
+          }}
+        >
           <Pressable
             onPress={() => router.push("/cart")}
             className="flex-row items-center justify-between rounded-2xl bg-primary px-5 py-4"

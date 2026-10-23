@@ -198,7 +198,12 @@ export default function RiderProfileScreen() {
       </ScrollView>
 
       {/* BOTTOM NAV */}
-      <View className="absolute bottom-0 left-0 right-0 flex-row border-t border-border bg-white px-4 pb-7 pt-3">
+      <View
+        className="absolute bottom-0 left-0 right-0 flex-row border-t border-border bg-white px-4 pt-3"
+        style={{
+          paddingBottom: "max(28px, env(safe-area-inset-bottom))" as any,
+        }}
+      >
         <Pressable
           onPress={() => router.push("/rider/dashboard")}
           className="flex-1 items-center"

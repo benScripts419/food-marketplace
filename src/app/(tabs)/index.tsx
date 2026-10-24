@@ -5,6 +5,7 @@ import BottomFade from "@/components/BottomFade";
 import {
   Alert,
   Image,
+  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -340,7 +341,10 @@ export default function HomeScreen() {
               HEADER
           ========================================== */}
 
-          <View className="px-5 pt-3">
+          <View
+            className="px-5"
+            style={{ paddingTop: Platform.OS === "web" ? 12 : 56 }}
+          >
             <View className="flex-row items-center justify-between">
               <View>
                 <Text className="text-xs text-textSecondary">Welcome back</Text>

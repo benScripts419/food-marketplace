@@ -5,6 +5,7 @@ import {
   type MenuCategory,
   type MenuItem as RestaurantMenuItem,
 } from "@/data/restaurantMenus";
+import { goBack } from "@/lib/goBack";
 import { supabase } from "@/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -13,6 +14,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -103,6 +105,7 @@ export default function RestaurantDetailScreen() {
   );
 
   const [isFreeSelectionMode, setIsFreeSelectionMode] = useState(false);
+  const [menuTop, setMenuTop] = useState(0);
 
   // --------------------------------------------------
   // FREE ITEM PROMOTION PROMPT
@@ -417,13 +420,13 @@ export default function RestaurantDetailScreen() {
 
     const timer = setTimeout(() => {
       scrollViewRef.current?.scrollTo({
-        y: Math.max(position - 20, 0),
+        y: Math.max(menuTop + position - 80, 0),
         animated: true,
       });
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [itemId, itemPositions, selectedCategory, selectedSubCategory]);
+  }, [itemId, itemPositions, menuTop, selectedCategory, selectedSubCategory]);
 
   // --------------------------------------------------
   // RESTAURANT CART
@@ -508,359 +511,375 @@ export default function RestaurantDetailScreen() {
       {/* FIXED RESTAURANT SECTION */}
       {/* -------------------------------------------------- */}
 
-      <View>
-        {/* HERO IMAGE */}
-
-        <View className="relative h-[230px] w-full">
-          <Image
-            source={restaurantImage}
-            className="h-full w-full"
-            resizeMode="cover"
-          />
-
-          <View className="absolute inset-0 bg-black/25" />
-
-          {/* BACK BUTTON */}
-
-          <Pressable
-            onPress={() => router.back()}
-            className="absolute left-4 top-12 h-10 w-10 items-center justify-center rounded-full bg-white"
-          >
-            <Ionicons name="arrow-back" size={22} color="#171717" />
-          </Pressable>
-
-          {/* FAVORITE BUTTON */}
-
-          <Pressable
-            onPress={() =>
-              void toggleFavorite(restaurant.id).catch((error: unknown) => {
-                Alert.alert(
-                  "Could not update favorites",
-                  error instanceof Error ? error.message : "Please try again.",
-                );
-              })
-            }
-            disabled={!favoritesLoaded}
-            accessibilityRole="button"
-            accessibilityLabel={
-              isFavorite(restaurant.id)
-                ? `Remove ${restaurant.name} from favorites`
-                : `Add ${restaurant.name} to favorites`
-            }
-            className="absolute right-4 top-12 h-10 w-10 items-center justify-center rounded-full bg-white"
-          >
-            <Ionicons
-              name={isFavorite(restaurant.id) ? "heart" : "heart-outline"}
-              size={21}
-              color={isFavorite(restaurant.id) ? "#E53935" : "#171717"}
-            />
-          </Pressable>
-        </View>
-
-        {/* RESTAURANT INFO */}
-
-        <View className="rounded-t-3xl bg-background px-5 pb-4 pt-5">
-          <Text className="text-2xl font-bold text-text">
-            {restaurant.name}
-          </Text>
-
-          {restaurant.description ? (
-            <Text className="mt-2 text-sm leading-5 text-textSecondary">
-              {restaurant.description}
-            </Text>
-          ) : null}
-
-          <View className="mt-3 flex-row items-center">
-            <Ionicons name="star" size={15} color="#F59E0B" />
-
-            <Text className="ml-1 text-sm font-semibold text-text">
-              {restaurant.rating != null ? restaurant.rating.toFixed(1) : "New"}
-            </Text>
-
-            <Text className="mx-2 text-sm text-border">•</Text>
-
-            <Text
-              className="flex-1 text-sm text-textSecondary"
-              numberOfLines={1}
-            >
-              {restaurant.cuisine ?? restaurant.category ?? "Restaurant"}
-            </Text>
-          </View>
-        </View>
-
-        {/* FREE ITEM SELECTION BANNER */}
-
-        {isFreeSelectionMode ? (
-          <View className="mx-5 mb-4 rounded-2xl bg-primary px-4 py-4">
-            <View className="flex-row items-center">
-              <View className="h-10 w-10 items-center justify-center rounded-full bg-white">
-                <Ionicons name="gift-outline" size={22} color="#E53935" />
-              </View>
-
-              <View className="ml-3 flex-1">
-                <Text className="text-base font-bold text-white">
-                  Choose your FREE item
-                </Text>
-
-                <Text className="mt-1 text-xs leading-4 text-white/90">
-                  Tap any Roll'd Up item below to get it free.
-                </Text>
-              </View>
-            </View>
-          </View>
-        ) : null}
-
-        {/* MAIN CATEGORY TABS */}
-
-        {menu.length > 0 ? (
-          <View className="border-b border-border bg-background">
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{
-                paddingHorizontal: 20,
-                paddingBottom: 12,
-              }}
-            >
-              {menu.map((category) => {
-                const isSelected = selectedCategory === category.id;
-
-                return (
-                  <Pressable
-                    key={category.id}
-                    onPress={() => handleCategoryPress(category.id)}
-                    className={`mr-3 rounded-full px-4 py-2.5 ${
-                      isSelected ? "bg-primary" : "bg-surface"
-                    }`}
-                  >
-                    <Text
-                      className={`text-sm font-semibold ${
-                        isSelected ? "text-white" : "text-textSecondary"
-                      }`}
-                    >
-                      {category.name}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-          </View>
-        ) : null}
-
-        {/* SUBCATEGORY FILTER */}
-
-        {selectedMenuCategory && subCategories.length > 1 ? (
-          <View className="bg-background px-5 pt-3">
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{
-                paddingBottom: 4,
-              }}
-            >
-              {subCategories.map((subCategory) => {
-                const isSelected = selectedSubCategory === subCategory;
-
-                return (
-                  <Pressable
-                    key={subCategory}
-                    onPress={() => setSelectedSubCategory(subCategory)}
-                    className={`mr-2 rounded-full px-4 py-2 ${
-                      isSelected ? "bg-primary" : "bg-surface"
-                    }`}
-                  >
-                    <Text
-                      className={`text-xs font-semibold ${
-                        isSelected ? "text-white" : "text-textSecondary"
-                      }`}
-                    >
-                      {subCategory}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-          </View>
-        ) : null}
-      </View>
-
-      {/* -------------------------------------------------- */}
-      {/* ONLY MENU ITEMS SCROLL */}
-      {/* -------------------------------------------------- */}
-
       <ScrollView
         ref={scrollViewRef}
+        stickyHeaderIndices={[1]}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: 20,
-          paddingTop: 16,
-          paddingBottom: cartCount > 0 ? 120 : 40,
-        }}
+        contentContainerStyle={{ paddingBottom: cartCount > 0 ? 120 : 40 }}
       >
-        {/* MENU */}
+        <View>
+          {/* HERO IMAGE */}
 
-        {menu.length === 0 ? (
-          <View className="items-center rounded-2xl border border-border bg-white px-6 py-10">
-            <View className="h-14 w-14 items-center justify-center rounded-full bg-surface">
-              <Ionicons name="fast-food-outline" size={28} color="#737373" />
-            </View>
+          <View
+            className="relative w-full"
+            style={{ height: Platform.OS === "web" ? 180 : 230 }}
+          >
+            <Image
+              source={restaurantImage}
+              className="h-full w-full"
+              resizeMode="cover"
+            />
 
-            <Text className="mt-4 text-center text-base font-bold text-text">
-              Menu coming soon
-            </Text>
+            <View className="absolute inset-0 bg-black/25" />
 
-            <Text className="mt-2 text-center text-sm leading-5 text-textSecondary">
-              This restaurant has not added its menu yet.
-            </Text>
+            {/* BACK BUTTON */}
+
+            <Pressable
+              onPress={() => goBack("/restaurants")}
+              className="absolute left-4 h-10 w-10 items-center justify-center rounded-full bg-white"
+              style={{ top: Platform.OS === "web" ? 12 : 48 }}
+            >
+              <Ionicons name="arrow-back" size={22} color="#171717" />
+            </Pressable>
+
+            {/* FAVORITE BUTTON */}
+
+            <Pressable
+              onPress={() =>
+                void toggleFavorite(restaurant.id).catch((error: unknown) => {
+                  Alert.alert(
+                    "Could not update favorites",
+                    error instanceof Error
+                      ? error.message
+                      : "Please try again.",
+                  );
+                })
+              }
+              disabled={!favoritesLoaded}
+              accessibilityRole="button"
+              accessibilityLabel={
+                isFavorite(restaurant.id)
+                  ? `Remove ${restaurant.name} from favorites`
+                  : `Add ${restaurant.name} to favorites`
+              }
+              className="absolute right-4 h-10 w-10 items-center justify-center rounded-full bg-white"
+              style={{ top: Platform.OS === "web" ? 12 : 48 }}
+            >
+              <Ionicons
+                name={isFavorite(restaurant.id) ? "heart" : "heart-outline"}
+                size={21}
+                color={isFavorite(restaurant.id) ? "#E53935" : "#171717"}
+              />
+            </Pressable>
           </View>
-        ) : selectedMenuCategory ? (
-          filteredItems.length > 0 ? (
-            filteredItems.map((item) => {
-              const quantity = getItemQuantity(item.id);
 
-              return (
-                <View
-                  key={item.id}
-                  onLayout={(event) => {
-                    const { y } = event.nativeEvent.layout;
+          {/* RESTAURANT INFO */}
 
-                    setItemPositions((previous) => ({
-                      ...previous,
-                      [item.id]: y,
-                    }));
-                  }}
-                  className={`mb-4 flex-row rounded-2xl border p-3 ${
-                    highlightedItemId === item.id
-                      ? "border-primary bg-red-50"
-                      : "border-border bg-white"
-                  }`}
-                >
-                  {/* FOOD IMAGE */}
+          <View className="rounded-t-3xl bg-background px-5 pb-4 pt-5">
+            <Text className="text-2xl font-bold text-text">
+              {restaurant.name}
+            </Text>
 
-                  <Image
-                    source={item.image}
-                    className="rounded-xl bg-[#f3f0e7]"
-                    style={{
-                      width: imageSize,
-                      height: imageSize,
-                    }}
-                    resizeMode="contain"
-                  />
+            {restaurant.description ? (
+              <Text className="mt-2 text-sm leading-5 text-textSecondary">
+                {restaurant.description}
+              </Text>
+            ) : null}
 
-                  {/* FOOD DETAILS */}
+            <View className="mt-3 flex-row items-center">
+              <Ionicons name="star" size={15} color="#F59E0B" />
 
-                  <View className="ml-3 flex-1">
-                    {/* ITEM NAME */}
+              <Text className="ml-1 text-sm font-semibold text-text">
+                {restaurant.rating != null
+                  ? restaurant.rating.toFixed(1)
+                  : "New"}
+              </Text>
 
-                    <Text
-                      className="text-base font-bold text-text"
-                      numberOfLines={2}
-                    >
-                      {item.name}
-                    </Text>
+              <Text className="mx-2 text-sm text-border">•</Text>
 
-                    {/* SELECTED ITEM BADGE */}
+              <Text
+                className="flex-1 text-sm text-textSecondary"
+                numberOfLines={1}
+              >
+                {restaurant.cuisine ?? restaurant.category ?? "Restaurant"}
+              </Text>
+            </View>
+          </View>
 
-                    {highlightedItemId === item.id ? (
-                      <View className="mt-1 self-start rounded-full bg-primary px-2 py-1">
-                        <Text className="text-[10px] font-bold text-white">
-                          Selected item
-                        </Text>
-                      </View>
-                    ) : null}
+          {/* FREE ITEM SELECTION BANNER */}
 
-                    {/* DESCRIPTION */}
-
-                    {item.description ? (
-                      <Text
-                        className="mt-1 text-xs leading-4 text-textSecondary"
-                        numberOfLines={2}
-                      >
-                        {item.description}
-                      </Text>
-                    ) : null}
-
-                    {/* PRICE */}
-
-                    <Text className="mt-2 text-base font-bold text-primary">
-                      GH₵
-                      {item.price.toFixed(2)}
-                    </Text>
-                  </View>
-
-                  {/* ADD / QUANTITY */}
-
-                  <View className="ml-2 justify-end">
-                    {isFreeSelectionMode ? (
-                      <Pressable
-                        onPress={() => handleAddToCart(item)}
-                        className="h-9 w-9 items-center justify-center rounded-full bg-primary"
-                      >
-                        <Ionicons
-                          name="gift-outline"
-                          size={20}
-                          color="#FFFFFF"
-                        />
-                      </Pressable>
-                    ) : quantity === 0 ? (
-                      <Pressable
-                        onPress={() => handleAddToCart(item)}
-                        className="h-9 w-9 items-center justify-center rounded-full bg-primary"
-                      >
-                        <Ionicons name="add" size={22} color="#FFFFFF" />
-                      </Pressable>
-                    ) : (
-                      <View className="flex-row items-center rounded-full bg-surface">
-                        <Pressable
-                          onPress={() => handleDecrease(item)}
-                          className="h-9 w-9 items-center justify-center"
-                        >
-                          <Ionicons name="remove" size={18} color="#E53935" />
-                        </Pressable>
-
-                        <Text className="min-w-[22px] text-center text-sm font-bold text-text">
-                          {quantity}
-                        </Text>
-
-                        <Pressable
-                          onPress={() => handleIncrease(item)}
-                          className="h-9 w-9 items-center justify-center rounded-full bg-primary"
-                        >
-                          <Ionicons name="add" size={18} color="#FFFFFF" />
-                        </Pressable>
-                      </View>
-                    )}
-                  </View>
+          {isFreeSelectionMode ? (
+            <View className="mx-5 mb-4 rounded-2xl bg-primary px-4 py-4">
+              <View className="flex-row items-center">
+                <View className="h-10 w-10 items-center justify-center rounded-full bg-white">
+                  <Ionicons name="gift-outline" size={22} color="#E53935" />
                 </View>
-              );
-            })
-          ) : (
-            <View className="items-center py-10">
+
+                <View className="ml-3 flex-1">
+                  <Text className="text-base font-bold text-white">
+                    Choose your FREE item
+                  </Text>
+
+                  <Text className="mt-1 text-xs leading-4 text-white/90">
+                    Tap any Roll'd Up item below to get it free.
+                  </Text>
+                </View>
+              </View>
+            </View>
+          ) : null}
+        </View>
+
+        <View className="bg-background">
+          {/* MAIN CATEGORY TABS */}
+
+          {menu.length > 0 ? (
+            <View className="border-b border-border bg-background">
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{
+                  paddingHorizontal: 20,
+                  paddingBottom: 12,
+                }}
+              >
+                {menu.map((category) => {
+                  const isSelected = selectedCategory === category.id;
+
+                  return (
+                    <Pressable
+                      key={category.id}
+                      onPress={() => handleCategoryPress(category.id)}
+                      className={`mr-3 rounded-full px-4 py-2.5 ${
+                        isSelected ? "bg-primary" : "bg-surface"
+                      }`}
+                    >
+                      <Text
+                        className={`text-sm font-semibold ${
+                          isSelected ? "text-white" : "text-textSecondary"
+                        }`}
+                      >
+                        {category.name}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          ) : null}
+
+          {/* SUBCATEGORY FILTER */}
+
+          {selectedMenuCategory && subCategories.length > 1 ? (
+            <View className="bg-background px-5 pt-3">
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{
+                  paddingBottom: 4,
+                }}
+              >
+                {subCategories.map((subCategory) => {
+                  const isSelected = selectedSubCategory === subCategory;
+
+                  return (
+                    <Pressable
+                      key={subCategory}
+                      onPress={() => setSelectedSubCategory(subCategory)}
+                      className={`mr-2 rounded-full px-4 py-2 ${
+                        isSelected ? "bg-primary" : "bg-surface"
+                      }`}
+                    >
+                      <Text
+                        className={`text-xs font-semibold ${
+                          isSelected ? "text-white" : "text-textSecondary"
+                        }`}
+                      >
+                        {subCategory}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          ) : null}
+        </View>
+
+        {/* -------------------------------------------------- */}
+        {/* ONLY MENU ITEMS SCROLL */}
+        {/* -------------------------------------------------- */}
+
+        <View
+          style={{ paddingHorizontal: 20, paddingTop: 16 }}
+          onLayout={(e) => setMenuTop(e.nativeEvent.layout.y)}
+        >
+          {/* MENU */}
+
+          {menu.length === 0 ? (
+            <View className="items-center rounded-2xl border border-border bg-white px-6 py-10">
               <View className="h-14 w-14 items-center justify-center rounded-full bg-surface">
-                <Ionicons name="search-outline" size={26} color="#737373" />
+                <Ionicons name="fast-food-outline" size={28} color="#737373" />
               </View>
 
               <Text className="mt-4 text-center text-base font-bold text-text">
-                No items found
+                Menu coming soon
               </Text>
 
-              <Text className="mt-1 text-center text-sm text-textSecondary">
-                There are no items available for {selectedSubCategory}.
+              <Text className="mt-2 text-center text-sm leading-5 text-textSecondary">
+                This restaurant has not added its menu yet.
               </Text>
             </View>
-          )
-        ) : null}
-      </ScrollView>
+          ) : selectedMenuCategory ? (
+            filteredItems.length > 0 ? (
+              filteredItems.map((item) => {
+                const quantity = getItemQuantity(item.id);
 
+                return (
+                  <View
+                    key={item.id}
+                    onLayout={(event) => {
+                      const { y } = event.nativeEvent.layout;
+
+                      setItemPositions((previous) => ({
+                        ...previous,
+                        [item.id]: y,
+                      }));
+                    }}
+                    className={`mb-4 flex-row rounded-2xl border p-3 ${
+                      highlightedItemId === item.id
+                        ? "border-primary bg-red-50"
+                        : "border-border bg-white"
+                    }`}
+                  >
+                    {/* FOOD IMAGE */}
+
+                    <Image
+                      source={item.image}
+                      className="rounded-xl bg-[#f3f0e7]"
+                      style={{
+                        width: imageSize,
+                        height: imageSize,
+                      }}
+                      resizeMode="contain"
+                    />
+
+                    {/* FOOD DETAILS */}
+
+                    <View className="ml-3 flex-1">
+                      {/* ITEM NAME */}
+
+                      <Text
+                        className="text-base font-bold text-text"
+                        numberOfLines={2}
+                      >
+                        {item.name}
+                      </Text>
+
+                      {/* SELECTED ITEM BADGE */}
+
+                      {highlightedItemId === item.id ? (
+                        <View className="mt-1 self-start rounded-full bg-primary px-2 py-1">
+                          <Text className="text-[10px] font-bold text-white">
+                            Selected item
+                          </Text>
+                        </View>
+                      ) : null}
+
+                      {/* DESCRIPTION */}
+
+                      {item.description ? (
+                        <Text
+                          className="mt-1 text-xs leading-4 text-textSecondary"
+                          numberOfLines={2}
+                        >
+                          {item.description}
+                        </Text>
+                      ) : null}
+
+                      {/* PRICE */}
+
+                      <Text className="mt-2 text-base font-bold text-primary">
+                        GH₵
+                        {item.price.toFixed(2)}
+                      </Text>
+                    </View>
+
+                    {/* ADD / QUANTITY */}
+
+                    <View className="ml-2 justify-end">
+                      {isFreeSelectionMode ? (
+                        <Pressable
+                          onPress={() => handleAddToCart(item)}
+                          className="h-9 w-9 items-center justify-center rounded-full bg-primary"
+                        >
+                          <Ionicons
+                            name="gift-outline"
+                            size={20}
+                            color="#FFFFFF"
+                          />
+                        </Pressable>
+                      ) : quantity === 0 ? (
+                        <Pressable
+                          onPress={() => handleAddToCart(item)}
+                          className="h-9 w-9 items-center justify-center rounded-full bg-primary"
+                        >
+                          <Ionicons name="add" size={22} color="#FFFFFF" />
+                        </Pressable>
+                      ) : (
+                        <View className="flex-row items-center rounded-full bg-surface">
+                          <Pressable
+                            onPress={() => handleDecrease(item)}
+                            className="h-9 w-9 items-center justify-center"
+                          >
+                            <Ionicons name="remove" size={18} color="#E53935" />
+                          </Pressable>
+
+                          <Text className="min-w-[22px] text-center text-sm font-bold text-text">
+                            {quantity}
+                          </Text>
+
+                          <Pressable
+                            onPress={() => handleIncrease(item)}
+                            className="h-9 w-9 items-center justify-center rounded-full bg-primary"
+                          >
+                            <Ionicons name="add" size={18} color="#FFFFFF" />
+                          </Pressable>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+                );
+              })
+            ) : (
+              <View className="items-center py-10">
+                <View className="h-14 w-14 items-center justify-center rounded-full bg-surface">
+                  <Ionicons name="search-outline" size={26} color="#737373" />
+                </View>
+
+                <Text className="mt-4 text-center text-base font-bold text-text">
+                  No items found
+                </Text>
+
+                <Text className="mt-1 text-center text-sm text-textSecondary">
+                  There are no items available for {selectedSubCategory}.
+                </Text>
+              </View>
+            )
+          ) : null}
+        </View>
+      </ScrollView>
       {/* -------------------------------------------------- */}
       {/* CART BAR */}
       {/* -------------------------------------------------- */}
 
       {cartCount > 0 && !isFreeSelectionMode ? (
         <View
-          className="absolute bottom-5 left-5 right-5"
+          className="absolute left-5 right-5"
           style={{
-            paddingBottom: "max(28px, env(safe-area-inset-bottom))" as any,
+            bottom: 0,
+            paddingBottom:
+              Platform.OS === "web"
+                ? ("max(20px, env(safe-area-inset-bottom))" as any)
+                : 20,
           }}
         >
           <Pressable

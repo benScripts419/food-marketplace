@@ -18,14 +18,14 @@ export type MenuCategory = {
 const kwMixedSalad = require("../../assets/images/food/mixed-salad.jpg");
 const greekSalad = require("../../assets/images/food/greek-salad.jpg");
 const chickenCeasarSalad = require("../../assets/images/food/chicken-ceasar-salad.jpeg");
-const chickenSalad = require("../../assets/images/food/mixed-salad.jpg");
+const chickenSalad = require("../../assets/images/food/concept-chicken-salad.jpeg");
 const exoticCoselaw = require("../../assets/images/food/exotic-coselaw.jpg");
 
 const vegetableRice = require("../../assets/images/food/vegetable-rice.jpg");
 const friedRiceOnly = require("../../assets/images/food/friedrice-only.jpg");
 const assortedFriedRice = require("../../assets/images/food/assorted-fried-rice.jpg");
 const assortedJollofRice = require("../../assets/images/food/assorted-jollof-rice.jpg");
-const jollofRice = require("../../assets/images/food/jollof-rice.jpg");
+const jollofRice = require("../../assets/images/food/jollof-only.jpg");
 const steamedRice = require("../../assets/images/food/steamed-rice.jpg");
 const frenchFries = require("../../assets/images/food/french-fries.jpg");
 const mashedPotatoes = require("../../assets/images/food/mashed-potatoes.jpg");

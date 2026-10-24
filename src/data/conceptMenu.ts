@@ -40,6 +40,14 @@ const chefSpecial = require("../../assets/images/food/chef-special.jpg");
 const chickenSandwich = require("../../assets/images/food/chicken-sandwich.jpg");
 const clubSandwich = require("../../assets/images/food/club-sandwich.jpg");
 const porkPieces = require("../../assets/images/food/pork-pieces.jpg");
+const chickenShawarma = require("../../assets/images/food/chicken-shawarma.jpg");
+const beefShawarma = require("../../assets/images/food/beef-shawarma.jpg");
+const jollofOnly = require("../../assets/images/food/jollof-only.jpg");
+const chickenJollof = require("../../assets/images/food/chicken-jollof.jpg");
+const creamedPotatoes = require("../../assets/images/food/creamed-potatoes.jpg");
+
+
+
 
 
 export const conceptMenu: MenuCategory[] = [
@@ -164,16 +172,16 @@ export const conceptMenu: MenuCategory[] = [
         price: 90,
         category: "Desserts",
         subCategory: "Beef",
-        image: kwMixedSalad,
+        image: beefShawarma,
       },
       {
         id: "concept-wrap-and-stack-5",
-        name: "Sandwich",
+        name: "Shawarma",
         description: "Chicken",
         price: 60,
         category: "Desserts",
         subCategory: "Chicken",
-        image: chickenSandwich,
+        image: chickenShawarma,
       },
     ],
   },
@@ -346,7 +354,7 @@ export const conceptMenu: MenuCategory[] = [
         description: "Only",
         price: 50,
         category: "Sides",
-        image: kwMixedSalad,
+        image: jollofOnly,
       },
       {
         id: "concept-sides-3",
@@ -354,7 +362,7 @@ export const conceptMenu: MenuCategory[] = [
         description: "Only",
         price: 50,
         category: "Sides",
-        image: kwMixedSalad,
+        image: creamedPotatoes,
       },
       {
         id: "concept-sides-4",
@@ -390,7 +398,7 @@ export const conceptMenu: MenuCategory[] = [
         price: 80,
         category: "Assorted",
         subCategory: "Chicken",
-        image: kwMixedSalad,
+        image: chickenJollof,
       },
       {
         id: "concept-assorted-2",

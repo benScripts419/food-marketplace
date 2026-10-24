@@ -133,11 +133,10 @@ export default function WebSiteHeader() {
               source={require("../../assets/images/akrobite-logo.png")}
               resizeMode="contain"
               style={{
-                width: 80,
-                height: 80,
+                width: 150,
+                height: 48,
                 flexGrow: 0,
                 flexShrink: 0,
-                marginRight: 10,
               }}
             />
           </Pressable>
@@ -164,11 +163,10 @@ export default function WebSiteHeader() {
                 source={require("../../assets/images/akrobite-logo.png")}
                 resizeMode="contain"
                 style={{
-                  width: 20,
-                  height: 20,
+                  width: 120,
+                  height: 40,
                   flexGrow: 0,
                   flexShrink: 0,
-                  marginRight: 10,
                 }}
               />
             </Pressable>

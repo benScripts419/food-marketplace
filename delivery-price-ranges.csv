@@ -1,0 +1,73 @@
+﻿restaurant,town,est_road_km_to_town,tier,fee_at_pin,fee_max,fee_at_pin_4plus_items,fee_max_4plus_items
+Kwayisibea Hotel,Akropong,2.9,1,10,20,15,25
+Kwayisibea Hotel,Mamfe,3.2,1,10,20,15,25
+Kwayisibea Hotel,Awukugua,7.2,2,20,30,35,52.5
+Kwayisibea Hotel,Dawu,5.8,2,20,30,35,52.5
+Kwayisibea Hotel,Mampong,7.9,2,20,30,35,52.5
+Kwayisibea Hotel,Adukrom,9.2,3,30,40,52.5,70
+Kwayisibea Hotel,Apirede,12.6,3,30,40,52.5,70
+Kwayisibea Hotel,Tutu,12,3,30,40,52.5,70
+Kwayisibea Hotel,Aburi,19.6,4,40,50,70,87.5
+50 cent,Akropong,0.7,1,10,20,15,25
+50 cent,Dawu,2.9,1,10,20,15,25
+50 cent,Adukrom,6.4,2,20,30,35,52.5
+50 cent,Awukugua,4.4,2,20,30,35,52.5
+50 cent,Mamfe,6.1,2,20,30,35,52.5
+50 cent,Apirede,10,3,30,40,52.5,70
+50 cent,Mampong,10.8,3,30,40,52.5,70
+50 cent,Tutu,14.9,3,30,40,52.5,70
+50 cent,Aburi,22.5,4,40,50,70,87.5
+lizjay's eatery,Akropong,0.7,1,10,20,15,25
+lizjay's eatery,Dawu,2.9,1,10,20,15,25
+lizjay's eatery,Adukrom,6.3,2,20,30,35,52.5
+lizjay's eatery,Awukugua,4.3,2,20,30,35,52.5
+lizjay's eatery,Mamfe,6.2,2,20,30,35,52.5
+lizjay's eatery,Apirede,9.9,3,30,40,52.5,70
+lizjay's eatery,Mampong,10.9,3,30,40,52.5,70
+lizjay's eatery,Tutu,15,3,30,40,52.5,70
+lizjay's eatery,Aburi,22.6,4,40,50,70,87.5
+concept,Akropong,1,1,10,20,15,25
+concept,Dawu,3.8,1,10,20,15,25
+concept,Adukrom,7.3,2,20,30,35,52.5
+concept,Awukugua,5.3,2,20,30,35,52.5
+concept,Mamfe,5.1,2,20,30,35,52.5
+concept,Apirede,10.7,3,30,40,52.5,70
+concept,Mampong,9.8,3,30,40,52.5,70
+concept,Tutu,13.9,3,30,40,52.5,70
+concept,Aburi,21.6,4,40,50,70,87.5
+bloombakes,Akropong,0.7,1,10,20,15,25
+bloombakes,Dawu,3,1,10,20,15,25
+bloombakes,Adukrom,6.4,2,20,30,35,52.5
+bloombakes,Awukugua,4.4,2,20,30,35,52.5
+bloombakes,Mamfe,6.1,2,20,30,35,52.5
+bloombakes,Apirede,10,3,30,40,52.5,70
+bloombakes,Mampong,10.8,3,30,40,52.5,70
+bloombakes,Tutu,14.9,3,30,40,52.5,70
+bloombakes,Aburi,22.5,4,40,50,70,87.5
+pam's check check,Akropong,0.8,1,10,20,15,25
+pam's check check,Dawu,2.9,1,10,20,15,25
+pam's check check,Adukrom,6.3,2,20,30,35,52.5
+pam's check check,Awukugua,4.3,2,20,30,35,52.5
+pam's check check,Mamfe,6.2,2,20,30,35,52.5
+pam's check check,Apirede,9.9,3,30,40,52.5,70
+pam's check check,Mampong,10.9,3,30,40,52.5,70
+pam's check check,Tutu,15,3,30,40,52.5,70
+pam's check check,Aburi,22.6,4,40,50,70,87.5
+brackers,Akropong,0.8,1,10,20,15,25
+brackers,Dawu,2.7,1,10,20,15,25
+brackers,Adukrom,6.2,2,20,30,35,52.5
+brackers,Awukugua,4.2,2,20,30,35,52.5
+brackers,Mamfe,6.4,2,20,30,35,52.5
+brackers,Apirede,9.8,3,30,40,52.5,70
+brackers,Mampong,11,3,30,40,52.5,70
+brackers,Tutu,15.1,3,30,40,52.5,70
+brackers,Aburi,22.7,4,40,50,70,87.5
+roll'd up,Akropong,0.7,1,10,20,15,25
+roll'd up,Dawu,3,1,10,20,15,25
+roll'd up,Adukrom,6.4,2,20,30,35,52.5
+roll'd up,Awukugua,4.5,2,20,30,35,52.5
+roll'd up,Mamfe,6.1,2,20,30,35,52.5
+roll'd up,Apirede,10,3,30,40,52.5,70
+roll'd up,Mampong,10.8,3,30,40,52.5,70
+roll'd up,Tutu,14.8,3,30,40,52.5,70
+roll'd up,Aburi,22.5,4,40,50,70,87.5

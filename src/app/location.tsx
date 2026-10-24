@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, type Href } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -19,7 +19,6 @@ import {
   saveDeliveryLocation,
   type Coordinates,
 } from "@/lib/deliveryLocation";
-import { goBackOr } from "@/lib/goBack";
 import { openInMaps } from "@/lib/mapLinks";
 
 // A fix this tight (in metres) is good enough on its own.
@@ -91,6 +90,21 @@ function getBestPosition(): Promise<Location.LocationObject> {
 }
 
 const isWeb = Platform.OS === "web";
+
+// Goes back if there is a screen to go back to, otherwise to the fallback.
+// Kept inside this screen so saving never depends on another file.
+function leaveScreen(fallback: Href) {
+  try {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+  } catch (error) {
+    console.warn("Could not go back:", error);
+  }
+
+  router.replace(fallback);
+}
 
 // Browsers only allow GPS on secure (https) pages.
 function pageIsInsecure(): boolean {
@@ -304,7 +318,7 @@ export default function LocationScreen() {
         returnTo === "payment" ||
         returnTo === "delivery-request"
       ) {
-        goBackOr(
+        leaveScreen(
           returnTo === "checkout"
             ? "/checkout"
             : returnTo === "payment"
@@ -315,6 +329,9 @@ export default function LocationScreen() {
         router.replace("/(tabs)");
       }
     } catch (error) {
+      // The full error goes to the console, so its source can be found.
+      console.error("Saving the delivery location failed:", error);
+
       setMessage(
         error instanceof Error
           ? error.message
@@ -343,7 +360,7 @@ export default function LocationScreen() {
         <View className="px-5 pb-4 pt-14">
           <View className="flex-row items-center">
             <Pressable
-              onPress={() => goBackOr("/(tabs)")}
+              onPress={() => leaveScreen("/(tabs)")}
               className="h-10 w-10 items-center justify-center"
               accessibilityRole="button"
               accessibilityLabel="Go back"

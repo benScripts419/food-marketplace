@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 
-import { goBackOr } from "@/lib/goBack";
+import { goBack } from "@/lib/goBack";
 import { supabase } from "@/lib/supabase";
 
 type DeliveryRequest = {
@@ -166,7 +166,7 @@ export default function RiderOrdersScreen() {
     <View className="flex-1 bg-background">
       <View className="px-5 pt-14">
         <Pressable
-          onPress={() => goBackOr("/rider/dashboard")}
+          onPress={() => goBack("/rider/dashboard")}
           accessibilityRole="button"
           accessibilityLabel="Go back"
           className="h-10 w-10 items-center justify-center"

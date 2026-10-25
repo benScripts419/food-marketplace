@@ -3,7 +3,6 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   ScrollView,
   Text,
@@ -29,6 +28,10 @@ export default function RiderPaymentDetailsScreen() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState<{
+    type: "error" | "success";
+    text: string;
+  } | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -40,7 +43,7 @@ export default function RiderPaymentDetailsScreen() {
 
       if (error) {
         console.error("Failed to load rider payout method:", error);
-        Alert.alert("Unable to load payout details", error.message);
+        setFeedback({ type: "error", text: error.message });
       } else if (mounted && data) {
         setProvider(data.provider as MobileMoneyProvider);
         setAccountName(data.account_name);
@@ -58,13 +61,14 @@ export default function RiderPaymentDetailsScreen() {
   const handleSave = async () => {
     if (saving) return;
     if (!accountName.trim() || !phoneNumber.trim()) {
-      Alert.alert(
-        "Missing details",
-        "Enter the Mobile Money account name and phone number.",
-      );
+      setFeedback({
+        type: "error",
+        text: "Enter the Mobile Money account name and phone number.",
+      });
       return;
     }
 
+    setFeedback(null);
     setSaving(true);
     try {
       await saveRiderPayoutMethod({
@@ -72,15 +76,15 @@ export default function RiderPaymentDetailsScreen() {
         accountName: accountName.trim(),
         phoneNumber: phoneNumber.trim(),
       });
-      Alert.alert(
-        "Payout method saved",
-        "Your Mobile Money account is ready for automatic delivery payouts.",
-      );
+      setFeedback({
+        type: "success",
+        text: "Your Mobile Money account is ready for automatic delivery payouts.",
+      });
     } catch (error) {
-      Alert.alert(
-        "Unable to save payout method",
-        error instanceof Error ? error.message : "Please try again.",
-      );
+      setFeedback({
+        type: "error",
+        text: error instanceof Error ? error.message : "Please try again.",
+      });
     } finally {
       setSaving(false);
     }
@@ -106,6 +110,25 @@ export default function RiderPaymentDetailsScreen() {
             </Text>
           </View>
         </View>
+
+        {feedback ? (
+          <View
+            className={`mx-5 mt-5 rounded-xl border p-4 ${
+              feedback.type === "success"
+                ? "border-green-200 bg-green-50"
+                : "border-red-200 bg-red-50"
+            }`}
+          >
+            <Text
+              accessibilityRole="alert"
+              className={`text-sm ${
+                feedback.type === "success" ? "text-green-800" : "text-red-700"
+              }`}
+            >
+              {feedback.text}
+            </Text>
+          </View>
+        ) : null}
 
         {loading ? (
           <ActivityIndicator className="mt-10" color="#E53935" />

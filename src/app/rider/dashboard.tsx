@@ -3,7 +3,6 @@ import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -64,12 +63,14 @@ export default function RiderDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [updatingAvailability, setUpdatingAvailability] = useState(false);
   const [payoutReady, setPayoutReady] = useState(true);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const toggleAvailability = useCallback(
     async (value: boolean) => {
       if (updatingAvailability) return;
 
       setUpdatingAvailability(true);
+      setStatusMessage(null);
 
       try {
         const { data: authData, error: authError } =
@@ -97,18 +98,18 @@ export default function RiderDashboard() {
 
         setRider(data as Rider);
 
-        Alert.alert(
-          value ? "You're online" : "You're offline",
+        setStatusMessage(
           value
-            ? "You can now receive delivery offers."
-            : "You will no longer receive new delivery offers.",
+            ? "You are online and can receive delivery offers."
+            : "You are offline and will not receive new delivery offers.",
         );
       } catch (error) {
         console.error("Availability update failed:", error);
 
-        Alert.alert(
-          "Unable to update availability",
-          error instanceof Error ? error.message : "Please try again.",
+        setStatusMessage(
+          error instanceof Error
+            ? error.message
+            : "Unable to update availability. Please try again.",
         );
       } finally {
         setUpdatingAvailability(false);
@@ -147,9 +148,8 @@ export default function RiderDashboard() {
         setOffers([]);
         setActiveOrders([]);
 
-        Alert.alert(
-          "Rider profile not found",
-          "Contact the administrator to link your rider account.",
+        setStatusMessage(
+          "Your rider profile is not linked to this account. Contact an administrator.",
         );
         return;
       }
@@ -290,11 +290,10 @@ export default function RiderDashboard() {
     } catch (error) {
       console.error("Rider dashboard load failed:", error);
 
-      Alert.alert(
-        "Unable to load dashboard",
+      setStatusMessage(
         error instanceof Error
           ? error.message
-          : "Please check your connection and try again.",
+          : "Unable to load the dashboard. Please check your connection and try again.",
       );
     }
   }, []);
@@ -383,7 +382,7 @@ export default function RiderDashboard() {
             <View className="flex-1">
               <Text className="text-sm text-textSecondary">Welcome back,</Text>
               <Text className="mt-1 text-2xl font-bold text-text">
-                {rider.full_name || "Rider"} 👋
+                {rider.full_name?.trim() || "Welcome back"} 👋
               </Text>
             </View>
 
@@ -428,6 +427,14 @@ export default function RiderDashboard() {
             )}
           </View>
         </View>
+
+        {statusMessage ? (
+          <View className="mx-5 mb-4 rounded-xl border border-border bg-white p-4">
+            <Text accessibilityRole="alert" className="text-sm text-text">
+              {statusMessage}
+            </Text>
+          </View>
+        ) : null}
 
         {!payoutReady ? (
           <View className="mx-5 mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
@@ -506,9 +513,9 @@ export default function RiderDashboard() {
                   Order #{order.id.slice(0, 8)}
                 </Text>
 
-                <Text className="mt-1 text-gray-600">
-                  {order.restaurant ?? "Restaurant"}
-                </Text>
+                {order.restaurant ? (
+                  <Text className="mt-1 text-gray-600">{order.restaurant}</Text>
+                ) : null}
 
                 <Text className="mt-1 text-sm text-gray-500">
                   Status: {order.status.replace(/_/g, " ")}
@@ -561,12 +568,18 @@ export default function RiderDashboard() {
                     </View>
 
                     <View className="ml-3 flex-1">
-                      <Text className="font-bold text-text">
-                        {order.restaurant || "Restaurant"}
-                      </Text>
-                      <Text className="mt-1 text-xs text-textSecondary">
-                        Customer: {order.customer || "Customer"}
-                      </Text>
+                      {order.restaurant ? (
+                        <Text className="font-bold text-text">{order.restaurant}</Text>
+                      ) : (
+                        <Text className="font-bold text-text">
+                          Order #{String(order.id).slice(0, 8)}
+                        </Text>
+                      )}
+                      {order.customer ? (
+                        <Text className="mt-1 text-xs text-textSecondary">
+                          Customer: {order.customer}
+                        </Text>
+                      ) : null}
                     </View>
 
                     <Text className="font-bold text-primary">
@@ -574,27 +587,31 @@ export default function RiderDashboard() {
                     </Text>
                   </View>
 
-                  <View className="mt-4 flex-row items-start">
-                    <Ionicons
-                      name="location-outline"
-                      size={16}
-                      color="#E53935"
-                    />
-                    <Text className="ml-2 flex-1 text-sm text-text">
-                      {order.restaurant_address || "Pickup address unavailable"}
-                    </Text>
-                  </View>
+                  {order.restaurant_address ? (
+                    <View className="mt-4 flex-row items-start">
+                      <Ionicons
+                        name="location-outline"
+                        size={16}
+                        color="#E53935"
+                      />
+                      <Text className="ml-2 flex-1 text-sm text-text">
+                        {order.restaurant_address}
+                      </Text>
+                    </View>
+                  ) : null}
 
-                  <View className="mt-2 flex-row items-start">
-                    <Ionicons
-                      name="navigate-outline"
-                      size={16}
-                      color="#171717"
-                    />
-                    <Text className="ml-2 flex-1 text-sm text-text">
-                      {order.customer_address || "Delivery address unavailable"}
-                    </Text>
-                  </View>
+                  {order.customer_address ? (
+                    <View className="mt-2 flex-row items-start">
+                      <Ionicons
+                        name="navigate-outline"
+                        size={16}
+                        color="#171717"
+                      />
+                      <Text className="ml-2 flex-1 text-sm text-text">
+                        {order.customer_address}
+                      </Text>
+                    </View>
+                  ) : null}
 
                   <View className="mt-4 flex-row items-center justify-between border-t border-border pt-3">
                     <Text className="text-xs text-textSecondary">
@@ -636,7 +653,9 @@ export default function RiderDashboard() {
           <View className="flex-row">
             <Pressable
               onPress={() => router.push("/rider/deliveries")}
-              className="mr-3 flex-1 items-center rounded-2xl border border-border bg-white p-4"
+              className={`items-center rounded-2xl border border-border bg-white p-4 ${
+                activeOrders[0] ? "mr-3 flex-1" : "w-full"
+              }`}
             >
               <Ionicons name="receipt-outline" size={24} color="#E53935" />
               <Text className="mt-2 text-xs font-semibold text-text">
@@ -644,27 +663,22 @@ export default function RiderDashboard() {
               </Text>
             </Pressable>
 
-            <Pressable
-              onPress={() => {
-                if (activeOrders[0]) {
+            {activeOrders[0] ? (
+              <Pressable
+                onPress={() =>
                   router.push({
                     pathname: "/rider/active-delivery",
                     params: { id: activeOrders[0].id },
-                  });
-                } else {
-                  Alert.alert(
-                    "No active delivery",
-                    "You don't have an active delivery to open yet.",
-                  );
+                  })
                 }
-              }}
-              className="flex-1 items-center rounded-2xl border border-border bg-white p-4"
-            >
-              <Ionicons name="map-outline" size={24} color="#E53935" />
-              <Text className="mt-2 text-xs font-semibold text-text">
-                Open Map
-              </Text>
-            </Pressable>
+                className="flex-1 items-center rounded-2xl border border-border bg-white p-4"
+              >
+                <Ionicons name="map-outline" size={24} color="#E53935" />
+                <Text className="mt-2 text-xs font-semibold text-text">
+                  Open Map
+                </Text>
+              </Pressable>
+            ) : null}
           </View>
         </View>
       </ScrollView>
@@ -691,25 +705,20 @@ export default function RiderDashboard() {
           </Text>
         </Pressable>
 
-        <Pressable
-          onPress={() => {
-            if (activeOrders[0]) {
+        {activeOrders[0] ? (
+          <Pressable
+            onPress={() =>
               router.push({
                 pathname: "/rider/active-delivery",
                 params: { id: activeOrders[0].id },
-              });
-            } else {
-              Alert.alert(
-                "No active delivery",
-                "Accept an offer before opening the delivery map.",
-              );
+              })
             }
-          }}
-          className="flex-1 items-center"
-        >
-          <Ionicons name="map-outline" size={21} color="#737373" />
-          <Text className="mt-1 text-[10px] text-textSecondary">Map</Text>
-        </Pressable>
+            className="flex-1 items-center"
+          >
+            <Ionicons name="map-outline" size={21} color="#737373" />
+            <Text className="mt-1 text-[10px] text-textSecondary">Map</Text>
+          </Pressable>
+        ) : null}
 
         <Pressable
           onPress={() => router.push("/rider/profile")}

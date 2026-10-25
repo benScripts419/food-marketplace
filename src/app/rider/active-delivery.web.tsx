@@ -3,7 +3,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Linking,
   Pressable,
   ScrollView,
@@ -32,7 +31,7 @@ export default function ActiveDeliveryWebScreen() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [completing, setCompleting] = useState(false);
   const [stepping, setStepping] = useState(false);
-  // Alert.alert does nothing on the web, so problems are shown on the page.
+  // Keep action feedback visible in the web layout.
   const [actionError, setActionError] = useState<string | null>(null);
   const [needsPayoutSetup, setNeedsPayoutSetup] = useState(false);
   const [reload, setReload] = useState(0);
@@ -101,10 +100,7 @@ export default function ActiveDeliveryWebScreen() {
     ) => {
       const opened = await openDirections(destination, fallbackAddress);
       if (!opened) {
-        Alert.alert(
-          "Can't open directions",
-          `No location is saved for the ${label}.`,
-        );
+        setActionError(`No location is saved for the ${label}.`);
       }
   };
   
@@ -240,13 +236,16 @@ export default function ActiveDeliveryWebScreen() {
                 <Text className="text-xs font-semibold text-textSecondary">
                   PICK UP
                 </Text>
-                <Text className="mt-1 font-bold text-text">
-                  {delivery.restaurant || "Restaurant"}
-                </Text>
-                <Text className="mt-1 text-sm text-textSecondary">
-                  {delivery.restaurant_address ||
-                    "Restaurant address unavailable"}
-                </Text>
+                {delivery.restaurant ? (
+                  <Text className="mt-1 font-bold text-text">
+                    {delivery.restaurant}
+                  </Text>
+                ) : null}
+                {delivery.restaurant_address ? (
+                  <Text className="mt-1 text-sm text-textSecondary">
+                    {delivery.restaurant_address}
+                  </Text>
+                ) : null}
                 <Pressable
                   onPress={() =>
                     void navigateTo(
@@ -277,12 +276,16 @@ export default function ActiveDeliveryWebScreen() {
                 <Text className="text-xs font-semibold text-textSecondary">
                   DELIVER TO
                 </Text>
-                <Text className="mt-1 font-bold text-text">
-                  {delivery.customer || "Customer"}
-                </Text>
-                <Text className="mt-1 text-sm text-textSecondary">
-                  {delivery.customer_address || "Customer address unavailable"}
-                </Text>
+                {delivery.customer ? (
+                  <Text className="mt-1 font-bold text-text">
+                    {delivery.customer}
+                  </Text>
+                ) : null}
+                {delivery.customer_address ? (
+                  <Text className="mt-1 text-sm text-textSecondary">
+                    {delivery.customer_address}
+                  </Text>
+                ) : null}
                 <Pressable
                   onPress={() =>
                     void navigateTo(
@@ -316,16 +319,21 @@ export default function ActiveDeliveryWebScreen() {
               </Text>
             </View>
             <View className="mt-4">
-              {delivery.order_items.length ? (
-                delivery.order_items.map((item, index) => (
-                  <Text
-                    key={`${item.item_name || item.name || "item"}-${index}`}
-                    className="mb-2 text-sm text-text"
-                  >
-                    {item.item_name || item.name || "Menu item"} ×{" "}
-                    {item.quantity}
-                  </Text>
-                ))
+              {delivery.order_items.some((item) =>
+                Boolean((item.item_name || item.name)?.trim()),
+              ) ? (
+                delivery.order_items.map((item, index) => {
+                  const itemName = item.item_name || item.name;
+                  if (!itemName?.trim()) return null;
+                  return (
+                    <Text
+                      key={`${itemName}-${index}`}
+                      className="mb-2 text-sm text-text"
+                    >
+                      {itemName} × {item.quantity}
+                    </Text>
+                  );
+                })
               ) : (
                 <Text className="text-sm text-textSecondary">
                   No item details available.
@@ -341,16 +349,21 @@ export default function ActiveDeliveryWebScreen() {
 
           <Pressable
             onPress={() => void callCustomer()}
-            className="mt-4 flex-row items-center rounded-2xl bg-white p-5"
+            disabled={!delivery.phone}
+            className={`mt-4 flex-row items-center rounded-2xl bg-white p-5 ${
+              delivery.phone ? "" : "opacity-60"
+            }`}
           >
             <Ionicons name="call-outline" size={22} color="#E53935" />
             <View className="ml-3 flex-1">
               <Text className="font-bold text-text">
-                {delivery.customer || "Customer"}
+                {delivery.customer || "Contact customer"}
               </Text>
-              <Text className="mt-1 text-sm text-textSecondary">
-                {delivery.phone || "Phone number unavailable"}
-              </Text>
+              {delivery.phone ? (
+                <Text className="mt-1 text-sm text-textSecondary">
+                  {delivery.phone}
+                </Text>
+              ) : null}
             </View>
             <Ionicons name="chevron-forward" size={20} color="#737373" />
           </Pressable>

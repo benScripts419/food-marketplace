@@ -142,7 +142,7 @@ export default function RiderOrdersScreen() {
         const title = order.restaurant_id
           ? (restaurantNames.get(order.restaurant_id) ??
             order.restaurant ??
-            "Restaurant")
+            "Food order")
           : (order.restaurant ?? "Multiple restaurants");
 
         return {

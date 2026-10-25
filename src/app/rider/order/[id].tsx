@@ -464,13 +464,17 @@ export default function RiderOrderDetailsScreen() {
             <View className="ml-4 flex-1">
               <Text className="text-xs text-textSecondary">PICK UP</Text>
 
-              <Text className="mt-1 font-bold text-text">
-                {order.restaurant}
-              </Text>
+              {order.restaurant ? (
+                <Text className="mt-1 font-bold text-text">
+                  {order.restaurant}
+                </Text>
+              ) : null}
 
-              <Text className="mt-1 text-sm text-textSecondary">
-                {order.restaurant_address || "Restaurant address unavailable"}
-              </Text>
+              {order.restaurant_address ? (
+                <Text className="mt-1 text-sm text-textSecondary">
+                  {order.restaurant_address}
+                </Text>
+              ) : null}
             </View>
           </View>
 
@@ -486,11 +490,15 @@ export default function RiderOrderDetailsScreen() {
             <View className="ml-4 flex-1">
               <Text className="text-xs text-textSecondary">DELIVER TO</Text>
 
-              <Text className="mt-1 font-bold text-text">{order.customer}</Text>
+              {order.customer ? (
+                <Text className="mt-1 font-bold text-text">{order.customer}</Text>
+              ) : null}
 
-              <Text className="mt-1 text-sm text-textSecondary">
-                {order.customer_address || "Customer address unavailable"}
-              </Text>
+              {order.customer_address ? (
+                <Text className="mt-1 text-sm text-textSecondary">
+                  {order.customer_address}
+                </Text>
+              ) : null}
             </View>
           </View>
         </View>
@@ -564,9 +572,11 @@ export default function RiderOrderDetailsScreen() {
             <View className="ml-3 flex-1">
               <Text className="font-bold text-text">{order.customer}</Text>
 
-              <Text className="mt-1 text-xs text-textSecondary">
-                {order.phone || "Phone number unavailable"}
-              </Text>
+              {order.phone ? (
+                <Text className="mt-1 text-xs text-textSecondary">
+                  {order.phone}
+                </Text>
+              ) : null}
             </View>
 
             <Pressable

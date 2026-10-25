@@ -186,12 +186,12 @@ export default function ActiveDeliveryScreen() {
     );
   }
 
-  const items = delivery.order_items.length
-    ? delivery.order_items.map((item) => ({
-        name: item.item_name || item.name || "Menu item",
-        quantity: item.quantity,
-      }))
-    : [];
+  const items = delivery.order_items
+    .map((item) => ({
+      name: item.item_name || item.name || "",
+      quantity: item.quantity,
+    }))
+    .filter((item) => item.name.trim().length > 0);
 
   return (
     <View className="flex-1 bg-background">
@@ -254,13 +254,16 @@ export default function ActiveDeliveryScreen() {
               <Text className="text-xs font-semibold text-textSecondary">
                 PICK UP
               </Text>
-              <Text className="mt-1 font-bold text-text">
-                {delivery.restaurant || "Restaurant"}
-              </Text>
-              <Text className="mt-1 text-sm text-textSecondary">
-                {delivery.restaurant_address ||
-                  "Restaurant address unavailable"}
-              </Text>
+              {delivery.restaurant ? (
+                <Text className="mt-1 font-bold text-text">
+                  {delivery.restaurant}
+                </Text>
+              ) : null}
+              {delivery.restaurant_address ? (
+                <Text className="mt-1 text-sm text-textSecondary">
+                  {delivery.restaurant_address}
+                </Text>
+              ) : null}
               <Pressable
                 onPress={() =>
                   void navigateTo(
@@ -291,12 +294,16 @@ export default function ActiveDeliveryScreen() {
               <Text className="text-xs font-semibold text-textSecondary">
                 DELIVER TO
               </Text>
-              <Text className="mt-1 font-bold text-text">
-                {delivery.customer || "Customer"}
-              </Text>
-              <Text className="mt-1 text-sm text-textSecondary">
-                {delivery.customer_address || "Customer address unavailable"}
-              </Text>
+              {delivery.customer ? (
+                <Text className="mt-1 font-bold text-text">
+                  {delivery.customer}
+                </Text>
+              ) : null}
+              {delivery.customer_address ? (
+                <Text className="mt-1 text-sm text-textSecondary">
+                  {delivery.customer_address}
+                </Text>
+              ) : null}
               <Pressable
                 onPress={() =>
                   void navigateTo(
@@ -354,16 +361,21 @@ export default function ActiveDeliveryScreen() {
 
         <Pressable
           onPress={() => void callCustomer()}
-          className="mx-5 mt-5 flex-row items-center rounded-2xl bg-white p-5"
+          disabled={!delivery.phone}
+          className={`mx-5 mt-5 flex-row items-center rounded-2xl bg-white p-5 ${
+            delivery.phone ? "" : "opacity-60"
+          }`}
         >
           <Ionicons name="call-outline" size={22} color="#E53935" />
           <View className="ml-3 flex-1">
             <Text className="font-bold text-text">
-              {delivery.customer || "Customer"}
+              {delivery.customer || "Contact customer"}
             </Text>
-            <Text className="mt-1 text-sm text-textSecondary">
-              {delivery.phone || "Phone number unavailable"}
-            </Text>
+            {delivery.phone ? (
+              <Text className="mt-1 text-sm text-textSecondary">
+                {delivery.phone}
+              </Text>
+            ) : null}
           </View>
           <Ionicons name="chevron-forward" size={20} color="#737373" />
         </Pressable>

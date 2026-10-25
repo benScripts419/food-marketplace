@@ -22,7 +22,11 @@ export default function DeliveryCompletedScreen() {
       ? "Your Mobile Money transfer is complete."
       : payoutStatus === "failed"
         ? "Your delivery is complete, but the transfer needs attention. Contact support."
-        : "Your Mobile Money transfer has been requested and is awaiting confirmation.";
+        : payoutStatus === "processing"
+          ? "Your Mobile Money transfer is awaiting confirmation."
+          : "Check your payout details for the latest transfer status."; 
+  const hasPayoutAmount =
+    rawAmount !== undefined && rawAmount.trim() !== "" && Number.isFinite(payoutAmount);
 
   return (
     <View className="flex-1 bg-background">
@@ -44,7 +48,9 @@ export default function DeliveryCompletedScreen() {
             Delivery Completed
           </Text>
           <Text className="mt-2 text-center text-sm leading-5 text-textSecondary">
-            Order {orderId ? `#${orderId}` : ""} has been marked delivered.
+            {orderId
+              ? `Order #${orderId} has been marked delivered.`
+              : "Your delivery has been marked delivered."}
           </Text>
         </View>
 
@@ -53,10 +59,11 @@ export default function DeliveryCompletedScreen() {
             <Text className="text-sm text-white">
               Your payout (80% of the delivery fee)
             </Text>
-            <Text className="mt-1 text-4xl font-extrabold text-white">
-              GH₵
-              {Number.isFinite(payoutAmount) ? payoutAmount.toFixed(2) : "0.00"}
-            </Text>
+            {hasPayoutAmount ? (
+              <Text className="mt-1 text-4xl font-extrabold text-white">
+                GH₵{payoutAmount.toFixed(2)}
+              </Text>
+            ) : null}
             <Text className="mt-3 text-center text-sm leading-5 text-white">
               {payoutMessage}
             </Text>
@@ -73,7 +80,9 @@ export default function DeliveryCompletedScreen() {
                 ? "Paid"
                 : payoutStatus === "failed"
                   ? "Needs attention"
-                  : "Processing"}
+                  : payoutStatus === "processing"
+                    ? "Processing"
+                    : "Check status"}
             </Text>
           </View>
         </View>

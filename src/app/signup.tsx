@@ -109,7 +109,26 @@ export default function SignupScreen() {
       });
 
       if (error) {
-        setSignupError(error.message);
+        const message = error.message.toLowerCase();
+
+        if (
+          message.includes("already registered") ||
+          message.includes("already exists")
+        ) {
+          setSignupMessage(
+            "We couldn't create a new account with this email. If you already have an account, try logging in or resetting your password.",
+          );
+        } else {
+          setSignupError(error.message);
+        }
+
+        return;
+      }
+
+      if (data.user && data.user.identities?.length === 0) {
+        setSignupMessage(
+          "We couldn't create a new account with this email. If you already have an account, try logging in or resetting your password.",
+        );
         return;
       }
 

@@ -3,7 +3,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -14,7 +13,8 @@ import { WebView } from "react-native-webview";
 
 import { initializeDeliveryPayment } from "@/lib/deliveryPayment";
 import { loadDeliveryLocation } from "@/lib/deliveryLocation";
-import { goBackOr } from "@/lib/goBack";
+import { goBack } from "@/lib/goBack";
+import { openCheckout } from "@/lib/openCheckout";
 import { verifyPaystackPayment } from "@/lib/paystack";
 
 type Params = {
@@ -77,12 +77,10 @@ export default function DeliveryConfirmScreen() {
   } | null>(null);
 
   const openPayment = (url: string) => {
-    setMismatch(null);
     setPaymentUrl(url);
 
-    // A web page can't show Paystack inside the app, so open it in a new tab.
     if (isWeb) {
-      void Linking.openURL(url);
+      openCheckout(url);
     }
   };
 
@@ -257,8 +255,8 @@ export default function DeliveryConfirmScreen() {
           </Text>
 
           <Text className="mt-2 text-center text-sm leading-5 text-textSecondary">
-            Paystack opened in a new tab. Pay there, then come back to this page
-            and tap the button below.
+            Taking you to Paystack. If nothing happens, tap "Open the payment
+            page" below. After you pay, you will come back here.
           </Text>
 
           {error ? (
@@ -287,11 +285,11 @@ export default function DeliveryConfirmScreen() {
           </Pressable>
 
           <Pressable
-            onPress={() => void Linking.openURL(paymentUrl)}
+            onPress={() => openCheckout(paymentUrl)}
             className="mt-4 px-4 py-2"
           >
             <Text className="text-sm font-semibold text-primary">
-              Open the payment page again
+              Open the payment page
             </Text>
           </Pressable>
         </View>
@@ -305,7 +303,7 @@ export default function DeliveryConfirmScreen() {
       {/* HEADER */}
       <View className="flex-row items-center px-5 pb-3 pt-14">
         <Pressable
-          onPress={() => goBackOr("/delivery-request")}
+          onPress={() => goBack("/delivery-request")}
           accessibilityRole="button"
           accessibilityLabel="Go back"
           className="h-10 w-10 items-center justify-center"
@@ -459,12 +457,7 @@ export default function DeliveryConfirmScreen() {
       </ScrollView>
 
       {/* PAY */}
-      <View
-        className="absolute bottom-0 left-0 right-0 border-t border-border bg-white px-5 pt-3"
-        style={{
-          paddingBottom: "max(28px, env(safe-area-inset-bottom))" as any,
-        }}
-      >
+      <View className="absolute bottom-0 left-0 right-0 border-t border-border bg-white px-5 pb-7 pt-3">
         {error ? (
           <Text accessibilityRole="alert" className="mb-3 text-xs text-primary">
             {error}

@@ -13,7 +13,7 @@ import {
   View,
 } from "react-native";
 import { WebView } from "react-native-webview";
-
+import { openCheckout } from "@/lib/openCheckout";
 import { quoteCartDelivery } from "@/lib/cartDeliveryFee";
 import {
   loadCustomerDetails,
@@ -361,7 +361,7 @@ export default function PaymentScreen() {
           </Pressable>
 
           <Pressable
-            onPress={() => void Linking.openURL(paymentUrl)}
+            onPress={() => openCheckout(paymentUrl)}
             className="mt-4 px-4 py-2"
           >
             <Text className="text-sm font-semibold text-primary">

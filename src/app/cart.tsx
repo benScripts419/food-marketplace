@@ -251,7 +251,7 @@ export default function CartScreen() {
       <View
         className="absolute bottom-0 left-0 right-0 border-t border-border bg-white px-5 pt-3"
         style={{
-          paddingBottom: "max(28px, env(safe-area-inset-bottom))" as any,
+          paddingBottom: "max(30px, env(safe-area-inset-bottom))" as any,
         }}
       >
         <Pressable

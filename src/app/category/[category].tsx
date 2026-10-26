@@ -132,7 +132,7 @@ export default function CategoryItemsScreen() {
     <View className="flex-1 bg-white">
       {/* HEADER */}
       <View
-        className="w-full self-center px-5 pb-4 pt-14"
+        className="w-full self-center px-5 pb-4 pt-8"
         style={{ maxWidth: MAX_CONTENT_WIDTH }}
       >
         <View className="flex-row items-center">

@@ -60,7 +60,7 @@ export const conceptMenu: MenuCategory[] = [
     items: [
       {
         id: "concept-1",
-        name: "English",
+        name: "English Breakfast",
         description:
           "Bake beans, toasted tomatoes, mushrooms, baking/ham, sliced bread or mini buns with, coffee / tea / hot chocolate.",
         price: 120,
@@ -69,7 +69,7 @@ export const conceptMenu: MenuCategory[] = [
       },
       {
         id: "concept-2",
-        name: "American",
+        name: "American Breakfast",
         description:
           "Waffle / pancakes, baking, sausages, ash brown, eggs, syrup, toasted bread, with coffee / tea / hot chocolate.",
         price: 100,

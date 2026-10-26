@@ -23,7 +23,7 @@ export const fiftyCentMenu: MenuCategory[] = [
     items: [
       {
         id: "50-cent-fried-rice-small",
-        name: "Fried Rice",
+        name: "Fried Rice & Chicken",
         description: "Small",
         price: 30,
         category: "Fast Food",
@@ -32,7 +32,7 @@ export const fiftyCentMenu: MenuCategory[] = [
       },
       {
         id: "50-cent-fried-rice-medium",
-        name: "Fried Rice",
+        name: "Fried Rice & Chicken",
         description: "Medium",
         price: 40,
         category: "Fast Food",
@@ -41,7 +41,7 @@ export const fiftyCentMenu: MenuCategory[] = [
       },
       {
         id: "50-cent-fried-rice-large",
-        name: "Fried Rice",
+        name: "Fried Rice & Chicken",
         description: "Large",
         price: 50,
         category: "Fast Food",
@@ -50,7 +50,7 @@ export const fiftyCentMenu: MenuCategory[] = [
       },
       {
         id: "50-cent-fried-rice-jumbo-pack",
-        name: "Fried Rice",
+        name: "Fried Rice & Chicken",
         description: "Jumbo Pack",
         price: 60,
         category: "Fast Food",

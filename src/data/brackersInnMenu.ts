@@ -30,7 +30,7 @@ export const brackersInnMenu: MenuCategory[] = [
     items: [
       {
         id: "brackers-fried-rice-small",
-        name: "Fried Rice",
+        name: "Fried Rice & Chicken",
         description: "Small",
         price: 30,
         category: "Main Dishes",
@@ -39,7 +39,7 @@ export const brackersInnMenu: MenuCategory[] = [
       },
       {
         id: "brackers-jollof-small",
-        name: "Jollof",
+        name: "Jollof & Chicken",
         description: "Small",
         price: 30,
         category: "Main Dishes",
@@ -48,7 +48,7 @@ export const brackersInnMenu: MenuCategory[] = [
       },
       {
         id: "brackers-fried-rice-medium",
-        name: "Fried Rice",
+        name: "Fried Rice & Chicken",
         description: "Medium",
         price: 40,
         category: "Main Dishes",
@@ -57,7 +57,7 @@ export const brackersInnMenu: MenuCategory[] = [
       },
       {
         id: "brackers-jollof-medium",
-        name: "Jollof",
+        name: "Jollof & Chicken",
         description: "Medium",
         price: 40,
         category: "Main Dishes",
@@ -75,7 +75,7 @@ export const brackersInnMenu: MenuCategory[] = [
       },
       {
         id: "brackers-fried-rice-large",
-        name: "Fried Rice",
+        name: "Fried Rice & Chicken",
         description: "Large",
         price: 50,
         category: "Main Dishes",
@@ -84,7 +84,7 @@ export const brackersInnMenu: MenuCategory[] = [
       },
       {
         id: "brackers-jollof-large",
-        name: "Jollof",
+        name: "Jollof & Chicken",
         description: "Large",
         price: 50,
         category: "Main Dishes",

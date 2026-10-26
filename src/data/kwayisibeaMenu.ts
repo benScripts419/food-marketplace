@@ -53,11 +53,14 @@ const spaghettiCarbonara = require("../../assets/images/food/spaghetti-carbonara
 const penneArrabiata = require("../../assets/images/food/penne-arrabiata.jpeg");
 const tilapiaLightsoup = require("../../assets/images/food/tilapia-lightsoup.jpeg");
 const assortedOkro = require("../../assets/images/food/assorted-okro.jpeg");
+const clubSandwich = require("../../assets/images/food/club-sandwich.jpg");
 
 
 const foodImage = require("@/assets/images/food/mixed-salad.jpg");
 
 export const kwayisibeaMenu: MenuCategory[] = [
+  // Starters
+
   {
     id: "starters",
     name: "Starters",
@@ -106,6 +109,9 @@ export const kwayisibeaMenu: MenuCategory[] = [
       },
     ],
   },
+
+  // Side Oders
+
   {
     id: "side orders",
     name: "Side Orders",
@@ -241,6 +247,9 @@ export const kwayisibeaMenu: MenuCategory[] = [
       },
     ],
   },
+
+  // Poultry
+
   {
     id: "poultry",
     name: "Poultry",
@@ -300,6 +309,9 @@ export const kwayisibeaMenu: MenuCategory[] = [
       },
     ],
   },
+
+  // Local Corner
+
   {
     id: "local corner",
     name: "Local Corner",
@@ -376,6 +388,9 @@ export const kwayisibeaMenu: MenuCategory[] = [
       },
     ],
   },
+
+  // Snacks
+
   {
     id: "snacks",
     name: "Snacks",
@@ -387,7 +402,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
           "Lettuce, onion, tomato, chicken, bacon and toasted bread.",
         price: 100,
         category: "Snacks",
-        image: foodImage,
+        image: clubSandwich,
       },
       {
         id: "kw-snack-2",
@@ -436,6 +451,8 @@ export const kwayisibeaMenu: MenuCategory[] = [
     ],
   },
 
+  // Vegetarian
+
   {
     id: "vegetarian",
     name: "Vegetarian",
@@ -471,6 +488,8 @@ export const kwayisibeaMenu: MenuCategory[] = [
       },
     ],
   },
+
+  // Pizzas
 
   {
     id: "pizzas",
@@ -534,6 +553,8 @@ export const kwayisibeaMenu: MenuCategory[] = [
       },
     ],
   },
+
+  // Pork, Beef & Grills
 
   {
     id: "pork-beef-grill",
@@ -616,6 +637,9 @@ export const kwayisibeaMenu: MenuCategory[] = [
       },
     ],
   },
+
+  // Italian Pastas
+
   {
     id: "italian pastas",
     name: "Italian Pastas",

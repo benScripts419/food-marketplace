@@ -393,7 +393,7 @@ export const conceptMenu: MenuCategory[] = [
     items: [
       {
         id: "concept-assorted-1",
-        name: "Jollof",
+        name: "Assorted Jollof",
         description: "Chicken",
         price: 80,
         category: "Assorted",
@@ -402,7 +402,7 @@ export const conceptMenu: MenuCategory[] = [
       },
       {
         id: "concept-assorted-2",
-        name: "Jollof",
+        name: "AssortedJollof",
         description: "Beef",
         price: 80,
         category: "Assorted",
@@ -411,7 +411,7 @@ export const conceptMenu: MenuCategory[] = [
       },
       {
         id: "concept-assorted-3",
-        name: "Jollof",
+        name: "Assorted Jollof",
         description: "Pork",
         price: 90,
         category: "Assorted",
@@ -420,7 +420,7 @@ export const conceptMenu: MenuCategory[] = [
       },
       {
         id: "concept-assorted-4",
-        name: "Fried Rice",
+        name: "Assorted Fried Rice",
         description: "Chicken",
         price: 80,
         category: "Assorted",
@@ -438,7 +438,7 @@ export const conceptMenu: MenuCategory[] = [
       },
       {
         id: "concept-assorted-6",
-        name: "Fried Rice",
+        name: "Assorted Fried Rice",
         description: "Pork",
         price: 90,
         category: "Assorted",

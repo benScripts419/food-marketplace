@@ -455,7 +455,7 @@ export default function HomeScreen() {
                     <View className="h-16 w-16 overflow-hidden rounded-full bg-surface">
                       <Image
                         source={category.image}
-                        className="h-full w-full"
+                        style={{ width: 64, height: 64 }}
                         resizeMode="cover"
                       />
                     </View>

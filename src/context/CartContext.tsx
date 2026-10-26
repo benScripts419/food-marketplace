@@ -29,6 +29,12 @@ export type CartItem = {
   quantity: number;
   restaurantId: string;
   restaurantName: string;
+  // Set when toppings were chosen. The cart line's `id` is then
+  // "<menu item id>::<topping ids>", so the same drink with different
+  // toppings is its own line. `price` already includes the toppings.
+  menuItemId?: string;
+  basePrice?: number;
+  toppings?: { id: string; name: string; price: number }[];
 };
 
 type FreeItemSelection = {

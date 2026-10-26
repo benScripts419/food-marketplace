@@ -21,6 +21,13 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import ToppingsPicker from "@/components/ToppingsPicker";
+import {
+  loadToppings,
+  toppingsForItem,
+  withToppings,
+  type Topping,
+} from "@/lib/toppings";
 
 type Restaurant = {
   id: string;
@@ -85,6 +92,8 @@ export default function RestaurantDetailScreen() {
   // --------------------------------------------------
 
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [toppings, setToppings] = useState<Topping[]>([]);
+  const [pickerItem, setPickerItem] = useState<RestaurantMenuItem | null>(null);
 
   const [menu, setMenu] = useState<MenuCategory[]>([]);
 
@@ -106,6 +115,31 @@ export default function RestaurantDetailScreen() {
 
   const [isFreeSelectionMode, setIsFreeSelectionMode] = useState(false);
   const [menuTop, setMenuTop] = useState(0);
+
+  useEffect(() => {
+    const restaurantId = restaurant?.id;
+
+    if (!restaurantId) {
+      setToppings([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    void loadToppings(restaurantId)
+      .then((items) => {
+        if (!cancelled) {
+          setToppings(items);
+        }
+      })
+      .catch((error: unknown) => {
+        console.error("Could not load toppings:", error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [restaurant?.id]);
 
   // --------------------------------------------------
   // FREE ITEM PROMOTION PROMPT
@@ -293,8 +327,7 @@ export default function RestaurantDetailScreen() {
       return;
     }
 
-    // FREE ITEM MODE
-
+    // Free-item selection
     if (isFreeSelectionMode) {
       selectFreeItem(cartItem);
       setIsFreeSelectionMode(false);
@@ -307,8 +340,13 @@ export default function RestaurantDetailScreen() {
       return;
     }
 
-    // NORMAL PAID ITEM
+    // Show the toppings picker when the item has available toppings.
+    if (toppingsForItem(item, toppings).length > 0) {
+      setPickerItem(item);
+      return;
+    }
 
+    // Otherwise, add the item directly.
     addToCart(cartItem);
   };
 
@@ -905,6 +943,24 @@ export default function RestaurantDetailScreen() {
           </Pressable>
         </View>
       ) : null}
+      <ToppingsPicker
+        visible={pickerItem !== null}
+        itemName={pickerItem?.name ?? ""}
+        itemDetail={pickerItem?.description}
+        basePrice={pickerItem?.price ?? 0}
+        toppings={pickerItem ? toppingsForItem(pickerItem, toppings) : []}
+        onClose={() => setPickerItem(null)}
+        onConfirm={(chosen) => {
+          if (pickerItem) {
+            const cartItem = createCartItem(pickerItem);
+
+            if (cartItem) {
+              addToCart(withToppings(cartItem, chosen));
+            }
+          }
+          setPickerItem(null);
+        }}
+      />
     </View>
   );
 }

@@ -12,6 +12,7 @@ export type PaystackCartItem = {
   quantity: number;
   restaurantId: string;
   restaurantName: string;
+  toppingIds?: string[];
 };
 
 export type FreeItemSelection = {

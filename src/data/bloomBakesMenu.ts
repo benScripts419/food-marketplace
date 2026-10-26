@@ -11,6 +11,7 @@ export type MenuItem = {
 export type MenuCategory = {
   id: string;
   name: string;
+  description: string;
   items: MenuItem[];
 };
 
@@ -39,8 +40,9 @@ export const bloomBakesMenu: MenuCategory[] = [
   // TEA / BOBA
   // =====================================================
   {
-    id: "Milk Series",
-    name: "Tea",
+    id: "milk-series",
+    name: "The Bloom Boba Tea",
+    description: "Milk Series",
     items: [
       {
         id: "bloom-chocolate-milk-tea-500",
@@ -273,9 +275,147 @@ export const bloomBakesMenu: MenuCategory[] = [
   },
 
   // =====================================================
-  // SANDWICH
+  // Fruit Tea Series
   // =====================================================
  
+  {
+    id: "fruit-tea-series",
+    name: "The Bloom Boba Tea",
+    description: "Fruit Tea Series",
+    items: [
+      {
+        id: "bloom-passion-fruit-tea-500",
+        name: "Passion Fruit",
+        description: "500ml",
+        price: 40,
+        category: "Tea",
+        subCategory: "500ml",
+        image: chocolateTea,
+      },
+      {
+        id: "bloom-passion-fruit-tea-700",
+        name: "Passion Fruit",
+        description: "700ml",
+        price: 50,
+        category: "Tea",
+        subCategory: "700ml",
+        image: chocolateTea,
+      },
+    
+      {
+        id: "bloom-strawberry-tea-500",
+        name: "Strawberry",
+        description: "500ml",
+        price: 40,
+        category: "Tea",
+        subCategory: "500ml",
+        image: chocolateTea,
+      },
+      {
+        id: "bloom-strawberry-tea-700",
+        name: "Strawberry",
+        description: "700ml",
+        price: 50,
+        category: "Tea",
+        subCategory: "700ml",
+        image: chocolateTea,
+      },
+    
+      {
+        id: "bloom-mango-tea-500",
+        name: "Mango",
+        description: "500ml",
+        price: 40,
+        category: "Tea",
+        subCategory: "500ml",
+        image: chocolateTea,
+      },
+      {
+        id: "bloom-mango-tea-700",
+        name: "Mango",
+        description: "700ml",
+        price: 50,
+        category: "Tea",
+        subCategory: "700ml",
+        image: chocolateTea,
+      },
+    
+      {
+        id: "bloom-water-melon-tea-500",
+        name: "Water Melon",
+        description: "500ml",
+        price: 40,
+        category: "Tea",
+        subCategory: "500ml",
+        image: chocolateTea,
+      },
+      {
+        id: "bloom-water-melon-tea-700",
+        name: "Water Melon",
+        description: "700ml",
+        price: 50,
+        category: "Tea",
+        subCategory: "700ml",
+        image: chocolateTea,
+      },
+    
+      {
+        id: "bloom-blueberry-tea-500",
+        name: "Blueberry",
+        description: "500ml",
+        price: 40,
+        category: "Tea",
+        subCategory: "500ml",
+        image: chocolateTea,
+      },
+      {
+        id: "bloom-blueberry-tea-700",
+        name: "Blueberry",
+        description: "700ml",
+        price: 50,
+        category: "Tea",
+        subCategory: "700ml",
+        image: chocolateTea,
+      },
+    
+      {
+        id: "bloom-dragon-fruit-tea-500",
+        name: "Dragon Fruit",
+        description: "500ml",
+        price: 40,
+        category: "Tea",
+        subCategory: "500ml",
+        image: chocolateTea,
+      },
+      {
+        id: "bloom-dragon-fruit-tea-700",
+        name: "Dragon Fruit",
+        description: "700ml",
+        price: 50,
+        category: "Tea",
+        subCategory: "700ml",
+        image: chocolateTea,
+      },
+    
+      {
+        id: "bloom-peach-tea-500",
+        name: "Peach",
+        description: "500ml",
+        price: 40,
+        category: "Tea",
+        subCategory: "500ml",
+        image: chocolateTea,
+      },
+      {
+        id: "bloom-peach-tea-700",
+        name: "Peach",
+        description: "700ml",
+        price: 50,
+        category: "Tea",
+        subCategory: "700ml",
+        image: chocolateTea,
+      },]
+  },
 
   // =====================================================
   // MATCHA
@@ -283,6 +423,7 @@ export const bloomBakesMenu: MenuCategory[] = [
   {
     id: "bloom-matcha",
     name: "Matcha",
+    description: "",
     items: [
       {
         id: "bloom-matcha-brown-sugar-500",
@@ -472,40 +613,6 @@ export const bloomBakesMenu: MenuCategory[] = [
         category: "Matcha",
         subCategory: "700ml",
         image: menuImage,
-      },
-    ],
-  },
-
-  // =====================================================
-  // EXTRA TOPPINGS
-  // =====================================================
-  {
-    id: "bloom-toppings",
-    name: "Extra Toppings",
-    items: [
-      {
-        id: "bloom-boba-pearls",
-        name: "Boba Pearls",
-        description: "Extra boba pearls",
-        price: 10,
-        category: "Tea",
-        image: bobaPearls,
-      },
-      {
-        id: "bloom-cheese",
-        name: "Cheese",
-        description: "Extra cheese",
-        price: 10,
-        category: "Tea",
-        image: cheese,
-      },
-      {
-        id: "bloom-vanilla-topping",
-        name: "Vanilla",
-        description: "Extra vanilla",
-        price: 10,
-        category: "Tea",
-        image: vanila,
       },
     ],
   },

@@ -240,6 +240,16 @@ export default function CartScreen() {
                   </Text>
                 )}
 
+                {/* TOPPINGS */}
+                {item.toppings && item.toppings.length > 0 ? (
+                  <Text
+                    className="mt-1 text-xs font-semibold text-primary"
+                    numberOfLines={2}
+                  >
+                    + {item.toppings.map((topping) => topping.name).join(", ")}
+                  </Text>
+                ) : null}
+
                 {/* PRICE + FREE LABEL */}
                 <View className="mt-2 flex-row items-center">
                   {paidQuantity > 0 && (

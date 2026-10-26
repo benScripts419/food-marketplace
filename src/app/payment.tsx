@@ -191,11 +191,12 @@ export default function PaymentScreen() {
 
       const payload = {
         cartItems: cartItems.map((item) => ({
-          id: item.id,
+          id: item.menuItemId ?? item.id, // changed
           name: item.name,
           description: item.description,
           price: item.price,
           quantity: item.quantity,
+          toppingIds: item.toppings?.map((topping) => topping.id) ?? [], // added
           restaurantId: item.restaurantId,
           restaurantName: item.restaurantName,
         })),

@@ -213,8 +213,16 @@ const ROLLD_UP_RESTAURANT_ID = "0a7aae53-94c5-428c-88c5-3e6cd88ee911";
 // Must match `serviceFee` in the app's payment screen.
 const SERVICE_FEE = 7.5;
 
+type SelectedTopping = {
+  id: string;
+  name?: string;
+  price?: number;
+};
+
 type CartItem = {
   id: string;
+  menuItemId?: string;
+  toppings?: SelectedTopping[];
   name: string;
   description?: string;
   price: number;
@@ -250,6 +258,16 @@ type MenuItem = {
   description: string | null;
   image_url: string | null;
   price: number;
+  category: string | null;
+  is_available: boolean;
+};
+
+type MenuTopping = {
+  id: string;
+  restaurant_id: string;
+  name: string;
+  price: number;
+  applies_to_categories: string[] | null;
   is_available: boolean;
 };
 
@@ -259,6 +277,40 @@ type Restaurant = {
   is_open: boolean;
   address: string | null;
 };
+
+type CartLinePricing = {
+  baseItemId: string;
+  basePrice: number;
+  unitPrice: number;
+  toppings: MenuTopping[];
+};
+
+// Topping-specific cart IDs are formed by withToppings() as
+// "<base menu item id>::<sorted topping IDs>". Always verify the
+// base ID against menu_items and calculate price from database values.
+function getBaseMenuItemId(item: CartItem): string {
+  return item.id.split("::", 1)[0];
+}
+
+function getToppingIds(item: CartItem): string[] {
+  return (item.toppings ?? []).map((topping) => topping.id).sort();
+}
+
+function hasValidToppingCartId(item: CartItem): boolean {
+  const separatorIndex = item.id.indexOf("::");
+  const selectedIds = getToppingIds(item);
+
+  if (separatorIndex < 0) {
+    return selectedIds.length === 0;
+  }
+
+  const baseId = item.id.slice(0, separatorIndex);
+  const suffix = item.id.slice(separatorIndex + 2);
+  if (!baseId || !suffix || selectedIds.length === 0) return false;
+
+  const suffixIds = suffix.split(",").sort();
+  return suffixIds.join(",") === selectedIds.join(",");
+}
 
 const jsonResponse = (body: Record<string, unknown>, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -284,7 +336,7 @@ Deno.serve(async (req) => {
     // --------------------------------------------------
     // 1. Authentication
     // --------------------------------------------------
-    console.log("INITIALIZE PAYMENT v4 - location pricing");
+    console.log("INITIALIZE PAYMENT v5 - verified toppings and location pricing");
     const authHeader = req.headers.get("Authorization");
 
     if (!authHeader) {
@@ -333,7 +385,6 @@ Deno.serve(async (req) => {
     // --------------------------------------------------
     // 2. Read request
     // --------------------------------------------------
-
     const rawBody = await req.json();
     if (!rawBody || typeof rawBody !== "object" || Array.isArray(rawBody)) {
       return jsonResponse({ error: "Invalid payment request." }, 400);
@@ -416,9 +467,32 @@ Deno.serve(async (req) => {
         !Number.isSafeInteger(item.quantity) ||
         item.quantity <= 0 ||
         typeof item.restaurantId !== "string" ||
-        !item.restaurantId
+        !item.restaurantId ||
+        (item.toppings !== undefined &&
+          (!Array.isArray(item.toppings) || item.toppings.length > 5 ||
+            item.toppings.some(
+              (topping) =>
+                !topping ||
+                typeof topping.id !== "string" ||
+                !topping.id.trim(),
+            )))
       ) {
         return jsonResponse({ error: "Invalid cart item." }, 400);
+      }
+
+      if (!hasValidToppingCartId(item)) {
+        return jsonResponse(
+          { error: "The selected toppings do not match this cart item. Refresh your cart and try again." },
+          400,
+        );
+      }
+
+      const toppingIds = getToppingIds(item);
+      if (new Set(toppingIds).size !== toppingIds.length) {
+        return jsonResponse(
+          { error: "A topping cannot be selected more than once." },
+          400,
+        );
       }
     }
 
@@ -436,7 +510,7 @@ Deno.serve(async (req) => {
 
     const requestedItemIds = [
       ...new Set([
-        ...cartItems.map((item) => item.id),
+        ...cartItems.map(getBaseMenuItemId),
         ...freeItemSelections.map((selection) => selection.itemId),
       ]),
     ];
@@ -444,7 +518,7 @@ Deno.serve(async (req) => {
     const { data: menuItems, error: menuItemsError } = await supabaseAdmin
       .from("menu_items")
       .select(
-        "id, restaurant_id, name, description, image_url, price, is_available",
+        "id, restaurant_id, name, description, image_url, price, category, is_available",
       )
       .in("id", requestedItemIds);
 
@@ -486,10 +560,50 @@ Deno.serve(async (req) => {
       restaurantMap.set(restaurant.id, restaurant);
     }
 
+    // --------------------------------------------------
+    // 3. Verify toppings and calculate the authoritative subtotal
+    // --------------------------------------------------
+    const requestedToppingIds = [
+      ...new Set(
+        cartItems.flatMap((item) => getToppingIds(item)),
+      ),
+    ];
+    const toppingMap = new Map<string, MenuTopping>();
+
+    if (requestedToppingIds.length > 0) {
+      const { data: toppingsData, error: toppingsError } = await supabaseAdmin
+        .from("menu_toppings")
+        .select(
+          "id, restaurant_id, name, price, applies_to_categories, is_available",
+        )
+        .in("id", requestedToppingIds);
+
+      if (toppingsError) {
+        console.error("Topping lookup error:", toppingsError);
+        return jsonResponse(
+          { error: "Failed to verify selected toppings." },
+          500,
+        );
+      }
+
+      if (!toppingsData || toppingsData.length !== requestedToppingIds.length) {
+        return jsonResponse(
+          { error: "A selected topping is invalid. Refresh your cart and try again." },
+          400,
+        );
+      }
+
+      for (const topping of toppingsData as MenuTopping[]) {
+        toppingMap.set(topping.id, topping);
+      }
+    }
+
     let subtotal = 0;
+    const cartLinePricing = new Map<string, CartLinePricing>();
 
     for (const item of cartItems) {
-      const menuItem = menuItemMap.get(item.id);
+      const baseItemId = getBaseMenuItemId(item);
+      const menuItem = menuItemMap.get(baseItemId);
       const restaurant = menuItem
         ? restaurantMap.get(menuItem.restaurant_id)
         : undefined;
@@ -509,19 +623,82 @@ Deno.serve(async (req) => {
         );
       }
 
-      const price = Number(menuItem.price);
-      if (!Number.isFinite(price) || price < 0) {
-        console.error("Invalid menu price:", { menuItemId: item.id });
+      const basePrice = Number(menuItem.price);
+      if (!Number.isFinite(basePrice) || basePrice < 0) {
+        console.error("Invalid menu price:", { menuItemId: baseItemId });
         return jsonResponse(
           { error: "A menu item has an invalid price." },
           500,
         );
       }
 
-      subtotal += price * item.quantity;
+      const selectedToppings: MenuTopping[] = [];
+      for (const toppingSelection of item.toppings ?? []) {
+        const topping = toppingMap.get(toppingSelection.id);
+
+        if (
+          !topping ||
+          !topping.is_available ||
+          topping.restaurant_id !== menuItem.restaurant_id
+        ) {
+          return jsonResponse(
+            { error: "A selected topping is unavailable for this restaurant." },
+            400,
+          );
+        }
+
+        const allowedCategories = topping.applies_to_categories ?? [];
+        if (
+          allowedCategories.length > 0 &&
+          (!menuItem.category ||
+            !allowedCategories.some(
+              (category) =>
+                category.trim().toLowerCase() ===
+                menuItem.category!.trim().toLowerCase(),
+            ))
+        ) {
+          return jsonResponse(
+            {
+              error: `The topping "${topping.name}" is not available for this item.`,
+            },
+            400,
+          );
+        }
+
+        const toppingPrice = Number(topping.price);
+        if (!Number.isFinite(toppingPrice) || toppingPrice < 0) {
+          console.error("Invalid topping price:", { toppingId: topping.id });
+          return jsonResponse(
+            { error: "A selected topping has an invalid price." },
+            500,
+          );
+        }
+
+        selectedToppings.push({ ...topping, price: toppingPrice });
+      }
+
+      const toppingsTotal = selectedToppings.reduce(
+        (sum, topping) => sum + topping.price,
+        0,
+      );
+      const unitPrice = Number((basePrice + toppingsTotal).toFixed(2));
+
+      cartLinePricing.set(item.id, {
+        baseItemId,
+        basePrice,
+        unitPrice,
+        toppings: selectedToppings,
+      });
+
+      subtotal += unitPrice * item.quantity;
     }
 
     subtotal = Number(subtotal.toFixed(2));
+    console.log("VERIFIED FOOD SUBTOTAL", {
+      subtotal,
+      cartLines: cartItems.length,
+      toppings: requestedToppingIds.length,
+    });
 
     // --------------------------------------------------
     // 4. Promotion
@@ -530,11 +707,8 @@ Deno.serve(async (req) => {
     // 6 paid items → choose 2 free items.
     // 9 paid items → choose 3 free items.
     // --------------------------------------------------
-
     const isWednesday = new Date().getUTCDay() === 3;
-
     let promotionDiscount = 0;
-
     let qualifyingItemCount = 0;
 
     for (const item of cartItems) {
@@ -544,7 +718,6 @@ Deno.serve(async (req) => {
     }
 
     const selectedFreeItemCount = freeItemSelections.length;
-
     const selectionKeys = freeItemSelections.map(
       (selection) => `${selection.restaurantId}:${selection.itemId}`,
     );
@@ -560,7 +733,7 @@ Deno.serve(async (req) => {
       const menuItem = menuItemMap.get(selection.itemId);
       const cartItem = cartItems.find(
         (item) =>
-          item.id === selection.itemId &&
+          getBaseMenuItemId(item) === selection.itemId &&
           item.restaurantId === selection.restaurantId,
       );
 
@@ -600,22 +773,16 @@ Deno.serve(async (req) => {
     // --------------------------------------------------
     // 5. Validate free item selections
     // --------------------------------------------------
-
     if (!isWednesday && freeItemSelections.length > 0) {
       return jsonResponse(
-        {
-          error: "The Roll'd Up promotion is not active today.",
-        },
+        { error: "The Roll'd Up promotion is not active today." },
         400,
       );
     }
 
     if (freeItemSelections.length > freeItemsUnlocked) {
       return jsonResponse(
-        {
-          error:
-            "You have selected more free items than your promotion allows.",
-        },
+        { error: "You have selected more free items than your promotion allows." },
         400,
       );
     }
@@ -623,19 +790,16 @@ Deno.serve(async (req) => {
     if (freeItemSelections.length > 0) {
       for (const selection of freeItemSelections) {
         const menuItem = menuItemMap.get(selection.itemId);
-
         if (menuItem) {
           promotionDiscount += Number(menuItem.price);
         }
       }
-
       promotionDiscount = Number(promotionDiscount.toFixed(2));
     }
 
     // --------------------------------------------------
-    // 9. Calculate final totals
+    // 6. Calculate final totals
     // --------------------------------------------------
-
     const totalItemCount = cartItems.reduce(
       (count, item) => count + item.quantity,
       0,
@@ -677,30 +841,24 @@ Deno.serve(async (req) => {
     }
 
     // The rider earns 80% of the delivery fee; AkroBite keeps 20%.
-    // This is the FINAL rider amount. Nothing else should multiply it again.
     const riderPayoutFee = Number((deliveryFee * 0.8).toFixed(2));
 
     console.log("DELIVERY QUOTE", { deliveryFee, totalItemCount, SERVICE_FEE });
 
     const serviceFee = SERVICE_FEE;
-
     const discountedFoodTotal = Number(
       Math.max(0, subtotal - promotionDiscount).toFixed(2),
     );
-
     const total = Number(
       (discountedFoodTotal + deliveryFee + serviceFee).toFixed(2),
     );
 
-    if (total <= 0) {
+    if (!Number.isFinite(total) || total <= 0) {
       return jsonResponse(
-        {
-          error: "Payment amount must be greater than zero.",
-        },
+        { error: "Payment amount must be greater than zero." },
         400,
       );
     }
-
 
     const { data: order, error: orderError } = await supabaseAdmin
       .from("orders")
@@ -743,11 +901,8 @@ Deno.serve(async (req) => {
 
     if (orderError || !order) {
       console.error("Order creation error:", orderError);
-
       return jsonResponse(
-        {
-          error: orderError?.message ?? "Failed to create order.",
-        },
+        { error: orderError?.message ?? "Failed to create order." },
         500,
       );
     }
@@ -757,30 +912,45 @@ Deno.serve(async (req) => {
         .from("orders")
         .delete()
         .eq("id", order.id);
-
       if (error) {
         console.error("Failed to clean up order:", error);
       }
     };
 
     // --------------------------------------------------
-    // 11. Create order items
+    // 7. Create order items, including verified topping details
     // --------------------------------------------------
+    const orderItems = cartItems.map((item) => {
+      const pricing = cartLinePricing.get(item.id);
+      if (!pricing) {
+        throw new Error(`Missing verified price for cart item ${item.id}`);
+      }
 
-    const orderItems = cartItems.map((item) => ({
-      menu_item_id: item.id,
-      order_id: order.id,
-      name: menuItemMap.get(item.id)!.name,
-      item_name: menuItemMap.get(item.id)!.name,
-      description: menuItemMap.get(item.id)!.description ?? null,
-      price: Number(menuItemMap.get(item.id)!.price),
-      unit_price: Number(menuItemMap.get(item.id)!.price),
-      quantity: item.quantity,
-      restaurant_id: item.restaurantId,
-      restaurant_name:
-        restaurantMap.get(item.restaurantId)?.name ?? item.restaurantName,
-      image: menuItemMap.get(item.id)!.image_url,
-    }));
+      const menuItem = menuItemMap.get(pricing.baseItemId);
+      if (!menuItem) {
+        throw new Error(`Missing menu item ${pricing.baseItemId}`);
+      }
+
+      return {
+        menu_item_id: pricing.baseItemId,
+        order_id: order.id,
+        name: menuItem.name,
+        item_name: menuItem.name,
+        description: menuItem.description ?? null,
+        price: pricing.unitPrice,
+        unit_price: pricing.unitPrice,
+        quantity: item.quantity,
+        restaurant_id: item.restaurantId,
+        restaurant_name:
+          restaurantMap.get(item.restaurantId)?.name ?? item.restaurantName,
+        image: menuItem.image_url,
+        toppings: pricing.toppings.map((topping) => ({
+          id: topping.id,
+          name: topping.name,
+          price: topping.price,
+        })),
+      };
+    });
 
     const { error: orderItemsError } = await supabaseAdmin
       .from("order_items")
@@ -789,19 +959,12 @@ Deno.serve(async (req) => {
     if (orderItemsError) {
       console.error("Order items creation error:", orderItemsError);
       await removeUnpaidOrder();
-
-      return jsonResponse(
-        {
-          error: "Failed to create order items.",
-        },
-        500,
-      );
+      return jsonResponse({ error: "Failed to create order items." }, 500);
     }
 
     // --------------------------------------------------
-    // 12. Initialize Paystack
+    // 8. Initialize Paystack
     // --------------------------------------------------
-
     const reference = `AKROBITE-${order.id}-${Date.now()}`;
     const { error: updateOrderError } = await supabaseAdmin
       .from("orders")
@@ -842,6 +1005,15 @@ Deno.serve(async (req) => {
             delivery_option: deliveryOption,
             free_item_selections: freeItemSelections,
             promotion: promotionDiscount > 0 ? "ROLLD_UP_WEDNESDAY" : null,
+            topping_selections: cartItems.map((item) => ({
+              item_id: getBaseMenuItemId(item),
+              quantity: item.quantity,
+              toppings: (cartLinePricing.get(item.id)?.toppings ?? []).map((topping) => ({
+                id: topping.id,
+                name: topping.name,
+                price: topping.price,
+              })),
+            })),
           },
         }),
       },
@@ -855,9 +1027,7 @@ Deno.serve(async (req) => {
       !paystackData.data?.authorization_url
     ) {
       console.error("Paystack initialization error:", paystackData);
-
       await removeUnpaidOrder();
-
       return jsonResponse(
         {
           error:
@@ -868,9 +1038,8 @@ Deno.serve(async (req) => {
     }
 
     // --------------------------------------------------
-    // 13. Create payment record
+    // 9. Create payment record
     // --------------------------------------------------
-
     const { error: paymentError } = await supabaseAdmin
       .from("payments")
       .insert({
@@ -886,30 +1055,29 @@ Deno.serve(async (req) => {
     if (paymentError) {
       console.error("Payment record error:", paymentError);
       await removeUnpaidOrder();
-
       return jsonResponse(
-        {
-          error: "Failed to create payment record.",
-        },
+        { error: "Failed to create payment record." },
         500,
       );
     }
 
     // --------------------------------------------------
-    // 14. Return payment information
+    // 10. Return payment information
     // --------------------------------------------------
-
     return jsonResponse({
       orderId: order.id,
       reference,
       authorization_url: paystackData.data.authorization_url,
       access_code: paystackData.data.access_code,
+      subtotal,
+      promotionDiscount,
+      deliveryFee,
+      serviceFee,
       total,
       currency: "GHS",
     });
   } catch (error) {
     console.error("INITIALIZE PAYMENT ERROR:", error);
-
     return jsonResponse(
       {
         error:

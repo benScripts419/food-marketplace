@@ -10,7 +10,6 @@ import {
   type ImageSourcePropType,
 } from "react-native";
 
-import CategoryFloatingTabs from "@/components/CategoryFloatingTabs";
 import { getAllMenuItems } from "@/data/restaurantMenus";
 import { getCategoryImage } from "@/lib/categoryImages";
 
@@ -207,8 +206,6 @@ export default function CategoriesScreen() {
           </View>
         )}
       </ScrollView>
-
-      <CategoryFloatingTabs activeTab="Home" />
     </View>
   );
 }

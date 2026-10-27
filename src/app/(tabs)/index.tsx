@@ -22,6 +22,7 @@ import { getCategoryImage } from "@/lib/categoryImages";
 import HomeCarousel, { Promotion } from "@/components/HomeCarousel";
 import { loadDeliveryLocation } from "@/lib/deliveryLocation";
 import { supabase } from "@/lib/supabase";
+import WebSiteFooter from "@/components/web-site-footer";
 
 // --------------------------------------------------
 // TYPES
@@ -757,6 +758,10 @@ export default function HomeScreen() {
           </View>
         </View>
       </ScrollView>
+      {/* Footer scrolls naturally with the page */}
+      <View className="w-full">
+        <WebSiteFooter />
+      </View>
     </View>
   );
 }

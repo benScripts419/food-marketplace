@@ -9,11 +9,11 @@ import {
   View,
 } from "react-native";
 
-import CategoryFloatingTabs from "@/components/CategoryFloatingTabs";
 import SafeImage from "@/components/SafeImage";
 import { getAllMenuItems } from "@/data/restaurantMenus";
 import { Alert } from "@/lib/dialog";
 import { goBack } from "@/lib/goBack";
+import WebSiteFooter from "@/components/web-site-footer";
 import { supabase } from "@/lib/supabase";
 
 const categoryAliases: Record<string, string[]> = {
@@ -435,8 +435,10 @@ export default function CategoryItemsScreen() {
           )}
         </View>
       </ScrollView>
-
-      <CategoryFloatingTabs activeTab="Restaurants" />
+      {/* Footer scrolls naturally with the page */}
+      <View className="w-full">
+        <WebSiteFooter />
+      </View>
     </View>
   );
 }

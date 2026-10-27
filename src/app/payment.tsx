@@ -28,6 +28,7 @@ import {
   initializePaystackPayment,
   verifyPaystackPayment,
 } from "@/lib/paystack";
+import WebSiteFooter from "@/components/web-site-footer";
 
 const isWeb = Platform.OS === "web";
 
@@ -653,6 +654,10 @@ export default function PaymentScreen() {
             </Text>
           )}
         </Pressable>
+      </View>
+      {/* Footer scrolls naturally with the page */}
+      <View className="w-full">
+        <WebSiteFooter />
       </View>
     </View>
   );

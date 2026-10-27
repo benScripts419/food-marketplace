@@ -618,7 +618,7 @@ export default function HomeScreen() {
                                   "Restaurant"}
                               </Text>
 
-                              <View className="mt-3 flex-row items-center">
+                              <View className="mt-1 flex-row items-center">
                                 <Ionicons
                                   name="restaurant-outline"
                                   size={14}
@@ -637,7 +637,7 @@ export default function HomeScreen() {
 
                               {restaurant.description ? (
                                 <Text
-                                  className="mt-2 text-xs leading-5 text-white/80"
+                                  className="mt-1 text-xs leading-5 text-white/80"
                                   numberOfLines={2}
                                 >
                                   {restaurant.description}

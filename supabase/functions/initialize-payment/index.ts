@@ -254,12 +254,19 @@ type PaymentRequest = {
 type MenuItem = {
   id: string;
   restaurant_id: string;
+  category_id: string | null;
   name: string;
   description: string | null;
   image_url: string | null;
   price: number;
-  category: string | null;
   is_available: boolean;
+};
+
+type MenuCategory = {
+  id: string;
+  restaurant_id: string;
+  name: string;
+  description: string | null;
 };
 
 type MenuTopping = {
@@ -294,6 +301,49 @@ function getBaseMenuItemId(item: CartItem): string {
 
 function getToppingIds(item: CartItem): string[] {
   return (item.toppings ?? []).map((topping) => topping.id).sort();
+}
+
+function normalizeCategoryName(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function toppingAppliesToCategory(
+  topping: MenuTopping,
+  category: MenuCategory | undefined,
+): boolean {
+  const allowedCategories = topping.applies_to_categories ?? [];
+  if (allowedCategories.length === 0) return true;
+  if (!category) return false;
+
+  const name = category.name ?? "";
+  const description = category.description ?? "";
+  const combined = `${name} ${description}`.toLowerCase();
+  const normalizedName = normalizeCategoryName(name);
+  const normalizedDescription = normalizeCategoryName(description);
+
+  return allowedCategories.some((allowed) => {
+    const wanted = normalizeCategoryName(allowed);
+
+    // Support the app's display labels even when database categories use
+    // names such as "The Bloom Boba Tea", "Milk Series", or "Matcha".
+    if (wanted === "bobatea" || wanted === "tea") {
+      if (combined.includes("matcha") && !combined.includes("boba")) {
+        return false;
+      }
+      return combined.includes("boba") || combined.includes("tea");
+    }
+
+    if (wanted === "matcha") {
+      return combined.includes("matcha");
+    }
+
+    return (
+      normalizedName === wanted ||
+      normalizedDescription === wanted ||
+      normalizedName.includes(wanted) ||
+      normalizedDescription.includes(wanted)
+    );
+  });
 }
 
 function hasValidToppingCartId(item: CartItem): boolean {
@@ -518,7 +568,7 @@ Deno.serve(async (req) => {
     const { data: menuItems, error: menuItemsError } = await supabaseAdmin
       .from("menu_items")
       .select(
-        "id, restaurant_id, name, description, image_url, price, category, is_available",
+        "id, restaurant_id, category_id, name, description, image_url, price, is_available",
       )
       .in("id", requestedItemIds);
 
@@ -542,6 +592,37 @@ Deno.serve(async (req) => {
     for (const item of verifiedMenuItems) {
       menuItemMap.set(item.id, item);
     }
+
+    // Resolve category labels through menu_items.category_id. The schema uses
+    // menu_categories, not a direct menu_items.category text column.
+    const categoryIds = [
+      ...new Set(
+        verifiedMenuItems
+          .map((item) => item.category_id)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    ];
+    const menuCategoryMap = new Map<string, MenuCategory>();
+
+    if (categoryIds.length > 0) {
+      const { data: categories, error: categoriesError } = await supabaseAdmin
+        .from("menu_categories")
+        .select("id, restaurant_id, name, description")
+        .in("id", categoryIds);
+
+      if (categoriesError) {
+        console.error("Menu category lookup error:", categoriesError);
+        return jsonResponse(
+          { error: "Failed to verify menu categories." },
+          500,
+        );
+      }
+
+      for (const category of (categories ?? []) as MenuCategory[]) {
+        menuCategoryMap.set(category.id, category);
+      }
+    }
+
     const restaurantIds = [
       ...new Set(verifiedMenuItems.map((item) => item.restaurant_id)),
     ];
@@ -647,16 +728,21 @@ Deno.serve(async (req) => {
           );
         }
 
-        const allowedCategories = topping.applies_to_categories ?? [];
+        const menuCategory = menuItem.category_id
+          ? menuCategoryMap.get(menuItem.category_id)
+          : undefined;
+
         if (
-          allowedCategories.length > 0 &&
-          (!menuItem.category ||
-            !allowedCategories.some(
-              (category) =>
-                category.trim().toLowerCase() ===
-                menuItem.category!.trim().toLowerCase(),
-            ))
+          menuCategory &&
+          menuCategory.restaurant_id !== menuItem.restaurant_id
         ) {
+          return jsonResponse(
+            { error: "The menu item's category is invalid." },
+            400,
+          );
+        }
+
+        if (!toppingAppliesToCategory(topping, menuCategory)) {
           return jsonResponse(
             {
               error: `The topping "${topping.name}" is not available for this item.`,

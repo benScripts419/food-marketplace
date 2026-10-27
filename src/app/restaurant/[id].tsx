@@ -28,6 +28,7 @@ import {
   withToppings,
   type Topping,
 } from "@/lib/toppings";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Restaurant = {
   id: string;
@@ -63,6 +64,7 @@ export default function RestaurantDetailScreen() {
   // --------------------------------------------------
 
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const isSmallScreen = width < 380;
   const imageSize = isSmallScreen ? 82 : 92;
 
@@ -553,7 +555,9 @@ export default function RestaurantDetailScreen() {
         ref={scrollViewRef}
         stickyHeaderIndices={[1]}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: cartCount > 0 ? 120 : 40 }}
+        contentContainerStyle={{
+          paddingBottom: (cartCount > 0 ? 120 : 40) + insets.bottom,
+        }}
       >
         <View>
           {/* HERO IMAGE */}
@@ -914,10 +918,9 @@ export default function RestaurantDetailScreen() {
           className="absolute left-5 right-5"
           style={{
             bottom: 0,
-            paddingBottom:
-              Platform.OS === "web"
-                ? ("max(20px, env(safe-area-inset-bottom))" as any)
-                : 20,
+            paddingBottom: Math.max(insets.bottom, 12) + 12,
+            zIndex: 10,
+            elevation: 8,
           }}
         >
           <Pressable

@@ -1,29 +1,19 @@
 import { router, type Href } from "expo-router";
-import { Platform } from "react-native";
 
-// Go back if the app has a previous screen. Otherwise (page opened directly,
-// refreshed, or shared as a link) go to a sensible fallback screen.
-export function goBack(fallback: Href = "/(tabs)") {
-  // Nothing to go back to inside the app.
-  if (!router.canGoBack()) {
+// Go back if there is a previous screen, otherwise go to a fallback screen.
+//
+// On the web, reloading the page or opening a link directly leaves the app
+// with no previous screen. router.back() then does nothing (and logs
+// "The action 'GO_BACK' was not handled by any navigator"), so the
+// person is left stuck on the screen.
+export function goBackOr(fallback: Href = "/(tabs)") {
+  if (router.canGoBack()) {
+    router.back();
+  } else {
     router.replace(fallback);
-    return;
   }
-
-  if (Platform.OS === "web" && typeof window !== "undefined") {
-    // Use the browser's own history, which iPhone Safari handles reliably.
-    // If the address doesn't change, fall back so the tap never does nothing.
-    const before = window.location.href;
-    window.history.back();
-
-    setTimeout(() => {
-      if (window.location.href === before) {
-        router.replace(fallback);
-      }
-    }, 350);
-
-    return;
-  }
-
-  router.back();
 }
+
+// The same function under a shorter name. Some screens import `goBack`,
+// others import `goBackOr`, so both work.
+export const goBack = goBackOr;

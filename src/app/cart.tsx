@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import BottomBar from "@/components/BottomBar";
 
 import { useCart } from "@/context/CartContext";
 
@@ -127,13 +128,14 @@ export default function CartScreen() {
             className="mb-4 rounded-2xl border border-border bg-white p-3"
           >
             <View className="flex-row">
-              {/* FOOD IMAGE */}
-              <View className="h-20 w-20 overflow-hidden rounded-xl bg-surface">
-                <Image
-                  source={item.image}
-                  className="h-full w-full"
-                  resizeMode="cover"
-                />
+              <View className="h-24 w-24 overflow-hidden rounded-xl bg-surface">
+                <View className="h-full w-full items-center justify-center">
+                  <Ionicons
+                    name="restaurant-outline"
+                    size={30}
+                    color="#737373"
+                  />
+                </View>
               </View>
 
               {/* ITEM DETAILS */}
@@ -248,19 +250,14 @@ export default function CartScreen() {
       </ScrollView>
 
       {/* CHECKOUT */}
-      <View
-        className="absolute bottom-0 left-0 right-0 border-t border-border bg-white px-5 pt-3"
-        style={{
-          paddingBottom: "max(30px, env(safe-area-inset-bottom))" as any,
-        }}
-      >
+      <BottomBar>
         <Pressable
           onPress={() => router.push("/checkout")}
           className="h-14 items-center justify-center rounded-xl bg-primary"
         >
           <Text className="font-bold text-white">Proceed to Checkout</Text>
         </Pressable>
-      </View>
+      </BottomBar>
     </View>
   );
 }

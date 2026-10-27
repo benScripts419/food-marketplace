@@ -8,7 +8,7 @@ export const restaurants = [
     time: "20–30 min",
     fee: "GH₵10",
     cuisine: "Local • African • Grills",
-    offer: true,
+    offer: false,
   },
 
   {

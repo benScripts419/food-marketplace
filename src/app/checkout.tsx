@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import BottomBar from "@/components/BottomBar";
 
 import { quoteCartDelivery } from "@/lib/cartDeliveryFee";
 import {
@@ -390,13 +391,7 @@ export default function CheckoutScreen() {
       </ScrollView>
 
       {/* CONTINUE TO PAYMENT */}
-
-      <View
-        className="absolute bottom-0 left-0 right-0 border-t border-border bg-white px-5 pt-3"
-        style={{
-          paddingBottom: "max(28px, env(safe-area-inset-bottom))" as any,
-        }}
-      >
+      <BottomBar>
         <Pressable
           onPress={continueToPayment}
           className={`h-14 flex-row items-center justify-center rounded-xl ${
@@ -411,7 +406,7 @@ export default function CheckoutScreen() {
             GH₵{total.toFixed(2)}
           </Text>
         </Pressable>
-      </View>
+      </BottomBar>
     </View>
   );
 }

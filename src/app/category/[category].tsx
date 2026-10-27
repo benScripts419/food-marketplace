@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  Image,
   Pressable,
   ScrollView,
   Text,
@@ -11,6 +10,7 @@ import {
 } from "react-native";
 
 import CategoryFloatingTabs from "@/components/CategoryFloatingTabs";
+import SafeImage from "@/components/SafeImage";
 import { getAllMenuItems } from "@/data/restaurantMenus";
 import { Alert } from "@/lib/dialog";
 import { goBack } from "@/lib/goBack";
@@ -21,7 +21,7 @@ const categoryAliases: Record<string, string[]> = {
   burgers: ["burger", "burgers"],
   chicken: ["chicken", "poultry"],
   local: ["local", "local corner", "ghanaian food"],
-  drinks: ["drink", "drinks", "beverages", "Tea"],
+  drinks: ["drink", "drinks", "beverages", "Tea", "Boba Tea", "Bubble Tea"],
   african: ["african", "african food"],
   "fast food": ["fast food", "fast-food", "Fast Food"],
   desserts: ["dessert", "desserts"],
@@ -29,6 +29,8 @@ const categoryAliases: Record<string, string[]> = {
 
 const MAX_CONTENT_WIDTH = 1100;
 const GRID_GAP = 16;
+// Same background the restaurant menu uses behind these pictures.
+const PHOTO_BACKGROUND = "#f3f0e7";
 
 type Restaurant = {
   id: string;
@@ -40,6 +42,10 @@ type Restaurant = {
   rating?: string | null;
 };
 
+// "Roll'd Up", "rolld up" and "ROLLD-UP" all become "rolldup".
+const normalizeName = (name: string) =>
+  name.toLowerCase().replace(/[^a-z0-9]/g, "");
+
 export default function CategoryItemsScreen() {
   const { category } = useLocalSearchParams<{
     category?: string;
@@ -50,6 +56,14 @@ export default function CategoryItemsScreen() {
   const { width } = useWindowDimensions();
   // One column on phones, two on tablets, three on desktops.
   const columns = width >= 900 ? 3 : width >= 600 ? 2 : 1;
+  const compact = columns === 1;
+  // Picture size in the phone layout grows with the screen (88px to 150px).
+  const photoSize = Math.round(Math.min(150, Math.max(88, width * 0.3)));
+  // Exact card width in pixels (percentages inside wrapping rows are unreliable on phones).
+  const contentWidth = Math.min(width, MAX_CONTENT_WIDTH) - 40;
+  const cardWidth = Math.floor(
+    (contentWidth - GRID_GAP * (columns - 1)) / columns,
+  );
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loadingRestaurants, setLoadingRestaurants] = useState(true);
@@ -59,6 +73,33 @@ export default function CategoryItemsScreen() {
   }>({ category: selectedCategory, restaurant: null });
 
   const allMenuItems = getAllMenuItems();
+
+  // A message shown on the page, because Alert is easy to miss on the web.
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const showNotice = (message: string) => {
+    setNotice(message);
+    setTimeout(() => setNotice(null), 4000);
+  };
+
+  // Find the restaurant row that belongs to a menu item's restaurant name.
+  const findRestaurant = (name: string) => {
+    const wanted = normalizeName(name);
+    if (!wanted) return undefined;
+
+    return (
+      restaurants.find(
+        (restaurant) => normalizeName(restaurant.name) === wanted,
+      ) ??
+      restaurants.find((restaurant) => {
+        const known = normalizeName(restaurant.name);
+        return (
+          wanted.length >= 4 &&
+          (known.includes(wanted) || wanted.includes(known))
+        );
+      })
+    );
+  };
 
   useEffect(() => {
     const fetchRestaurants = async () => {
@@ -105,17 +146,18 @@ export default function CategoryItemsScreen() {
     : filteredItems;
 
   const handleViewItem = (restaurantName: string, itemId: string) => {
-    const restaurant = restaurants.find(
-      (restaurant) =>
-        restaurant.name.trim().toLowerCase() ===
-        restaurantName.trim().toLowerCase(),
-    );
+    if (loadingRestaurants) {
+      showNotice(
+        "Restaurants are still loading. Please try again in a moment.",
+      );
+      return;
+    }
+
+    const restaurant = findRestaurant(restaurantName);
 
     if (!restaurant) {
-      Alert.alert(
-        "Restaurant unavailable",
-        `${restaurantName} could not be found.`,
-      );
+      console.warn("No restaurant row matches the menu name:", restaurantName);
+      showNotice(`${restaurantName} could not be found.`);
       return;
     }
 
@@ -126,6 +168,119 @@ export default function CategoryItemsScreen() {
         itemId,
       },
     });
+  };
+
+  // One menu item. A compact row on phones, a card with the picture on top
+  // on wider screens. The picture always keeps its shape and is never cropped.
+  const renderItem = (item: (typeof visibleItems)[number]) => {
+    const restaurant = findRestaurant(item.restaurantName);
+
+    const details = (
+      <>
+        <Text className="text-base font-bold text-text" numberOfLines={2}>
+          {item.name}
+        </Text>
+
+        {!!item.description && (
+          <Text
+            className="mt-1 text-xs leading-5 text-textSecondary"
+            numberOfLines={2}
+          >
+            {item.description}
+          </Text>
+        )}
+
+        <View className="mt-3 flex-row items-center">
+          <Ionicons name="restaurant-outline" size={15} color="#737373" />
+
+          <Text
+            className="ml-2 flex-1 text-xs font-semibold text-text"
+            numberOfLines={1}
+          >
+            {restaurant?.name ?? item.restaurantName}
+          </Text>
+
+          {restaurant?.rating ? (
+            <View className="ml-2 flex-row items-center">
+              <Ionicons name="star" size={13} color="#F59E0B" />
+
+              <Text className="ml-1 text-xs font-semibold text-text">
+                {restaurant.rating}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+
+        <View className="mt-3 flex-row items-center justify-between">
+          <Text className="text-base font-bold text-primary">
+            GH₵{Number(item.price).toFixed(2)}
+          </Text>
+
+          <Pressable
+            onPress={() => handleViewItem(item.restaurantName, item.id)}
+            accessibilityRole="button"
+            accessibilityLabel={`View ${item.name}`}
+            className="flex-row items-center"
+          >
+            <Text className="text-xs font-bold text-primary">View item</Text>
+
+            <Ionicons
+              name="arrow-forward"
+              size={14}
+              color="#E53935"
+              style={{ marginLeft: 4 }}
+            />
+          </Pressable>
+        </View>
+      </>
+    );
+
+    if (compact) {
+      return (
+        <Pressable
+          key={`${item.restaurantName}-${item.id}`}
+          onPress={() => handleViewItem(item.restaurantName, item.id)}
+          accessibilityRole="button"
+          accessibilityLabel={`Open ${item.name} at ${item.restaurantName}`}
+          className="flex-row rounded-2xl border border-border bg-white p-3"
+          style={{ width: cardWidth }}
+        >
+          <View style={{ width: photoSize }}>
+            <SafeImage
+              source={item.image}
+              label={item.name}
+              aspectRatio={1}
+              fit="contain"
+              backgroundColor={PHOTO_BACKGROUND}
+              radius={12}
+            />
+          </View>
+
+          <View className="ml-3 flex-1">{details}</View>
+        </Pressable>
+      );
+    }
+
+    return (
+      <Pressable
+        key={`${item.restaurantName}-${item.id}`}
+        onPress={() => handleViewItem(item.restaurantName, item.id)}
+        accessibilityRole="button"
+        accessibilityLabel={`Open ${item.name} at ${item.restaurantName}`}
+        className="overflow-hidden rounded-2xl border border-border bg-white"
+        style={{ width: cardWidth }}
+      >
+        <SafeImage
+          source={item.image}
+          label={item.name}
+          aspectRatio={4 / 3}
+          fit="contain"
+          backgroundColor={PHOTO_BACKGROUND}
+        />
+
+        <View style={{ padding: 16 }}>{details}</View>
+      </Pressable>
+    );
   };
 
   return (
@@ -230,6 +385,15 @@ export default function CategoryItemsScreen() {
           className="w-full self-center"
           style={{ maxWidth: MAX_CONTENT_WIDTH }}
         >
+          {notice ? (
+            <Text
+              accessibilityRole="alert"
+              className="mb-3 rounded-xl bg-red-50 p-3 text-sm text-red-700"
+            >
+              {notice}
+            </Text>
+          ) : null}
+
           {loadingRestaurants ? (
             <View className="items-center justify-center py-20">
               <Text className="text-sm text-textSecondary">
@@ -238,113 +402,13 @@ export default function CategoryItemsScreen() {
             </View>
           ) : visibleItems.length > 0 ? (
             <View
-              className="flex-row flex-wrap"
-              style={{ marginHorizontal: -GRID_GAP / 2 }}
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                gap: GRID_GAP,
+              }}
             >
-              {visibleItems.map((item) => {
-                const restaurant = restaurants.find(
-                  (restaurant) =>
-                    restaurant.name.trim().toLowerCase() ===
-                    item.restaurantName.trim().toLowerCase(),
-                );
-
-                return (
-                  <View
-                    key={`${item.restaurantName}-${item.id}`}
-                    style={{
-                      width: `${100 / columns}%` as any,
-                      paddingHorizontal: GRID_GAP / 2,
-                    }}
-                  >
-                    <View
-                      className="mb-4 overflow-hidden rounded-2xl border border-border bg-white"
-                      style={{ flex: 1 }}
-                    >
-                      {/* IMAGE: keeps one shape and scales with the card */}
-                      <Image
-                        source={item.image}
-                        className="w-full bg-surface"
-                        style={{ width: "100%", aspectRatio: 16 / 10 }}
-                        resizeMode="cover"
-                        accessibilityLabel={item.name}
-                      />
-
-                      {/* INFORMATION */}
-                      <View className="flex-1 p-4">
-                        <View className="flex-row items-start justify-between">
-                          <View className="flex-1 pr-3">
-                            <Text
-                              className="text-base font-bold text-text"
-                              numberOfLines={2}
-                            >
-                              {item.name}
-                            </Text>
-
-                            {!!item.description && (
-                              <Text
-                                className="mt-1 text-xs leading-5 text-textSecondary"
-                                numberOfLines={2}
-                              >
-                                {item.description}
-                              </Text>
-                            )}
-                          </View>
-
-                          <Text className="text-base font-bold text-primary">
-                            GH₵{Number(item.price).toFixed(2)}
-                          </Text>
-                        </View>
-
-                        {/* RESTAURANT */}
-                        <View className="mt-4 flex-row items-center">
-                          <Ionicons
-                            name="restaurant-outline"
-                            size={15}
-                            color="#737373"
-                          />
-
-                          <Text
-                            className="ml-2 flex-1 text-xs font-semibold text-text"
-                            numberOfLines={1}
-                          >
-                            {restaurant?.name ?? item.restaurantName}
-                          </Text>
-
-                          {restaurant?.rating ? (
-                            <View className="ml-2 flex-row items-center">
-                              <Ionicons name="star" size={13} color="#F59E0B" />
-
-                              <Text className="ml-1 text-xs font-semibold text-text">
-                                {restaurant.rating}
-                              </Text>
-                            </View>
-                          ) : null}
-                        </View>
-
-                        {/* VIEW ITEM */}
-                        <Pressable
-                          onPress={() =>
-                            handleViewItem(item.restaurantName, item.id)
-                          }
-                          accessibilityRole="button"
-                          className="mt-4 flex-row items-center self-start"
-                        >
-                          <Text className="text-xs font-bold text-primary">
-                            View item
-                          </Text>
-
-                          <Ionicons
-                            name="arrow-forward"
-                            size={14}
-                            color="#E53935"
-                            style={{ marginLeft: 4 }}
-                          />
-                        </Pressable>
-                      </View>
-                    </View>
-                  </View>
-                );
-              })}
+              {visibleItems.map(renderItem)}
             </View>
           ) : (
             <View className="items-center justify-center py-20">

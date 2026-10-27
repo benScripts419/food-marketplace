@@ -191,18 +191,33 @@ export default function PaymentScreen() {
 
       const payload = {
         cartItems: cartItems.map((item) => ({
-          id: item.menuItemId ?? item.id, // changed
+          // Preserve the full cart ID, including selected topping IDs.
+          id: item.id,
+
+          // Keep the original menu item ID for reference.
+          menuItemId: item.menuItemId,
+
           name: item.name,
           description: item.description,
           price: item.price,
           quantity: item.quantity,
-          toppingIds: item.toppings?.map((topping) => topping.id) ?? [], // added
+
+          // Send topping objects in the format the Edge Function expects.
+          toppings: (item.toppings ?? []).map((topping) => ({
+            id: topping.id,
+            name: topping.name,
+            price: topping.price,
+          })),
+
           restaurantId: item.restaurantId,
           restaurantName: item.restaurantName,
+          image: item.image,
         })),
+
         deliveryOption: "standard" as const,
         freeItemSelections,
         deliveryLocation,
+
         customer: {
           name: contact.details.name,
           phone: contact.details.phone,

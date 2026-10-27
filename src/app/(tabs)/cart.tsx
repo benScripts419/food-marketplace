@@ -89,7 +89,7 @@ export default function CartScreen() {
    * --------------------------------------------------
    */
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white mt-5">
       {/* HEADER */}
       <View className="px-5 pb-3 pt-6">
         <Text className="text-2xl font-bold text-text">Your Cart</Text>

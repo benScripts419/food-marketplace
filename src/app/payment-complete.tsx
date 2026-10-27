@@ -2,13 +2,10 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
+import CategoryFloatingTabs from "@/components/CategoryFloatingTabs";
 import { useCart } from "@/context/CartContext";
 import { verifyPaystackPayment } from "@/lib/paystack";
 import { supabase } from "@/lib/supabase";
-
-// Paystack sends the customer back here after they pay on the web:
-//   /payment-complete?reference=AKROBITE-<order id>-<time>&trxref=...
-// The order id is inside the payment reference, so nothing else is needed.
 
 const REFERENCE_PATTERN = /^AKROBITE-([0-9a-fA-F-]{36})-\d+$/;
 
@@ -47,7 +44,6 @@ export default function PaymentCompleteScreen() {
     setChecking(true);
     setMessage(null);
 
-    // The bank can take a moment to confirm, so try a few times.
     let lastError = "";
 
     for (let attempt = 1; attempt <= CHECK_ATTEMPTS; attempt++) {
@@ -55,7 +51,6 @@ export default function PaymentCompleteScreen() {
         const result = await verifyPaystackPayment(reference, orderId);
 
         if (result.paid) {
-          // Paying for food finishes the cart. A delivery request has no cart.
           const { data: order } = await supabase
             .from("orders")
             .select("order_type")
@@ -95,54 +90,65 @@ export default function PaymentCompleteScreen() {
 
   useEffect(() => {
     if (started.current) return;
+
     started.current = true;
     void check();
+
+    // Run the initial payment check once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <View className="flex-1 items-center justify-center bg-white px-6">
-      <View className="w-full max-w-[480px] items-center">
-        {checking ? (
-          <>
-            <ActivityIndicator size="large" color="#E53935" />
-            <Text className="mt-4 text-center text-base font-semibold text-text">
-              Confirming your payment...
-            </Text>
-            <Text className="mt-2 text-center text-sm text-textSecondary">
-              Please don't close this page.
-            </Text>
-          </>
-        ) : (
-          <>
-            <Text className="text-center text-lg font-bold text-text">
-              Payment not confirmed yet
-            </Text>
+    <View className="flex-1 bg-white">
+      {/* PAYMENT CONFIRMATION CONTENT */}
+      <View className="flex-1 items-center justify-center px-6 pb-24">
+        <View className="w-full max-w-[480px] items-center">
+          {checking ? (
+            <>
+              <ActivityIndicator size="large" color="#E53935" />
 
-            {message ? (
-              <Text className="mt-2 text-center text-sm leading-5 text-textSecondary">
-                {message}
+              <Text className="mt-4 text-center text-base font-semibold text-text">
+                Confirming your payment...
               </Text>
-            ) : null}
 
-            {orderId ? (
+              <Text className="mt-2 text-center text-sm text-textSecondary">
+                Please don't close this page.
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text className="text-center text-lg font-bold text-text">
+                Payment not confirmed yet
+              </Text>
+
+              {message ? (
+                <Text className="mt-2 text-center text-sm leading-5 text-textSecondary">
+                  {message}
+                </Text>
+              ) : null}
+
+              {orderId ? (
+                <Pressable
+                  onPress={() => void check()}
+                  className="mt-6 w-full items-center rounded-xl bg-primary py-4"
+                >
+                  <Text className="font-bold text-white">Check again</Text>
+                </Pressable>
+              ) : null}
+
               <Pressable
-                onPress={() => void check()}
-                className="mt-6 w-full items-center rounded-xl bg-primary py-4"
+                onPress={() => router.replace("/(tabs)/orders")}
+                className="mt-3 w-full items-center rounded-xl border border-primary bg-white py-4"
               >
-                <Text className="font-bold text-white">Check again</Text>
+                <Text className="font-bold text-primary">View my orders</Text>
               </Pressable>
-            ) : null}
-
-            <Pressable
-              onPress={() => router.replace("/(tabs)/orders")}
-              className="mt-3 w-full items-center rounded-xl border border-primary bg-white py-4"
-            >
-              <Text className="font-bold text-primary">View my orders</Text>
-            </Pressable>
-          </>
-        )}
+            </>
+          )}
+        </View>
       </View>
+
+      {/* BOTTOM NAVIGATION */}
+      <CategoryFloatingTabs activeTab="Orders" />
     </View>
   );
 }

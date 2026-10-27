@@ -4,7 +4,6 @@ import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import BottomBar from "@/components/BottomBar";
-import WebSiteFooter from "@/components/web-site-footer";
 
 import { quoteCartDelivery } from "@/lib/cartDeliveryFee";
 import {
@@ -409,9 +408,7 @@ export default function CheckoutScreen() {
         </Pressable>
       </BottomBar>
       {/* Footer scrolls naturally with the page */}
-      <View className="w-full">
-        <WebSiteFooter />
-      </View>
+      <View className="w-full"></View>
     </View>
   );
 }

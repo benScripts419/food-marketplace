@@ -26,3 +26,10 @@ verify_jwt = true
 
 [functions.whatsapp-webhook]
 verify_jwt = false
+
+# Merge this section into supabase/config.toml.
+# The catering form supports guest requests, so this endpoint accepts
+# anonymous invocation; the function only emails a real, existing request
+# and uses email_status to prevent duplicate sends.
+[functions.notify-catering-admin]
+verify_jwt = false

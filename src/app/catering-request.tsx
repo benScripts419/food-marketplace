@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -13,6 +12,7 @@ import {
   View,
 } from "react-native";
 
+import { Alert } from "@/lib/dialog";
 import { supabase } from "@/lib/supabase";
 
 type FieldProps = {
@@ -61,6 +61,37 @@ function Field({
   );
 }
 
+function createRequestId(): string {
+  const bytes = new Uint8Array(16);
+  const cryptoApi = globalThis.crypto;
+
+  if (cryptoApi?.getRandomValues) {
+    cryptoApi.getRandomValues(bytes);
+  } else {
+    // Fallback for runtimes without Web Crypto; this is only a record UUID.
+    for (let index = 0; index < bytes.length; index += 1) {
+      bytes[index] = Math.floor(Math.random() * 256);
+    }
+  }
+
+  // Mark the value as a standard UUID v4.
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+  const hex = Array.from(bytes, (byte) =>
+    byte.toString(16).padStart(2, "0"),
+  ).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
+function isValidDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return (
+    !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
+  );
+}
+
 export default function CateringRequestScreen() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -71,13 +102,23 @@ export default function CateringRequestScreen() {
   const [details, setDetails] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // Prefill the name from the signed-in account.
+  // Prefill the name from the signed-in account when available.
   useEffect(() => {
-    void supabase.auth.getSession().then(({ data: { session } }) => {
-      const meta = session?.user?.user_metadata ?? {};
-      const full = meta.full_name || meta.name;
-      if (full) setName(String(full));
+    let active = true;
+
+    void supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.warn("Could not load catering form session:", error.message);
+        return;
+      }
+      const metadata = session?.user?.user_metadata ?? {};
+      const fullName = metadata.full_name || metadata.name;
+      if (active && fullName) setName(String(fullName));
     });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const submit = async () => {
@@ -91,14 +132,18 @@ export default function CateringRequestScreen() {
       return;
     }
 
-    const guestCount = parseInt(guests, 10);
-    if (!Number.isFinite(guestCount) || guestCount < 1) {
-      Alert.alert("Check guests", "Enter the number of guests as a number.");
+    const guestCount = Number(guests.trim());
+    if (!Number.isSafeInteger(guestCount) || guestCount < 1) {
+      Alert.alert("Check guests", "Enter a valid whole number of guests.");
       return;
     }
 
-    if (eventDate.trim() && !/^\d{4}-\d{2}-\d{2}$/.test(eventDate.trim())) {
-      Alert.alert("Check date", "Use the format YYYY-MM-DD, e.g. 2026-12-20.");
+    const trimmedDate = eventDate.trim();
+    if (trimmedDate && !isValidDate(trimmedDate)) {
+      Alert.alert(
+        "Check date",
+        "Use a valid date in YYYY-MM-DD format, e.g. 2026-12-20.",
+      );
       return;
     }
 
@@ -107,37 +152,71 @@ export default function CateringRequestScreen() {
     try {
       const {
         data: { session },
+        error: sessionError,
       } = await supabase.auth.getSession();
 
-      const { error } = await supabase.from("catering_requests").insert({
-        user_id: session?.user?.id ?? null,
-        name: name.trim(),
-        phone: phone.trim(),
-        email: session?.user?.email ?? null,
-        event_type: eventType.trim(),
-        event_date: eventDate.trim() || null,
-        guests: guestCount,
-        location: location.trim() || null,
-        details: details.trim() || null,
-      });
+      if (sessionError) {
+        console.warn("Could not read current session:", sessionError.message);
+      }
 
-      if (error) throw error;
+      const requestId = createRequestId();
+
+      // These column names match the existing public.catering_requests table.
+      const { error: insertError } = await supabase
+        .from("catering_requests")
+        .insert({
+          id: requestId,
+          user_id: session?.user?.id ?? null,
+          name: name.trim(),
+          phone: phone.trim(),
+          email: session?.user?.email ?? null,
+          event_type: eventType.trim(),
+          event_date: trimmedDate || null,
+          guests: guestCount,
+          location: location.trim() || null,
+          details: details.trim() || null,
+          status: "new",
+        });
+
+      if (insertError) throw insertError;
+
+      // The DB trigger immediately creates the in-app admin notification.
+      // This function sends the email and records whether it succeeded.
+      const { data: notifyData, error: notifyError } =
+        await supabase.functions.invoke("notify-catering-admin", {
+          body: { requestId },
+        });
+
+      const emailSent = !notifyError && notifyData?.emailSent === true;
+      if (notifyError) {
+        console.error(
+          "Catering request saved, but admin email invocation failed:",
+          notifyError,
+        );
+      } else if (!emailSent) {
+        console.warn(
+          "Catering request saved; email delivery not confirmed:",
+          notifyData,
+        );
+      }
 
       Alert.alert(
-        "Request sent",
-        "BestPoint Catering has your details and will contact you to arrange everything.",
+        "Request submitted",
+        emailSent
+          ? "Your catering request is saved. The BestPoint team has been notified in the admin dashboard and by email."
+          : "Your catering request is saved and an in-app admin notification has been created. Email delivery could not be confirmed yet.",
         [{ text: "Done", onPress: () => router.back() }],
       );
-    } catch (error: any) {
-      console.error("Catering request failed:", {
-        message: error?.message,
-        details: error?.details,
-        code: error?.code,
-      });
+    } catch (error: unknown) {
+      console.error("Catering request submission failed:", error);
+      const message =
+        error && typeof error === "object" && "message" in error
+          ? String(error.message)
+          : "Unknown error";
 
       Alert.alert(
         "Could not send request",
-        "Check your connection and try again.",
+        `Your request could not be saved. Please check your connection and try again. (${message})`,
       );
     } finally {
       setSubmitting(false);
@@ -161,16 +240,15 @@ export default function CateringRequestScreen() {
             accessibilityLabel="Go back"
             className="h-11 w-11 items-center justify-center rounded-full bg-surface"
           >
-            <Ionicons name="chevron-back" size={22} color="#171717" />
+            <Ionicons name="arrow-back" size={22} color="#171717" />
           </Pressable>
-
           <Text className="mt-5 text-2xl font-extrabold text-text">
             Request catering
           </Text>
 
           <Text className="mt-1 text-sm leading-5 text-textSecondary">
-            Tell BestPoint Catering about your event. The team will call you to
-            agree the menu, price and delivery.
+            Tell BestPoint Catering about your event. The team will contact you
+            to agree on the menu, price and delivery.
           </Text>
 
           <Field label="Your name" value={name} onChangeText={setName} />

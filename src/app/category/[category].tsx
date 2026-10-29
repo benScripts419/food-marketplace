@@ -127,7 +127,9 @@ export default function CategoryItemsScreen() {
         const selected = selectedCategory.trim().toLowerCase();
         const itemCategory = item.category?.trim().toLowerCase();
 
-        const aliases = categoryAliases[selected] ?? [selected];
+        const aliases = (categoryAliases[selected] ?? [selected]).map((alias) =>
+          alias.trim().toLowerCase(),
+        );
 
         return aliases.includes(itemCategory ?? "");
       })
@@ -246,9 +248,11 @@ export default function CategoryItemsScreen() {
         >
           <View
             style={{
-              width: "100%",
-              aspectRatio: 1,
+              width: photoSize,
+              height: photoSize,
+              flexShrink: 0,
               overflow: "hidden",
+              borderRadius: 12,
               backgroundColor: PHOTO_BACKGROUND,
             }}
           >
@@ -261,7 +265,7 @@ export default function CategoryItemsScreen() {
             />
           </View>
 
-          <View className="ml-3 flex-1">{details}</View>
+          <View className="ml-3 min-w-0 flex-1">{details}</View>
         </Pressable>
       );
     }

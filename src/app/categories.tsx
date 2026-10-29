@@ -12,6 +12,7 @@ import {
 
 import { getAllMenuItems } from "@/data/restaurantMenus";
 import { getCategoryImage } from "@/lib/categoryImages";
+import { goBack } from "@/lib/goBack";
 
 // --------------------------------------------------
 // CATEGORY DESCRIPTIONS
@@ -106,7 +107,7 @@ export default function CategoriesScreen() {
       <View className="px-5 pb-4 pt-14">
         <View className="flex-row items-center">
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => goBack()}
             accessibilityRole="button"
             accessibilityLabel="Go back"
             className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-surface"

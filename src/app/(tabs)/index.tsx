@@ -223,6 +223,7 @@ export default function HomeScreen() {
           "african",
           "restaurant",
           "bubble tea",
+          "ghanaian",
         ];
 
         const generatedCategories: Category[] = Array.from(

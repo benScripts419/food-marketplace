@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Alert,
   Linking,
+  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -47,6 +48,14 @@ export default function RiderOrderDetailsScreen() {
   const [loading, setLoading] = useState(true);
   const [accepting, setAccepting] = useState(false);
   const [declining, setDeclining] = useState(false);
+
+  const showMessage = (title: string, message: string) => {
+    if (Platform.OS === "web") {
+      window.alert(`${title}\n\n${message}`);
+    } else {
+      Alert.alert(title, message);
+    }
+  };
 
   const { id, assignmentId } = useLocalSearchParams<{
     id: string;
@@ -103,6 +112,13 @@ export default function RiderOrderDetailsScreen() {
   // --------------------------------------------------
 
   const goToPayoutSetup = (message: string) => {
+    if (Platform.OS === "web") {
+      if (window.confirm(`${message}\n\nSet up Mobile Money now?`)) {
+        router.push("/rider/payment-details");
+      }
+      return;
+    }
+
     Alert.alert("Set up your payout account", message, [
       { text: "Not now", style: "cancel" },
       {
@@ -114,7 +130,7 @@ export default function RiderOrderDetailsScreen() {
 
   const acceptDelivery = async () => {
     if (!id) {
-      Alert.alert(
+      showMessage(
         "Unable to accept",
         "The order ID is missing. Go back and open the order again.",
       );
@@ -130,7 +146,7 @@ export default function RiderOrderDetailsScreen() {
       } = await supabase.auth.getUser();
 
       if (authError || !user) {
-        Alert.alert(
+        showMessage(
           "Session expired",
           "Please log in again before accepting a delivery.",
         );
@@ -139,7 +155,7 @@ export default function RiderOrderDetailsScreen() {
       }
 
       if (assignmentId) {
-        // The admin offered this order to this rider.
+        // Accept an offer assigned by the admin.
         const { data, error } = await supabase.rpc(
           "respond_to_driver_order_offer",
           {
@@ -151,7 +167,7 @@ export default function RiderOrderDetailsScreen() {
 
         if (error) {
           console.error("Accept offer RPC error:", error);
-          Alert.alert("Could not accept delivery", error.message);
+          showMessage("Could not accept delivery", error.message);
           return;
         }
 
@@ -163,33 +179,42 @@ export default function RiderOrderDetailsScreen() {
         }
 
         if (data !== "accepted") {
-          Alert.alert(
+          showMessage(
             "Offer not accepted",
             "This delivery offer may no longer be available.",
           );
           return;
         }
       } else {
-        // The rider chose this order from the list.
+        // Accept an available order from the rider's list.
         const { error } = await supabase.rpc("accept_order", {
           p_order_id: id,
         });
 
         if (error) {
           console.error("Accept order RPC error:", error);
-          if (error.message.includes("payout account")) {
+
+          if (error.message.toLowerCase().includes("payout")) {
             goToPayoutSetup(error.message);
           } else {
-            Alert.alert("Could not accept delivery", error.message);
+            showMessage("Could not accept delivery", error.message);
           }
           return;
         }
       }
 
-      Alert.alert(
-        "Delivery accepted",
-        "The order has been assigned to you. Go to the restaurant and tap 'I have arrived' when you get there.",
-        [
+      const successMessage =
+        "The order has been assigned to you. Go to the restaurant and tap 'I have arrived' when you get there.";
+
+      if (Platform.OS === "web") {
+        window.alert(`Delivery accepted\n\n${successMessage}`);
+
+        router.replace({
+          pathname: "/rider/active-delivery",
+          params: { id },
+        });
+      } else {
+        Alert.alert("Delivery accepted", successMessage, [
           {
             text: "View active delivery",
             onPress: () =>
@@ -198,13 +223,16 @@ export default function RiderOrderDetailsScreen() {
                 params: { id },
               }),
           },
-        ],
-      );
+        ]);
+      }
     } catch (error) {
       console.error("Unexpected accept error:", error);
-      Alert.alert(
+
+      showMessage(
         "Error",
-        "Something went wrong while accepting this delivery.",
+        error instanceof Error
+          ? error.message
+          : "Something went wrong while accepting this delivery.",
       );
     } finally {
       setAccepting(false);
@@ -223,7 +251,7 @@ export default function RiderOrderDetailsScreen() {
       } = await supabase.auth.getUser();
 
       if (authError || !user) {
-        Alert.alert("Session expired", "Please log in again.");
+        showMessage("Session expired", "Please log in again.");
         router.replace("/rider");
         return;
       }
@@ -240,11 +268,11 @@ export default function RiderOrderDetailsScreen() {
         );
 
         if (error) {
-          Alert.alert("Could not decline", error.message);
+          showMessage("Could not decline", error.message);
           return;
         }
         if (data !== "declined") {
-          Alert.alert(
+          showMessage(
             "Could not decline",
             "This offer may no longer be available.",
           );
@@ -260,7 +288,7 @@ export default function RiderOrderDetailsScreen() {
           );
 
         if (error) {
-          Alert.alert("Could not decline", error.message);
+          showMessage("Could not decline", error.message);
           return;
         }
       }
@@ -268,28 +296,34 @@ export default function RiderOrderDetailsScreen() {
       router.replace("/rider/deliveries");
     } catch (error) {
       console.error("Unexpected decline error:", error);
-      Alert.alert("Error", "Something went wrong while declining.");
+      showMessage("Error", "Something went wrong while declining.");
     } finally {
       setDeclining(false);
     }
   };
 
   const declineDelivery = () => {
-    Alert.alert(
-      "Decline this delivery?",
-      assignmentId
-        ? "The admin will offer it to another rider."
-        : "It will be hidden from your list. Other riders can still take it.",
-      [
-        { text: "Keep", style: "cancel" },
-        {
-          text: "Decline",
-          style: "destructive",
-          onPress: () => void confirmDecline(),
-        },
-      ],
-    );
+    const message = assignmentId
+      ? "The admin will offer it to another rider."
+      : "It will be hidden from your list. Other riders can still take it.";
+
+    if (Platform.OS === "web") {
+      if (window.confirm(`Decline this delivery?\n\n${message}`)) {
+        void confirmDecline();
+      }
+      return;
+    }
+
+    Alert.alert("Decline this delivery?", message, [
+      { text: "Keep", style: "cancel" },
+      {
+        text: "Decline",
+        style: "destructive",
+        onPress: () => void confirmDecline(),
+      },
+    ]);
   };
+
   // --------------------------------------------------
   // CALL CUSTOMER
   // --------------------------------------------------
@@ -491,7 +525,9 @@ export default function RiderOrderDetailsScreen() {
               <Text className="text-xs text-textSecondary">DELIVER TO</Text>
 
               {order.customer ? (
-                <Text className="mt-1 font-bold text-text">{order.customer}</Text>
+                <Text className="mt-1 font-bold text-text">
+                  {order.customer}
+                </Text>
               ) : null}
 
               {order.customer_address ? (

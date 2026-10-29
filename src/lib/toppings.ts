@@ -1,3 +1,4 @@
+
 import { supabase } from "@/lib/supabase";
 
 export type Topping = {
@@ -7,8 +8,10 @@ export type Topping = {
   applies_to_categories: string[] | null;
 };
 
-// The toppings a restaurant offers.
-export async function loadToppings(restaurantId: string): Promise<Topping[]> {
+// Load the available toppings for a restaurant.
+export async function loadToppings(
+  restaurantId: string,
+): Promise<Topping[]> {
   const { data, error } = await supabase
     .from("menu_toppings")
     .select("id, name, price, applies_to_categories")
@@ -25,33 +28,67 @@ export async function loadToppings(restaurantId: string): Promise<Topping[]> {
     id: String(row.id),
     name: String(row.name),
     price: Number(row.price),
-    applies_to_categories: (row.applies_to_categories as string[] | null) ?? null,
+    applies_to_categories:
+      (row.applies_to_categories as string[] | null) ?? null,
   }));
 }
 
-// The toppings that can go on one menu item (matched on its category).
+function normalizeCategory(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+// Return toppings that apply to the selected item's category.
 export function toppingsForItem(
-  item: { category: string },
+  item: { category?: string | null },
   toppings: Topping[],
 ): Topping[] {
+  const itemCategory = normalizeCategory(item.category ?? "");
+
   return toppings.filter((topping) => {
-    const categories = topping.applies_to_categories;
+    const allowedCategories = topping.applies_to_categories ?? [];
 
-    if (!categories || categories.length === 0) return true;
+    // An empty list means the topping applies to all categories.
+    if (allowedCategories.length === 0) return true;
 
-    return categories.some(
-      (category) => category.toLowerCase() === item.category.toLowerCase(),
-    );
+    return allowedCategories.some((allowed) => {
+      const allowedCategory = normalizeCategory(allowed);
+
+      if (!allowedCategory) return false;
+
+      // Bloom Bakes' Tea toppings support Tea, Boba Tea,
+      // Bubble Tea, and Milk Series items.
+      if (
+        allowedCategory === "tea" ||
+        allowedCategory === "bobatea" ||
+        allowedCategory === "bubbletea"
+      ) {
+        // Do not apply Tea toppings to Matcha-only items.
+        if (
+          itemCategory.includes("matcha") &&
+          !itemCategory.includes("boba") &&
+          !itemCategory.includes("tea")
+        ) {
+          return false;
+        }
+
+        return (
+          itemCategory.includes("tea") ||
+          itemCategory.includes("boba") ||
+          itemCategory.includes("milkseries")
+        );
+      }
+
+      // Match other categories without case or punctuation differences.
+      return (
+        itemCategory === allowedCategory ||
+        itemCategory.includes(allowedCategory)
+      );
+    });
   });
 }
 
-// Turns a menu item and the toppings chosen for it into a cart line.
-//
-// A cart line is told apart by its id, so the same drink with different
-// toppings becomes separate lines. With toppings the id is
-// "<menu item id>::<topping ids>"; the real menu item id is kept in
-// menuItemId, and `price` already includes the toppings. The server works the
-// price out again from the database before anything is charged.
+// Give differently topped versions of the same item separate cart IDs.
+// The payment Edge Function verifies topping IDs and prices from the database.
 export function withToppings<T extends { id: string; price: number }>(
   item: T,
   chosen: Topping[],
@@ -61,7 +98,10 @@ export function withToppings<T extends { id: string; price: number }>(
   }
 
   const ids = chosen.map((topping) => topping.id).sort();
-  const extra = chosen.reduce((sum, topping) => sum + topping.price, 0);
+  const extra = chosen.reduce(
+    (sum, topping) => sum + topping.price,
+    0,
+  );
 
   return {
     ...item,
@@ -69,6 +109,10 @@ export function withToppings<T extends { id: string; price: number }>(
     menuItemId: item.id,
     basePrice: item.price,
     price: Number((item.price + extra).toFixed(2)),
-    toppings: chosen.map(({ id, name, price }) => ({ id, name, price })),
+    toppings: chosen.map(({ id, name, price }) => ({
+      id,
+      name,
+      price,
+    })),
   };
 }

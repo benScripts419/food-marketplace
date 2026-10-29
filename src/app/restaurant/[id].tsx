@@ -95,6 +95,8 @@ export default function RestaurantDetailScreen() {
 
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [toppings, setToppings] = useState<Topping[]>([]);
+  const [toppingsLoading, setToppingsLoading] = useState(true);
+  const [toppingsLoadError, setToppingsLoadError] = useState(false);
   const [pickerItem, setPickerItem] = useState<RestaurantMenuItem | null>(null);
 
   const [menu, setMenu] = useState<MenuCategory[]>([]);
@@ -123,10 +125,17 @@ export default function RestaurantDetailScreen() {
 
     if (!restaurantId) {
       setToppings([]);
+      setToppingsLoading(false);
+      setToppingsLoadError(false);
       return;
     }
 
     let cancelled = false;
+
+    // Clear stale data when changing restaurants.
+    setToppings([]);
+    setToppingsLoading(true);
+    setToppingsLoadError(false);
 
     void loadToppings(restaurantId)
       .then((items) => {
@@ -136,6 +145,15 @@ export default function RestaurantDetailScreen() {
       })
       .catch((error: unknown) => {
         console.error("Could not load toppings:", error);
+
+        if (!cancelled) {
+          setToppingsLoadError(true);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setToppingsLoading(false);
+        }
       });
 
     return () => {
@@ -342,13 +360,31 @@ export default function RestaurantDetailScreen() {
       return;
     }
 
-    // Show the toppings picker when the item has available toppings.
-    if (toppingsForItem(item, toppings).length > 0) {
+    // Do not silently add the item while its toppings are loading.
+    if (toppingsLoading) {
+      Alert.alert(
+        "Loading extra toppings",
+        "Please wait a moment, then try again.",
+      );
+      return;
+    }
+
+    if (toppingsLoadError) {
+      Alert.alert(
+        "Unable to load extra toppings",
+        "Please try again. Your item has not been added.",
+      );
+      return;
+    }
+
+    const applicableToppings = toppingsForItem(item, toppings);
+
+    if (applicableToppings.length > 0) {
       setPickerItem(item);
       return;
     }
 
-    // Otherwise, add the item directly.
+    // Items without applicable extras can be added directly.
     addToCart(cartItem);
   };
 

@@ -107,11 +107,18 @@ const REFRESH_INTERVAL_MS = 30000;
 
 // ---------- Types ----------
 
+type OrderItemTopping = {
+  id: string;
+  name: string;
+  price: number;
+};
+
 type OrderItem = {
   id: string;
   name: string;
   price: number;
   quantity: number;
+  toppings: OrderItemTopping[];
 };
 
 type AdminOrder = {
@@ -183,6 +190,41 @@ function toNumber(value: unknown): number {
 
 function toText(value: unknown): string | null {
   return typeof value === "string" && value.trim() !== "" ? value.trim() : null;
+}
+
+function parseOrderItemToppings(value: unknown): OrderItemTopping[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((entry, index) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      return [];
+    }
+
+    const row = entry as Record<string, unknown>;
+    const name = toText(row.name);
+
+    if (!name) return [];
+
+    return [
+      {
+        id: toText(row.id) ?? `${name}-${index}`,
+        name,
+        price: toNumber(row.price),
+      },
+    ];
+  });
+}
+
+function isMilkOption(name: string): boolean {
+  const normalized = name.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+  // Match named milk options and common menu labels such as Oat or Soy.
+  return (
+    normalized.includes("milk") ||
+    ["oat", "almond", "soy", "coconut", "whole", "skim", "fresh"].includes(
+      normalized,
+    )
+  );
 }
 
 function errorText(error: unknown): string {
@@ -600,22 +642,55 @@ function OrderCard({
             Item details unavailable
           </Text>
         ) : (
-          order.items.map((item) => (
-            <View
-              key={`${order.id}-${item.id}`}
-              className="mb-1.5 flex-row justify-between"
-            >
-              <Text
-                numberOfLines={1}
-                className="mr-3 flex-1 text-sm text-gray-800"
-              >
-                {item.quantity} × {item.name}
+          order.items.map((item) => {
+            const toppings = item.toppings ?? [];
+            const milkOptions = toppings.filter((t) => isMilkOption(t.name));
+            const extraToppings = toppings.filter((t) => !isMilkOption(t.name));
+
+            const renderSelectedOption = (topping: OrderItemTopping) => (
+              <Text key={topping.id} className="mt-1 text-xs text-gray-600">
+                • {topping.name}
+                {topping.price > 0
+                  ? ` (+${formatMoney(topping.price)})`
+                  : " (Free)"}
               </Text>
-              <Text className="text-sm font-semibold text-gray-800">
-                {formatMoney(item.price * item.quantity)}
-              </Text>
-            </View>
-          ))
+            );
+
+            return (
+              <View key={`${order.id}-${item.id}`} className="mb-3">
+                {/* Food item and line total */}
+                <View className="flex-row justify-between">
+                  <Text className="mr-3 flex-1 text-sm text-gray-800">
+                    {item.quantity} × {item.name}
+                  </Text>
+
+                  <Text className="text-sm font-semibold text-gray-800">
+                    {formatMoney(item.price * item.quantity)}
+                  </Text>
+                </View>
+
+                {/* Selected milk */}
+                {milkOptions.length > 0 ? (
+                  <View className="ml-3 mt-1">
+                    <Text className="text-xs font-semibold text-gray-700">
+                      Milk option
+                    </Text>
+                    {milkOptions.map(renderSelectedOption)}
+                  </View>
+                ) : null}
+
+                {/* Selected extras */}
+                {extraToppings.length > 0 ? (
+                  <View className="ml-3 mt-1">
+                    <Text className="text-xs font-semibold text-gray-700">
+                      Extra toppings
+                    </Text>
+                    {extraToppings.map(renderSelectedOption)}
+                  </View>
+                ) : null}
+              </View>
+            );
+          })
         )}
       </View>
 
@@ -848,6 +923,7 @@ export default function OrdersManagement({
     if (showLoader) setLoading(true);
 
     try {
+      // Load orders first.
       const { data: orderRows, error: ordersError } = await supabase
         .from("orders")
         .select("*")
@@ -857,7 +933,6 @@ export default function OrdersManagement({
       if (ordersError) throw ordersError;
 
       const rows = orderRows ?? [];
-
       const orderIds = rows.map((row: Record<string, unknown>) =>
         String(row.id),
       );
@@ -867,16 +942,14 @@ export default function OrdersManagement({
       const payoutsByOrder = new Map<string, RestaurantPayout[]>();
       const offersByOrder = new Map<string, OrderOffer>();
 
-      // Load the food items belonging to these orders.
+      // Load food items, including saved milk options and toppings.
       if (orderIds.length > 0) {
         const { data: itemRows, error: itemsError } = await supabase
           .from("order_items")
-          .select("id, order_id, name, price, quantity")
+          .select("id, order_id, name, price, quantity, toppings")
           .in("order_id", orderIds);
 
-        if (itemsError) {
-          throw itemsError;
-        }
+        if (itemsError) throw itemsError;
 
         for (const row of itemRows ?? []) {
           const orderKey = String(row.order_id);
@@ -887,19 +960,20 @@ export default function OrdersManagement({
             name: String(row.name ?? "Unnamed item"),
             price: toNumber(row.price),
             quantity: Math.max(0, toNumber(row.quantity)),
+            toppings: parseOrderItemToppings(row.toppings),
           });
 
           itemsByOrder.set(orderKey, existing);
         }
       }
 
+      // Load restaurant payouts.
       if (orderIds.length > 0) {
         const { data: payoutRows, error: payoutsError } = await supabase
           .from("restaurant_payouts")
           .select("id, order_id, amount, status")
           .in("order_id", orderIds);
 
-        // Not fatal: the orders still load if this table isn't set up yet.
         if (payoutsError) {
           console.error(
             "Admin: could not load restaurant payouts:",
@@ -909,16 +983,19 @@ export default function OrdersManagement({
           for (const row of payoutRows ?? []) {
             const key = String(row.order_id);
             const existing = payoutsByOrder.get(key) ?? [];
+
             existing.push({
               id: String(row.id),
               status: String(row.status),
               amount: toNumber(row.amount),
             });
+
             payoutsByOrder.set(key, existing);
           }
         }
       }
 
+      // Load the latest driver offer for each order.
       if (orderIds.length > 0) {
         const { data: offerRows, error: offersError } = await supabase
           .from("order_assignments")
@@ -926,13 +1003,14 @@ export default function OrdersManagement({
           .in("order_id", orderIds)
           .order("offered_at", { ascending: false });
 
-        // Not fatal: orders still load without the offer line.
         if (offersError) {
           console.error("Admin: could not load driver offers:", offersError);
         } else {
           for (const row of offerRows ?? []) {
             const key = String(row.order_id);
-            if (offersByOrder.has(key)) continue; // newest offer wins
+
+            // Since results are newest first, keep the latest offer.
+            if (offersByOrder.has(key)) continue;
 
             const driver = Array.isArray(row.drivers)
               ? row.drivers[0]
@@ -948,40 +1026,51 @@ export default function OrdersManagement({
         }
       }
 
+      // Convert database records into admin orders.
       setOrders(
         rows.map((row: Record<string, unknown>) => ({
           id: String(row.id),
+
           restaurant:
             toText(row.restaurant) ??
             ((restaurantsByOrder.get(String(row.id)) ?? []).join(", ") ||
               "Restaurant"),
+
           status: toText(row.status) ?? "pending",
           paymentStatus: toText(row.payment_status),
           total: toNumber(row.total),
           deliveryFee: toNullableNumber(row.delivery_fee),
           createdAt: toText(row.created_at),
-          // Your orders table: customer, phone, customer_address,
-          // customer_latitude, customer_longitude (older names kept as fallbacks).
+
           customerName: toText(row.customer) ?? toText(row.customer_name),
           customerPhone: toText(row.phone) ?? toText(row.customer_phone),
           customerAltPhone: toText(row.customer_alt_phone),
+
           deliveryAddress:
             toText(row.customer_address) ?? toText(row.delivery_address),
+
           deliveryTown: toText(row.delivery_town) ?? townFromRow(row),
+
           deliveryLat: toNullableNumber(
             row.customer_latitude ?? row.delivery_lat,
           ),
+
           deliveryLng: toNullableNumber(
             row.customer_longitude ?? row.delivery_lng,
           ),
+
           riderId:
             row.rider_id === null || row.rider_id === undefined
               ? null
               : String(row.rider_id),
+
           items: itemsByOrder.get(String(row.id)) ?? [],
+
           cancellationReason: toText(row.cancellation_reason),
           refundStatus: toText(row.refund_status),
+
           restaurantPayouts: payoutsByOrder.get(String(row.id)) ?? [],
+
           orderType: toText(row.order_type) ?? "food",
           pickupAddress: toText(row.pickup_address),
           pickupTown: toText(row.pickup_town),
@@ -990,12 +1079,15 @@ export default function OrdersManagement({
           orderDetails: toText(row.order_details),
           itemCount: toNullableNumber(row.item_count),
           adminConfirmedAt: toText(row.admin_confirmed_at),
+
           offer: offersByOrder.get(String(row.id)) ?? null,
         })),
       );
+
       setErrorMessage(null);
     } catch (error) {
       console.error("Admin: could not load orders:", error);
+
       setErrorMessage(
         `Couldn't load orders: ${errorText(error)}. If this mentions a missing column, run supabase-admin-setup.sql in Supabase.`,
       );
@@ -1004,33 +1096,16 @@ export default function OrdersManagement({
     }
   }, []);
 
+  // Fetch orders when this screen mounts and keep the list refreshed.
   useEffect(() => {
-    void loadOrders();
+    void loadOrders(true);
 
-    // Live updates: fires whenever an order is created or changed.
-    const channel = supabase
-      .channel(`admin-orders-${Math.random().toString(36).slice(2)}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "orders" },
-        (payload: { eventType: string }) => {
-          if (payload.eventType === "INSERT") flashNewOrderBanner();
-          void loadOrders(false);
-        },
-      )
-      .subscribe();
-
-    // Safety net in case realtime isn't enabled or the connection drops.
-    const interval = setInterval(() => {
+    const intervalId = setInterval(() => {
       void loadOrders(false);
     }, REFRESH_INTERVAL_MS);
 
-    return () => {
-      clearInterval(interval);
-      if (bannerTimer.current) clearTimeout(bannerTimer.current);
-      void supabase.removeChannel(channel);
-    };
-  }, [loadOrders, flashNewOrderBanner]);
+    return () => clearInterval(intervalId);
+  }, [loadOrders]);
 
   // Supabase hides other people's orders from non-admin accounts without any
   // error, which looks exactly like "no orders". Check and say so.

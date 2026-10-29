@@ -161,6 +161,7 @@ Deno.serve(async (req) => {
       "respond_to_driver_order_offer",
       {
         p_assignment_id: assignmentId,
+        
         p_driver_phone: from,
         p_response: action,
       },

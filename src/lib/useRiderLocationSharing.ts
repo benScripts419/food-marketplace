@@ -20,6 +20,7 @@ export function useRiderLocationSharing(
     error: null,
   });
   const sharingKey = orderId && isActive ? orderId : null;
+  
 
   useEffect(() => {
     if (!orderId || !isActive) {

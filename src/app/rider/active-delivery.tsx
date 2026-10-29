@@ -32,10 +32,12 @@ export default function ActiveDeliveryScreen() {
   const [completing, setCompleting] = useState(false);
   const [reload, setReload] = useState(0);
   const [stepping, setStepping] = useState(false);
+
   const isDeliveryActive =
     delivery?.status === "picked_up" || delivery?.status === "on_the_way";
+
   const { riderLocation, error: locationSharingError } =
-    useRiderLocationSharing(id, isDeliveryActive);
+    useRiderLocationSharing(delivery?.id, isDeliveryActive);
 
   useEffect(() => {
     let mounted = true;

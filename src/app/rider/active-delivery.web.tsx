@@ -23,7 +23,6 @@ import { useRiderLocationSharing } from "@/lib/useRiderLocationSharing";
 import DeliveryMap from "@/components/DeliveryMap";
 import { openDirections, type MapPoint } from "@/lib/navigation";
 
-
 export default function ActiveDeliveryWebScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [delivery, setDelivery] = useState<RiderDelivery | null>(null);
@@ -35,10 +34,12 @@ export default function ActiveDeliveryWebScreen() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [needsPayoutSetup, setNeedsPayoutSetup] = useState(false);
   const [reload, setReload] = useState(0);
+
   const isDeliveryActive =
     delivery?.status === "picked_up" || delivery?.status === "on_the_way";
+
   const { riderLocation, error: locationSharingError } =
-    useRiderLocationSharing(id, isDeliveryActive);
+    useRiderLocationSharing(delivery?.id, isDeliveryActive);
 
   useEffect(() => {
     let mounted = true;
@@ -93,17 +94,17 @@ export default function ActiveDeliveryWebScreen() {
     }
   };
 
-    const navigateTo = async (
-      destination: MapPoint | null,
-      fallbackAddress: string | null,
-      label: string,
-    ) => {
-      const opened = await openDirections(destination, fallbackAddress);
-      if (!opened) {
-        setActionError(`No location is saved for the ${label}.`);
-      }
+  const navigateTo = async (
+    destination: MapPoint | null,
+    fallbackAddress: string | null,
+    label: string,
+  ) => {
+    const opened = await openDirections(destination, fallbackAddress);
+    if (!opened) {
+      setActionError(`No location is saved for the ${label}.`);
+    }
   };
-  
+
   const handleDelivered = async () => {
     if (!id || !delivery || completing) return;
     setCompleting(true);

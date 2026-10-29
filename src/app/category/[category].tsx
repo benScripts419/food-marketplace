@@ -13,7 +13,6 @@ import SafeImage from "@/components/SafeImage";
 import { getAllMenuItems } from "@/data/restaurantMenus";
 import { Alert } from "@/lib/dialog";
 import { goBack } from "@/lib/goBack";
-import WebSiteFooter from "@/components/web-site-footer";
 import { supabase } from "@/lib/supabase";
 
 const categoryAliases: Record<string, string[]> = {
@@ -245,7 +244,15 @@ export default function CategoryItemsScreen() {
           className="flex-row rounded-2xl border border-border bg-white p-3"
           style={{ width: cardWidth }}
         >
-          <View style={{ width: photoSize }}>
+          <View
+            style={{
+              width: Math.min(photoSize, cardWidth * 0.38),
+              aspectRatio: 1,
+              flexShrink: 0,
+              overflow: "hidden",
+              borderRadius: 12,
+            }}
+          >
             <SafeImage
               source={item.image}
               label={item.name}
@@ -270,13 +277,21 @@ export default function CategoryItemsScreen() {
         className="overflow-hidden rounded-2xl border border-border bg-white"
         style={{ width: cardWidth }}
       >
-        <SafeImage
-          source={item.image}
-          label={item.name}
-          aspectRatio={4 / 3}
-          fit="contain"
-          backgroundColor={PHOTO_BACKGROUND}
-        />
+        <View
+          style={{
+            width: "100%",
+            aspectRatio: 4 / 3,
+            overflow: "hidden",
+          }}
+        >
+          <SafeImage
+            source={item.image}
+            label={item.name}
+            aspectRatio={4 / 3}
+            fit="contain"
+            backgroundColor={PHOTO_BACKGROUND}
+          />
+        </View>
 
         <View style={{ padding: 16 }}>{details}</View>
       </Pressable>
@@ -435,10 +450,6 @@ export default function CategoryItemsScreen() {
           )}
         </View>
       </ScrollView>
-      {/* Footer scrolls naturally with the page */}
-      <View className="w-full">
-        <WebSiteFooter />
-      </View>
     </View>
   );
 }

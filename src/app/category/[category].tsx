@@ -246,11 +246,10 @@ export default function CategoryItemsScreen() {
         >
           <View
             style={{
-              width: Math.min(photoSize, cardWidth * 0.38),
+              width: "100%",
               aspectRatio: 1,
-              flexShrink: 0,
               overflow: "hidden",
-              borderRadius: 12,
+              backgroundColor: PHOTO_BACKGROUND,
             }}
           >
             <SafeImage
@@ -259,7 +258,6 @@ export default function CategoryItemsScreen() {
               aspectRatio={1}
               fit="contain"
               backgroundColor={PHOTO_BACKGROUND}
-              radius={12}
             />
           </View>
 
@@ -280,14 +278,15 @@ export default function CategoryItemsScreen() {
         <View
           style={{
             width: "100%",
-            aspectRatio: 4 / 3,
+            aspectRatio: 1,
             overflow: "hidden",
+            backgroundColor: PHOTO_BACKGROUND,
           }}
         >
           <SafeImage
             source={item.image}
             label={item.name}
-            aspectRatio={4 / 3}
+            aspectRatio={1}
             fit="contain"
             backgroundColor={PHOTO_BACKGROUND}
           />

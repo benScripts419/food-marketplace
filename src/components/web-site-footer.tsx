@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text, View, Image } from "react-native";
 
 import { useWebAuth } from "@/context/WebAuthContext";
 
@@ -21,9 +21,22 @@ export default function WebSiteFooter() {
         <View className="flex-col gap-7 md:flex-row md:flex-wrap md:justify-between md:gap-8">
           {/* Brand and description */}
           <View className="w-full max-w-[320px]">
-            <Text className="text-lg font-extrabold text-text">
-              Akro<Text className="text-primary">Bite</Text>
-            </Text>
+            <Pressable
+              onPress={() => router.replace("/(tabs)")}
+              accessibilityRole="link"
+              accessibilityLabel="AkroBite home"
+            >
+              <Image
+                source={require("../../assets/images/akrobite-logo.png")}
+                resizeMode="contain"
+                style={{
+                  width: 150,
+                  height: 48,
+                  flexGrow: 0,
+                  flexShrink: 0,
+                }}
+              />
+            </Pressable>
 
             <Text className="mt-2 text-sm leading-5 text-textSecondary">
               Discover local restaurants and enjoy good food, delivered around

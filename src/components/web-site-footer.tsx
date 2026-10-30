@@ -30,7 +30,7 @@ export default function WebSiteFooter() {
                 source={require("../../assets/images/akrobite-logo.png")}
                 resizeMode="contain"
                 style={{
-                  width: 150,
+                  width: 140,
                   height: 42,
                   flexGrow: 0,
                   flexShrink: 0,

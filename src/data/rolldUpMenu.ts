@@ -14,6 +14,8 @@ export type MenuCategory = {
 };
 
 const kwMixedSalad = require("../../assets/images/food/mixed-salad.jpg");
+const chickenShawarma = require("../../assets/images/food/chicken-shawarma.jpg");
+const beefShawarma = require("../../assets/images/food/beef-shawarma.jpg");
 
 export const rolldUpMenu: MenuCategory[] = [
   {
@@ -26,7 +28,7 @@ export const rolldUpMenu: MenuCategory[] = [
         price: 40,
         category: "Shawarma",
         subCategory: "Chicken Pack",
-        image: kwMixedSalad,
+        image: chickenShawarma,
       },
       {
         id: "rolld-up-2",
@@ -34,7 +36,7 @@ export const rolldUpMenu: MenuCategory[] = [
         price: 50,
         category: "Shawarma",
         subCategory: "Chicken Pack",
-        image: kwMixedSalad,
+        image: chickenShawarma,
       },
       {
         id: "rolld-up-3",
@@ -42,7 +44,7 @@ export const rolldUpMenu: MenuCategory[] = [
         price: 60,
         category: "Shawarma",
         subCategory: "Chicken Pack",
-        image: kwMixedSalad,
+        image: chickenShawarma,
       },
       {
         id: "rolld-up-4",
@@ -50,7 +52,7 @@ export const rolldUpMenu: MenuCategory[] = [
         price: 70,
         category: "Shawarma",
         subCategory: "Chicken Pack",
-        image: kwMixedSalad,
+        image: chickenShawarma,
       },
       {
         id: "rolld-up-5",
@@ -58,7 +60,7 @@ export const rolldUpMenu: MenuCategory[] = [
         price: 80,
         category: "Shawarma",
         subCategory: "Chicken Pack",
-        image: kwMixedSalad,
+        image: chickenShawarma,
       },
       {
         id: "rolld-up-6",
@@ -66,7 +68,7 @@ export const rolldUpMenu: MenuCategory[] = [
         price: 50,
         category: "Shawarma",
         subCategory: "Beef Pack",
-        image: kwMixedSalad,
+        image: beefShawarma,
       },
       {
         id: "rolld-up-7",
@@ -74,7 +76,7 @@ export const rolldUpMenu: MenuCategory[] = [
         price: 60,
         category: "Shawarma",
         subCategory: "Beef Pack",
-        image: kwMixedSalad,
+        image: beefShawarma,
       },
       {
         id: "rolld-up-8",
@@ -82,7 +84,7 @@ export const rolldUpMenu: MenuCategory[] = [
         price: 70,
         category: "Shawarma",
         subCategory: "Beef Pack",
-        image: kwMixedSalad,
+        image: beefShawarma,
       },
       {
         id: "rolld-up-9",
@@ -90,7 +92,7 @@ export const rolldUpMenu: MenuCategory[] = [
         price: 80,
         category: "Shawarma",
         subCategory: "Beef Pack",
-        image: kwMixedSalad,
+        image: beefShawarma,
       },
       {
         id: "rolld-up-10",
@@ -98,7 +100,7 @@ export const rolldUpMenu: MenuCategory[] = [
         price: 90,
         category: "Shawarma",
         subCategory: "Beef Pack",
-        image: kwMixedSalad,
+        image: beefShawarma,
       },
       {
         id: "rolld-up-11",

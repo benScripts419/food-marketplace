@@ -453,11 +453,11 @@ export default function HomeScreen() {
                     }
                     className="mr-4 items-center"
                   >
-                    <View className="h-16 w-16 overflow-hidden rounded-full bg-surface">
+                    <View className="h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-white">
                       <Image
                         source={category.image}
                         style={{ width: 64, height: 64 }}
-                        resizeMode="cover"
+                        resizeMode="contain"
                       />
                     </View>
 

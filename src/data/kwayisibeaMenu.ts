@@ -43,18 +43,23 @@ const chickenPizza = require("../../assets/images/food/chicken-pizza.png");
 const pepperoniPizza = require("../../assets/images/food/pepperoni-pizza.jpeg");
 const chickenKiev = require("../../assets/images/food/chicken-kiev.jpeg");
 const chickenCurry = require("../../assets/images/food/chicken-curry.jpeg");
-const chickenCordon = require("../../assets/images/food/chicken-cordon.jpeg");
+const chickenCordon = require("../../assets/images/food/chicken-cordon.jpg");
 const chickenWings = require("../../assets/images/food/chicken-wings.jpeg");
 const honeyChickenWings = require("../../assets/images/food/honey-chicken-wings.jpg");
 const chickenPieces = require("../../assets/images/food/chicken-pieces.jpeg");
-const grilledChicken = require("../../assets/images/food/grilled-chicken.jpg");
+const chickenThigh = require("../../assets/images/food/chicken-thigh.png");
 const spaghettiBolognese = require("../../assets/images/food/spaghetti-bolognese.jpeg");
 const spaghettiCarbonara = require("../../assets/images/food/spaghetti-carbonara.jpg");
 const penneArrabiata = require("../../assets/images/food/penne-arrabiata.jpeg");
 const tilapiaLightsoup = require("../../assets/images/food/tilapia-lightsoup.jpeg");
 const assortedOkro = require("../../assets/images/food/assorted-okro.jpeg");
 const clubSandwich = require("../../assets/images/food/club-sandwich.jpg");
-
+const grilledTilapia = require("../../assets/images/food/grilled-tilapia.jpg");
+const spicyGoat = require("../../assets/images/food/spicy-goat.jpg");
+const goatLightSoup = require("../../assets/images/food/goat-light-soup.jpg");
+const beansStew = require("../../assets/images/food/beans-stew.jpg");
+const palavaSauce = require("../../assets/images/food/palava-sauce.jpg");
+const porkPieces = require("../../assets/images/food/pork-pieces.jpg");
 
 const foodImage = require("@/assets/images/food/mixed-salad.jpg");
 
@@ -175,14 +180,6 @@ export const kwayisibeaMenu: MenuCategory[] = [
       },
       {
         id: "side-orders-8",
-        name: "Mashed Potatoes",
-        description: "Only",
-        price: 40,
-        category: "Side Orders",
-        image: mashedPotatoes,
-      },
-      {
-        id: "side-orders-9",
         name: "Kelewele",
         description: "Only",
         price: 30,
@@ -190,15 +187,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         image: kelewele,
       },
       {
-        id: "side-orders-10",
-        name: "Fufu",
-        description: "Only",
-        price: 30,
-        category: "Side Orders",
-        image: fufu,
-      },
-      {
-        id: "side-orders-11",
+        id: "side-orders-9",
         name: "Banku",
         description: "Only",
         price: 20,
@@ -206,15 +195,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         image: banku,
       },
       {
-        id: "side-orders-12",
-        name: "Omo Tuo",
-        description: "Only",
-        price: 30,
-        category: "Side Orders",
-        image: omoTuo,
-      },
-      {
-        id: "side-orders-13",
+        id: "side-orders-10",
         name: "Yam Chips",
         description: "Only",
         price: 30,
@@ -222,23 +203,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         image: yamChips,
       },
       {
-        id: "side-orders-14",
-        name: "Akple",
-        description: "Only",
-        price: 30,
-        category: "Side Orders",
-        image: akple,
-      },
-      {
-        id: "side-orders-15",
-        name: "Konkonte",
-        description: "Only",
-        price: 30,
-        category: "Side Orders",
-        image: foodImage,
-      },
-      {
-        id: "side-orders-16",
+        id: "side-orders-11",
         name: "Fried Plantain",
         description: "Only",
         price: 30,
@@ -305,7 +270,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         description: "Well-Seasoned oven grilled chicken.",
         price: 90,
         category: "Poultry",
-        image: grilledChicken,
+        image: chickenThigh,
       },
     ],
   },
@@ -321,7 +286,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         name: "Spicy Grilled Tilapia",
         price: 150,
         category: "Locals",
-        image: foodImage,
+        image: grilledTilapia,
       },
       {
         id: "kw-local-2",
@@ -342,47 +307,33 @@ export const kwayisibeaMenu: MenuCategory[] = [
         name: "Goat Light Soup",
         price: 130,
         category: "Locals",
-        image: foodImage,
+        image: goatLightSoup,
       },
       {
         id: "kw-local-5",
         name: "Fish Beans Stew",
         price: 80,
         category: "Locals",
-        image: foodImage,
+        image: beansStew,
       },
       {
         id: "kw-local-6",
         name: "Fish and Wele Palava Sauce",
         price: 80,
         category: "Locals",
-        image: foodImage,
+        image: palavaSauce,
       },
       {
         id: "kw-local-7",
-        name: "Assorted Meat and Dry Fish Ebunu Ebunu Soup",
-        price: 100,
-        category: "Locals",
-        image: foodImage,
-      },
-      {
-        id: "kw-local-8",
         name: "Spicy Grilled/Fried Goat Meat",
         price: 130,
         category: "Locals",
-        image: foodImage,
+        image: spicyGoat,
       },
       {
-        id: "kw-local-9",
+        id: "kw-local-8",
         name: "Fish Garden Egg Stew",
         price: 80,
-        category: "Locals",
-        image: foodImage,
-      },
-      {
-        id: "kw-local-10",
-        name: "Assorted Meat and Fish Palmnut Soup",
-        price: 150,
         category: "Locals",
         image: foodImage,
       },
@@ -566,7 +517,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         description: "Oven grilled honey mustard pork chops.",
         price: 140,
         category: "Pork, Beef & Grill",
-        image: foodImage,
+        image: porkPieces,
       },
       {
         id: "kw-grill-2",

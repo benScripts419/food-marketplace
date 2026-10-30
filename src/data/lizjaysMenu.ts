@@ -25,7 +25,7 @@ const purpleBlueberryTea = require("../../assets/images/food/purple-blueberry-te
 
 const sandwich = require("../../assets/images/food/sandwich.jpg");
 const burger = require("../../assets/images/food/burger.jpg");
-const samosa = require("../../assets/images/food/samosa.jpeg");
+const samosa = require("../../assets/images/food/samosa.jpg");
 const springRolls = require("../../assets/images/food/spring-rolls.jpeg");
 const sandwichWithFries = require("../../assets/images/food/sandwich-fries.jpg");
 

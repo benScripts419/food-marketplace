@@ -234,45 +234,6 @@ export const conceptMenu: MenuCategory[] = [
   },
 
   // ===================
-  // EXTRA TOPPINGS
-  // ===================
-
-  {
-    id: "extra-toppings",
-    name: "Extra Toppings",
-    items: [
-      {
-        id: "concept-extra-toppings-1",
-        name: "Spring Rolls",
-        price: 30,
-        category: "Extra Toppings",
-        image: kwMixedSalad,
-      },
-      {
-        id: "concept-extra-toppings-2",
-        name: "Pancake",
-        price: 30,
-        category: "Extra Toppings",
-        image: kwMixedSalad,
-      },
-      {
-        id: "concept-extra-toppings-3",
-        name: "Samosa",
-        price: 30,
-        category: "Extra Toppings",
-        image: kwMixedSalad,
-      },
-      {
-        id: "concept-extra-toppings-4",
-        name: "Meat Pie",
-        price: 30,
-        category: "Extra Toppings",
-        image: kwMixedSalad,
-      },
-    ],
-  },
-
-  // ===================
   // MAIN DISHES
   // ===================
 

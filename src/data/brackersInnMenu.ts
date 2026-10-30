@@ -19,6 +19,7 @@ const eggFriedRice = require("../../assets/images/food/fried-rice.jpg");
 const jollofRice = require("../../assets/images/food/jollof-rice.jpg");
 const assortedFriedRice = require("../../assets/images/food/assorted-fried-rice.jpg");
 const assortedJollofRice = require("../../assets/images/food/assorted-jollof-rice.jpg");
+const chickenShawarma = require("../../assets/images/food/chicken-shawarma.jpg");
 
 export const brackersInnMenu: MenuCategory[] = [
   // =====================================================
@@ -155,7 +156,7 @@ export const brackersInnMenu: MenuCategory[] = [
         description: "Chicken shawarma",
         price: 60,
         category: "Main Dishes",
-        image: menuImage,
+        image: chickenShawarma,
       },
 
       {

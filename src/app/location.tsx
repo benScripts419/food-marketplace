@@ -13,7 +13,6 @@ import {
   View,
 } from "react-native";
 
-import { DELIVERY_TOWNS } from "@/lib/deliveryPricing";
 import {
   loadDeliveryLocation,
   saveDeliveryLocation,
@@ -116,19 +115,19 @@ function pageIsInsecure(): boolean {
 
 function describeLocationError(error: unknown): string {
   if (pageIsInsecure()) {
-    return "This page isn't on a secure (https) connection, so the browser blocks GPS. Open the app's secure https link, or choose your town below.";
+    return "This page isn't on a secure (https) connection, so the browser blocks GPS. Open the app's secure https link and try again.";
   }
 
   const text = error instanceof Error ? error.message : "";
   const denied = /denied|permission|not allowed/i.test(text);
 
   if (denied && isWeb) {
-    return "The browser blocked location access. Click the padlock beside the web address, allow Location, then reload the page. Or choose your town below.";
+    return "The browser blocked location access. Click the padlock beside the web address, allow Location, then reload the page.";
   }
 
   if (text) return text;
 
-  return "Could not get your current location. You can choose your town below instead.";
+  return "Could not get your current location. Check your location settings and try again.";
 }
 
 export default function LocationScreen() {
@@ -137,12 +136,8 @@ export default function LocationScreen() {
   const [coordinate, setCoordinate] = useState<Coordinates | null>(null);
   const [accuracy, setAccuracy] = useState<number | null>(null);
 
-  // The pin is the phone's GPS position at the moment the button is tapped,
-  // or the centre of the chosen town. A pin saved earlier is NOT fresh: it may
-  // belong to another place.
+  // A pin saved earlier is NOT fresh: it may belong to another place.
   const [pinFresh, setPinFresh] = useState(false);
-  const [approximate, setApproximate] = useState(false);
-  const [townName, setTownName] = useState<string | null>(null);
   const [savedAddress, setSavedAddress] = useState<string | null>(null);
 
   const [address, setAddress] = useState("");
@@ -227,24 +222,11 @@ export default function LocationScreen() {
           : null,
       );
       setPinFresh(true);
-      setApproximate(false);
-      setTownName(null);
     } catch (error) {
       setMessage(describeLocationError(error));
     } finally {
       setLocating(false);
     }
-  };
-
-  // No GPS (blocked, or not available): use the centre of the town. The
-  // delivery fee is the town's price, and the rider phones to find the door.
-  const chooseTown = (town: (typeof DELIVERY_TOWNS)[number]) => {
-    setCoordinate({ latitude: town.latitude, longitude: town.longitude });
-    setAccuracy(null);
-    setPinFresh(true);
-    setApproximate(true);
-    setTownName(town.name);
-    setMessage(null);
   };
 
   const checkOnMap = () => {
@@ -255,20 +237,12 @@ export default function LocationScreen() {
 
   const save = async () => {
     if (!coordinate) {
-      setMessage("Tap Use My Current Location, or choose your town.");
+      setMessage("Tap Use My Current Location to get your delivery pin.");
       return;
     }
 
     if (!address.trim()) {
       setMessage("Enter your delivery address or a nearby landmark.");
-      return;
-    }
-
-    // A town was chosen instead of GPS: the rider needs a landmark.
-    if (approximate && landmark.trim().length < 3) {
-      setMessage(
-        "Add a nearby landmark, so the rider can find you from the town centre.",
-      );
       return;
     }
 
@@ -279,14 +253,13 @@ export default function LocationScreen() {
       address.trim() !== savedAddress.trim()
     ) {
       setMessage(
-        "You changed the address, but the pin is still your earlier location. Go to the new delivery spot and tap Use My Current Location, or choose your town.",
+        "You changed the address, but the pin is still your earlier location. Go to the new delivery spot and tap Use My Current Location.",
       );
       return;
     }
 
     // A weak fix is accepted, but the rider needs a landmark to find the door.
     if (
-      !approximate &&
       pinFresh &&
       accuracy !== null &&
       accuracy > LANDMARK_REQUIRED_ABOVE_METERS &&
@@ -302,11 +275,9 @@ export default function LocationScreen() {
     setMessage(null);
 
     try {
-      const prefix = approximate && townName ? `${townName}: ` : "";
-      const base = `${prefix}${address.trim()}`;
       const fullAddress = landmark.trim()
-        ? `${base} (Landmark: ${landmark.trim()})`
-        : base;
+        ? `${address.trim()} (Landmark: ${landmark.trim()})`
+        : address.trim();
 
       await saveDeliveryLocation({
         ...coordinate,
@@ -343,10 +314,7 @@ export default function LocationScreen() {
   };
 
   const weakFix =
-    pinFresh &&
-    !approximate &&
-    accuracy !== null &&
-    accuracy > LANDMARK_REQUIRED_ABOVE_METERS;
+    pinFresh && accuracy !== null && accuracy > LANDMARK_REQUIRED_ABOVE_METERS;
 
   return (
     <KeyboardAvoidingView
@@ -395,19 +363,11 @@ export default function LocationScreen() {
 
           <Text className="mt-1 text-sm text-textSecondary">
             {coordinate
-              ? approximate && townName
-                ? `Centre of ${townName}`
-                : `${coordinate.latitude.toFixed(6)}, ${coordinate.longitude.toFixed(6)}`
+              ? `${coordinate.latitude.toFixed(6)}, ${coordinate.longitude.toFixed(6)}`
               : "No location selected yet."}
           </Text>
 
-          {coordinate && pinFresh && approximate ? (
-            <Text className="mt-1 text-xs font-semibold text-amber-600">
-              Approximate. The rider will phone you, so add a landmark below.
-            </Text>
-          ) : null}
-
-          {coordinate && pinFresh && !approximate && accuracy !== null ? (
+          {coordinate && pinFresh && accuracy !== null ? (
             <Text
               className={`mt-1 text-xs font-semibold ${
                 accuracy <= GOOD_ACCURACY_METERS
@@ -467,43 +427,6 @@ export default function LocationScreen() {
           ) : null}
         </View>
 
-        {/* NO GPS: CHOOSE A TOWN */}
-        <View className="mx-5 mt-5 rounded-2xl border border-border p-4">
-          <Text className="text-sm font-bold text-text">
-            Can't use GPS? Choose your town
-          </Text>
-          <Text className="mt-1 text-xs leading-5 text-textSecondary">
-            You'll be charged the town's delivery price, and the rider will
-            phone you to find the exact place.
-          </Text>
-
-          <View className="mt-3 flex-row flex-wrap">
-            {DELIVERY_TOWNS.map((town) => {
-              const selected = approximate && townName === town.name;
-
-              return (
-                <Pressable
-                  key={town.name}
-                  onPress={() => chooseTown(town)}
-                  className={`mb-2 mr-2 rounded-full border px-4 py-2 ${
-                    selected
-                      ? "border-primary bg-red-50"
-                      : "border-border bg-white"
-                  }`}
-                >
-                  <Text
-                    className={`text-xs font-semibold ${
-                      selected ? "text-primary" : "text-text"
-                    }`}
-                  >
-                    {town.name}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-
         <View className="mx-5 mt-5">
           <Text className="mb-2 text-sm font-bold text-text">
             Delivery address
@@ -520,7 +443,7 @@ export default function LocationScreen() {
           />
 
           <Text className="mb-2 mt-4 text-sm font-bold text-text">
-            {approximate || weakFix
+            {weakFix
               ? "Nearby landmark (required)"
               : "Nearby landmark (optional)"}
           </Text>
@@ -535,9 +458,8 @@ export default function LocationScreen() {
           />
 
           <Text className="mt-3 text-xs leading-5 text-textSecondary">
-            The pin comes from GPS (or your town), not from the address you
-            type. Use the address and landmark to help the rider find the exact
-            door.
+            The pin comes from GPS, not from the address you type. Use the
+            address and landmark to help the rider find the exact door.
           </Text>
         </View>
 

@@ -31,7 +31,7 @@ export default function WebSiteFooter() {
                 resizeMode="contain"
                 style={{
                   width: 150,
-                  height: 48,
+                  height: 42,
                   flexGrow: 0,
                   flexShrink: 0,
                 }}

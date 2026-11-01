@@ -8,14 +8,29 @@ export async function saveRiderPayoutMethod(input: {
   accountName: string;
   phoneNumber: string;
 }) {
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error("You must be signed in to set up your payout account.");
+  }
+
+  console.log("Payout setup authenticated user:", user.id);
+
   const { data, error } = await supabase.functions.invoke(
     "setup-rider-payout",
     { body: input },
   );
 
+  console.log("Payout setup response:", data);
+  console.log("Payout setup error:", error);
+
   if (error) {
     throw new Error(await getFunctionErrorMessage(error));
   }
+
   if (!data?.saved) {
     throw new Error(data?.error ?? "Payout method was not saved.");
   }

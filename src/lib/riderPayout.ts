@@ -12,7 +12,7 @@ export async function saveRiderPayoutMethod(input: {
 }) {
   const { data, error } = await supabase.functions.invoke(
     "setup-rider-payout",
-    { body: input },
+    { body: input }
   );
 
   if (error) {
@@ -23,13 +23,7 @@ export async function saveRiderPayoutMethod(input: {
     throw new Error(data?.error ?? "Payout method was not saved.");
   }
 
-  return data as {
-    saved: true;
-    riderId: string;
-    provider: MobileMoneyProvider;
-    phoneLastFour: string;
-    alreadyConfigured?: boolean;
-  };
+  return data;
 }
 
 

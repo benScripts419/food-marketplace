@@ -5,7 +5,6 @@ export type MobileMoneyProvider = "mtn" | "telecel" | "at";
 
 
 export async function saveRiderPayoutMethod(input: {
-  riderId: string;
   provider: MobileMoneyProvider;
   accountName: string;
   phoneNumber: string;

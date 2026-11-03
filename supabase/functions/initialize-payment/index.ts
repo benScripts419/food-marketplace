@@ -1079,7 +1079,10 @@ Deno.serve(async (req) => {
           amount: Math.round(total * 100),
           currency: "GHS",
           reference,
-          channels: ["card", "mobile_money", "bank", "ussd", "bank_transfer"],
+          // Temporarily restrict live Paystack checkout to channels that are
+          // confirmed for the merchant account. Mobile money has been failing in
+          // production for this project, so keep checkout on card + bank options.
+          channels: ["card", "bank", "bank_transfer"],
           metadata: {
             order_id: order.id,
             user_id: user.id,

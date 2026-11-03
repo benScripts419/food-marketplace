@@ -1,10 +1,19 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+const getCorsHeaders = (req: Request) => {
+  const origin = req.headers.get("Origin") ?? "";
+  const allowed =
+    /^https?:\/\/(localhost|127\.0\.0\.1)(?::\d+)?$/i.test(origin) ||
+    /^exp:\/\/.*$/i.test(origin) ||
+    /^https:\/\/.*\.supabase\.co$/i.test(origin);
+
+  return {
+    "Access-Control-Allow-Origin": allowed ? origin : "null",
+    Vary: "Origin",
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
 };
 
 const providerBankCodes = {
@@ -15,15 +24,18 @@ const providerBankCodes = {
 
 type Provider = keyof typeof providerBankCodes;
 
-const jsonResponse = (body: Record<string, unknown>, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-
 Deno.serve(async (req) => {
+  const jsonResponse = (body: Record<string, unknown>, status = 200) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: {
+        ...getCorsHeaders(req),
+        "Content-Type": "application/json",
+      },
+    });
+
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { headers: getCorsHeaders(req) });
   }
   if (req.method !== "POST") {
     return jsonResponse({ error: "Method not allowed." }, 405);

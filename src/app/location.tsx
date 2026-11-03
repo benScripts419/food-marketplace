@@ -32,60 +32,72 @@ const LANDMARK_REQUIRED_ABOVE_METERS = 100;
 const REFINE_SECONDS = 10;
 const ACCURATE_ENOUGH_METERS = 25;
 
-// Keeps reading the position for a few seconds and returns the most accurate
-// reading. The first reading is usually the roughest; GPS tightens up.
-function getBestPosition(): Promise<Location.LocationObject> {
-  return new Promise((resolve, reject) => {
-    let best: Location.LocationObject | null = null;
-    let subscription: Location.LocationSubscription | null = null;
-    let finished = false;
-
-    const accuracyOf = (position: Location.LocationObject) =>
-      typeof position.coords.accuracy === "number"
-        ? position.coords.accuracy
-        : Number.POSITIVE_INFINITY;
-
-    const finish = () => {
-      if (finished) return;
-      finished = true;
-      clearTimeout(timer);
-      subscription?.remove();
-
-      if (best) {
-        resolve(best);
-      } else {
-        reject(new Error("No location fix was received."));
-      }
-    };
-
-    const timer = setTimeout(finish, REFINE_SECONDS * 1000);
-
-    Location.watchPositionAsync(
-      {
+// Use an explicit current-position read instead of a watch loop. Some devices and
+// browsers fail to keep reporting GPS fixes reliably with watchPositionAsync,
+// which is why the delivery pin can appear "stuck" or never acquire a usable fix.
+async function getCurrentLocation(): Promise<Location.LocationObject> {
+  const attempts = [
+    () =>
+      Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.BestForNavigation,
+      }),
+    () =>
+      Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
-        timeInterval: 1000,
-        distanceInterval: 0,
-      },
-      (position) => {
-        if (!best || accuracyOf(position) < accuracyOf(best)) {
-          best = position;
-        }
-        if (best && accuracyOf(best) <= ACCURATE_ENOUGH_METERS) {
-          finish();
-        }
-      },
-    )
-      .then((sub) => {
-        subscription = sub;
-        if (finished) sub.remove();
-      })
-      .catch((error: unknown) => {
-        if (finished) return;
-        finished = true;
-        clearTimeout(timer);
-        reject(error);
+      }),
+    () =>
+      Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      }),
+  ];
+
+  let lastError: unknown;
+
+  for (const attempt of attempts) {
+    try {
+      return await attempt();
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  if (isWeb && typeof navigator !== "undefined" && navigator.geolocation) {
+    try {
+      return await new Promise<Location.LocationObject>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            resolve({
+              coords: {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                altitude: position.coords.altitude ?? null,
+                accuracy: position.coords.accuracy ?? 0,
+                altitudeAccuracy: position.coords.altitudeAccuracy ?? null,
+                heading: position.coords.heading ?? null,
+                speed: position.coords.speed ?? null,
+              },
+              timestamp: position.timestamp,
+              mocked: false,
+            } as Location.LocationObject);
+          },
+          (error) => {
+            reject(new Error(error.message || "Geolocation failed."));
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0,
+          },
+        );
       });
-  });
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("No location fix was received.");
 }
 
 const isWeb = Platform.OS === "web";
@@ -195,22 +207,10 @@ export default function LocationScreen() {
         );
       }
 
-      // Read the position for a few seconds and keep the most accurate
-      // reading. If that can't run, fall back to a single reading.
-      let position: Location.LocationObject;
-      try {
-        position = await getBestPosition();
-      } catch {
-        try {
-          position = await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.High,
-          });
-        } catch {
-          position = await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.Balanced,
-          });
-        }
-      }
+      // Prefer a fresh GPS reading with a direct current fix. Some platforms have
+      // unreliable watchPositionAsync behavior, which causes delivery pins to fail
+      // or stay stale even when GPS is available.
+      const position = await getCurrentLocation();
 
       setCoordinate({
         latitude: position.coords.latitude,

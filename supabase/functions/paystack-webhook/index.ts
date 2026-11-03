@@ -120,6 +120,92 @@ Deno.serve(async (req) => {
     }
 
     // ------------------------------------------------------------------
+    // Charge records (customer payment lifecycle)
+    // ------------------------------------------------------------------
+    if (type === "charge.success" || type === "charge.failed") {
+      const reference =
+        typeof data.reference === "string"
+          ? data.reference
+          : typeof data.transaction_reference === "string"
+            ? data.transaction_reference
+            : "";
+      if (!reference) return new Response("ok");
+
+      const metadata =
+        data.metadata && typeof data.metadata === "object"
+          ? (data.metadata as Record<string, unknown>)
+          : {};
+      const orderId =
+        typeof metadata.order_id === "string" ? metadata.order_id : null;
+
+      const { data: orderRow, error: orderLookupError } = orderId
+        ? await admin
+            .from("orders")
+            .select("id, user_id, payment_status, refund_status, status")
+            .eq("id", orderId)
+            .maybeSingle()
+        : await admin
+            .from("orders")
+            .select("id, user_id, payment_status, refund_status, status")
+            .eq("payment_reference", reference)
+            .maybeSingle();
+
+      if (orderLookupError) {
+        console.error("Webhook order lookup failed:", orderLookupError);
+        return new Response("ok");
+      }
+
+      if (!orderRow) {
+        return new Response("ok");
+      }
+
+      const normalizedAmount =
+        Number(data.amount ?? 0) > 0
+          ? Number((Number(data.amount ?? 0) / 100).toFixed(2))
+          : 0;
+
+      const paymentPatch = {
+        order_id: orderRow.id,
+        user_id: orderRow.user_id,
+        reference,
+        amount: normalizedAmount,
+        currency:
+          typeof data.currency === "string" ? data.currency : "GHS",
+        status: type === "charge.success" ? "success" : "failed",
+        channel: typeof data.channel === "string" ? data.channel : null,
+        gateway_response:
+          typeof data.gateway_response === "string"
+            ? data.gateway_response
+            : null,
+        paid_at:
+          typeof data.paid_at === "string" ? data.paid_at : now,
+        raw_response: event,
+        updated_at: now,
+      };
+
+      const { error: paymentUpsertError } = await admin
+        .from("payments")
+        .upsert(paymentPatch, { onConflict: "reference" });
+      if (paymentUpsertError) throw paymentUpsertError;
+
+      if (type === "charge.success") {
+        const { error: orderUpdateError } = await admin
+          .from("orders")
+          .update({
+            payment_status: "paid",
+            status: "confirmed",
+            updated_at: now,
+          })
+          .eq("id", orderRow.id)
+          .in("payment_status", ["pending", "failed", "processing", "paid"])
+          .is("refund_status", null);
+        if (orderUpdateError) throw orderUpdateError;
+      }
+
+      return new Response("ok");
+    }
+
+    // ------------------------------------------------------------------
     // Refunds (customer money back after the admin cancels)
     // ------------------------------------------------------------------
     if (

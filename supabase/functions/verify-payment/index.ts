@@ -1,25 +1,53 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+const getCorsHeaders = (req: Request) => {
+  const origin = req.headers.get("Origin") ?? "";
+  const allowed =
+    /^https?:\/\/(localhost|127\.0\.0\.1)(?::\d+)?$/i.test(origin) ||
+    /^exp:\/\/.*$/i.test(origin) ||
+    /^https:\/\/.*\.supabase\.co$/i.test(origin);
+
+  return {
+    "Access-Control-Allow-Origin": allowed ? origin : "null",
+    Vary: "Origin",
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
 };
 
-const jsonResponse = (body: Record<string, unknown>, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: {
-      ...corsHeaders,
-      "Content-Type": "application/json",
-    },
-  });
+async function getPaymentStatusByReference(
+  supabaseAdmin: ReturnType<typeof createClient>,
+  reference: string,
+  orderId: string,
+) {
+  const { data, error } = await supabaseAdmin
+    .from("payments")
+    .select("id, status, reference, order_id")
+    .eq("reference", reference)
+    .eq("order_id", orderId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Payment lookup failed:", error);
+  }
+
+  return data;
+}
 
 Deno.serve(async (req) => {
+  const jsonResponse = (body: Record<string, unknown>, status = 200) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: {
+        ...getCorsHeaders(req),
+        "Content-Type": "application/json",
+      },
+    });
+
   if (req.method === "OPTIONS") {
     return new Response("ok", {
-      headers: corsHeaders,
+      headers: getCorsHeaders(req),
     });
   }
 
@@ -125,10 +153,9 @@ Deno.serve(async (req) => {
     }
 
     // --------------------------------------------------
-    // Already paid?
+    // Already paid or previously processed?
     // --------------------------------------------------
 
-    // This makes the endpoint safe to call more than once.
     if (
       order.payment_status === "paid" &&
       order.payment_reference === reference
@@ -138,6 +165,39 @@ Deno.serve(async (req) => {
         orderId,
         reference,
       });
+    }
+
+    const existingPayment = await getPaymentStatusByReference(
+      supabaseAdmin,
+      reference,
+      orderId,
+    );
+
+    if (existingPayment?.status === "success") {
+      const { data: reconciledOrder, error: orderReconcileError } =
+        await supabaseAdmin
+          .from("orders")
+          .update({
+            payment_status: "paid",
+            status: "confirmed",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", orderId)
+          .eq("payment_reference", reference)
+          .select("id")
+          .maybeSingle();
+
+      if (orderReconcileError) {
+        console.error("Payment reconcile order update failed:", orderReconcileError);
+      }
+
+      if (reconciledOrder || order.payment_status === "paid") {
+        return jsonResponse({
+          paid: true,
+          orderId,
+          reference,
+        });
+      }
     }
 
     // --------------------------------------------------
@@ -275,18 +335,41 @@ Deno.serve(async (req) => {
         })
         .eq("reference", reference)
         .eq("order_id", orderId)
+        .in("status", ["pending", "failed", "success"])
         .select("id")
         .maybeSingle();
 
-    if (paymentUpdateError || !updatedPayment) {
+    if (paymentUpdateError) {
       console.error("Payment update error:", paymentUpdateError);
-
       return jsonResponse(
         {
           error:
             "Payment was verified, but the payment record could not be updated.",
         },
         500,
+      );
+    }
+
+    if (!updatedPayment) {
+      const reconciledPayment = await getPaymentStatusByReference(
+        supabaseAdmin,
+        reference,
+        orderId,
+      );
+
+      if (reconciledPayment?.status === "success") {
+        return jsonResponse({
+          paid: true,
+          orderId,
+          reference,
+        });
+      }
+
+      return jsonResponse(
+        {
+          error: "This payment was already processed by another request.",
+        },
+        409,
       );
     }
 
@@ -303,10 +386,11 @@ Deno.serve(async (req) => {
       })
       .eq("id", orderId)
       .eq("user_id", user.id)
+      .in("payment_status", ["pending", "failed", "processing", "paid"])
       .select("id")
       .maybeSingle();
 
-    if (orderUpdateError || !updatedOrder) {
+    if (orderUpdateError) {
       console.error("Order update error:", orderUpdateError);
 
       return jsonResponse(
@@ -314,6 +398,35 @@ Deno.serve(async (req) => {
           error: "Payment succeeded, but the order could not be updated.",
         },
         500,
+      );
+    }
+
+    if (!updatedOrder) {
+      const { data: existingOrder, error: existingOrderError } =
+        await supabaseAdmin
+          .from("orders")
+          .select("id, payment_status")
+          .eq("id", orderId)
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+      if (existingOrderError) {
+        console.error("Order reconciliation failed:", existingOrderError);
+      }
+
+      if (existingOrder?.payment_status === "paid") {
+        return jsonResponse({
+          paid: true,
+          orderId,
+          reference,
+        });
+      }
+
+      return jsonResponse(
+        {
+          error: "This order has already moved on from a pending payment.",
+        },
+        409,
       );
     }
 

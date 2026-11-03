@@ -2,6 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
+import FloatingTabBar, {
+  type FloatingTabItem,
+} from "@/components/FloatingTabBar";
 import { useCart } from "@/context/CartContext";
 
 export default function OrderDetailsScreen() {
@@ -9,6 +12,44 @@ export default function OrderDetailsScreen() {
   const { orders } = useCart();
 
   const order = orders.find((item) => item.id === id);
+
+  const tabItems: FloatingTabItem[] = [
+    {
+      key: "home",
+      title: "Home",
+      icon: "home-outline",
+      focused: false,
+      onPress: () => router.push("/(tabs)"),
+    },
+    {
+      key: "search",
+      title: "Search",
+      icon: "search-outline",
+      focused: false,
+      onPress: () => router.push("/(tabs)/search"),
+    },
+    {
+      key: "cart",
+      title: "Cart",
+      icon: "cart-outline",
+      focused: false,
+      onPress: () => router.push("/(tabs)/cart"),
+    },
+    {
+      key: "orders",
+      title: "Orders",
+      icon: "receipt-outline",
+      focused: true,
+      onPress: () => router.push("/(tabs)/orders"),
+    },
+    {
+      key: "profile",
+      title: "Profile",
+      icon: "person-outline",
+      focused: false,
+      onPress: () => router.push("/(tabs)/profile"),
+    },
+  ];
 
   if (!order) {
     return (
@@ -66,7 +107,7 @@ export default function OrderDetailsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: 20,
-          paddingBottom: 40,
+          paddingBottom: 120,
         }}
       >
         {/* RESTAURANT */}
@@ -228,6 +269,8 @@ export default function OrderDetailsScreen() {
           <Text className="font-bold text-white">Track Order</Text>
         </Pressable>
       </ScrollView>
+
+      <FloatingTabBar items={tabItems} />
     </View>
   );
 }

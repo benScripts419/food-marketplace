@@ -1,10 +1,19 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+const getCorsHeaders = (req: Request) => {
+  const origin = req.headers.get("Origin") ?? "";
+  const allowed =
+    /^https?:\/\/(localhost|127\.0\.0\.1)(?::\d+)?$/i.test(origin) ||
+    /^exp:\/\/.*$/i.test(origin) ||
+    /^https:\/\/.*\.supabase\.co$/i.test(origin);
+
+  return {
+    "Access-Control-Allow-Origin": allowed ? origin : "null",
+    Vary: "Origin",
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
 };
 
 type OrderRow = {
@@ -27,10 +36,10 @@ type ChannelResult = {
   detail?: string;
 };
 
-const jsonResponse = (body: Record<string, unknown>, status = 200) =>
+const jsonResponse = (body: Record<string, unknown>, req: Request, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
   });
 
 function escapeHtml(value: string) {
@@ -96,10 +105,10 @@ async function sendEmail(
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { headers: getCorsHeaders(req) });
   }
   if (req.method !== "POST") {
-    return jsonResponse({ error: "Method not allowed." }, 405);
+    return jsonResponse({ error: "Method not allowed." }, req, 405);
   }
 
   try {
@@ -110,10 +119,10 @@ Deno.serve(async (req) => {
     const paystackSecretKey = Deno.env.get("PAYSTACK_SECRET_KEY");
 
     if (!authorization || !supabaseUrl || !anonKey || !serviceRoleKey) {
-      return jsonResponse({ error: "Order service is not configured." }, 500);
+      return jsonResponse({ error: "Order service is not configured." }, req, 500);
     }
     if (!paystackSecretKey) {
-      return jsonResponse({ error: "Paystack refunds are not configured." }, 500);
+      return jsonResponse({ error: "Paystack refunds are not configured." }, req, 500);
     }
 
     const userClient = createClient(supabaseUrl, anonKey, {
@@ -123,7 +132,7 @@ Deno.serve(async (req) => {
       data: { user },
       error: authError,
     } = await userClient.auth.getUser();
-    if (authError || !user) return jsonResponse({ error: "Unauthorized." }, 401);
+    if (authError || !user) return jsonResponse({ error: "Unauthorized." }, req, 401);
 
     const admin = createClient(supabaseUrl, serviceRoleKey);
     const { data: adminProfile, error: adminProfileError } = await admin
@@ -133,24 +142,24 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (adminProfileError) {
       console.error("Admin role lookup failed:", adminProfileError);
-      return jsonResponse({ error: "Unable to verify admin access." }, 500);
+      return jsonResponse({ error: "Unable to verify admin access." }, req, 500);
     }
     if (adminProfile?.role !== "admin") {
-      return jsonResponse({ error: "Admins only." }, 403);
+      return jsonResponse({ error: "Admins only." }, req, 403);
     }
 
     let body: unknown;
     try {
       body = await req.json();
     } catch {
-      return jsonResponse({ error: "Invalid request body." }, 400);
+      return jsonResponse({ error: "Invalid request body." }, req, 400);
     }
     if (!body || typeof body !== "object" || Array.isArray(body)) {
-      return jsonResponse({ error: "Invalid request body." }, 400);
+      return jsonResponse({ error: "Invalid request body." }, req, 400);
     }
     const orderId = (body as Record<string, unknown>).order_id;
     if (typeof orderId !== "string" || !orderId) {
-      return jsonResponse({ error: "Order ID is required." }, 400);
+      return jsonResponse({ error: "Order ID is required." }, req, 400);
     }
 
     const { data: order, error: orderError } = await admin
@@ -162,9 +171,9 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (orderError) {
       console.error("Loading unavailable order failed:", orderError);
-      return jsonResponse({ error: "Unable to load this order." }, 500);
+      return jsonResponse({ error: "Unable to load this order." }, req, 500);
     }
-    if (!order) return jsonResponse({ error: "Order not found." }, 404);
+    if (!order) return jsonResponse({ error: "Order not found." }, req, 404);
 
     const orderRow = order as OrderRow;
     if (
@@ -175,6 +184,7 @@ Deno.serve(async (req) => {
         {
           error: `This order has already entered refund processing (${orderRow.refund_status ?? "status unavailable"}).`,
         },
+        req,
         409,
       );
     }
@@ -192,6 +202,7 @@ Deno.serve(async (req) => {
           error:
             "Only paid orders that have not been assigned to a rider can be marked unavailable.",
         },
+        req,
         409,
       );
     }
@@ -215,12 +226,14 @@ Deno.serve(async (req) => {
       console.error("Claiming unavailable order failed:", claimError);
       return jsonResponse(
         { error: "Could not safely start the cancellation and refund." },
+        req,
         500,
       );
     }
     if (!claimedOrder) {
       return jsonResponse(
         { error: "This order changed and can no longer be marked unavailable." },
+        req,
         409,
       );
     }
@@ -343,16 +356,19 @@ Deno.serve(async (req) => {
       console.error("Order cancellation has a refund issue:", refundErrorMessage);
     }
 
-    return jsonResponse({
-      success: true,
-      order_id: orderId,
-      refund_status: refundStatus,
-      refund_error: refundErrorMessage,
-      notifications: { email },
-      warning: refundRecordError
-        ? "Refund was requested but its status could not be saved to the order."
-        : null,
-    });
+    return jsonResponse(
+      {
+        success: true,
+        order_id: orderId,
+        refund_status: refundStatus,
+        refund_error: refundErrorMessage,
+        notifications: { email },
+        warning: refundRecordError
+          ? "Refund was requested but its status could not be saved to the order."
+          : null,
+      },
+      req,
+    );
   } catch (error) {
     console.error("Marking order unavailable failed:", error);
     return jsonResponse(
@@ -362,6 +378,7 @@ Deno.serve(async (req) => {
             ? error.message
             : "Unable to mark the order unavailable.",
       },
+      req,
       500,
     );
   }

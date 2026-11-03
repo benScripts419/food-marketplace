@@ -131,12 +131,12 @@ export default function CartScreen() {
 
                 <View className="ml-3 flex-1">
                   <Text className="text-sm font-extrabold text-primary">
-                    You've unlocked a FREE item!
+                    You have unlocked a FREE item!
                   </Text>
 
                   <Text className="mt-1 text-xs leading-5 text-textSecondary">
-                    You've qualified for a free Roll'd Up item. Choose the item
-                    you want for FREE.
+                    You have qualified for a free Roll&apos;d Up item. Choose
+                    the item you want for FREE.
                   </Text>
                 </View>
               </View>
@@ -169,7 +169,7 @@ export default function CartScreen() {
 
                 <View className="ml-3 flex-1">
                   <Text className="text-sm font-extrabold text-primary">
-                    Roll'd Up Wednesday
+                    Roll&apos;d Up Wednesday
                   </Text>
 
                   <Text className="mt-1 text-xs leading-5 text-textSecondary">
@@ -337,7 +337,7 @@ export default function CartScreen() {
           {promotionDiscount > 0 && (
             <View className="flex-row justify-between py-2">
               <Text className="text-sm font-semibold text-success">
-                Roll'd Up Wednesday
+                Roll&apos;d Up Wednesday
               </Text>
 
               <Text className="text-sm font-bold text-success">

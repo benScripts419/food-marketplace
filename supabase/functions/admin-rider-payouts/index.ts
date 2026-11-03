@@ -1,11 +1,22 @@
 ﻿
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+let currentRequest: Request | null = null;
+
+const getCorsHeaders = (req: Request) => {
+  const origin = req.headers.get("Origin") ?? "";
+  const allowed =
+    /^https?:\/\/(localhost|127\.0\.0\.1)(?::\d+)?$/i.test(origin) ||
+    /^exp:\/\/.*$/i.test(origin) ||
+    /^https:\/\/.*\.supabase\.co$/i.test(origin);
+
+  return {
+    "Access-Control-Allow-Origin": allowed ? origin : "null",
+    Vary: "Origin",
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
 };
 
 const providerBankCodes = {
@@ -28,10 +39,12 @@ function jsonResponse(
   body: Record<string, unknown>,
   status = 200,
 ): Response {
+  const request = currentRequest ?? new Request("http://localhost");
+
   return new Response(JSON.stringify(body), {
     status,
     headers: {
-      ...corsHeaders,
+      ...getCorsHeaders(request),
       "Content-Type": "application/json",
     },
   });
@@ -106,8 +119,10 @@ async function createPaystackRecipient(input: {
 }
 
 Deno.serve(async (req: Request) => {
+  currentRequest = req;
+
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { headers: getCorsHeaders(req) });
   }
 
   if (req.method !== "POST") {

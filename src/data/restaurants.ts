@@ -75,7 +75,6 @@ export const restaurants = [
   {
     id: "8",
     name: "Pam's Check Check",
-    emoji: "🧋",
     rating: "4.5",
     reviews: "0",
     time: "15–25 min",

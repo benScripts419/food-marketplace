@@ -1,0 +1,62 @@
+export type MenuItem = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  subCategory?: string;
+  image: any;
+};
+
+export type MenuCategory = {
+  id: string;
+  name: string;
+  items: MenuItem[];
+};
+
+const eggFriedRice = require("../../assets/images/food/fried-rice.jpg");
+
+export const pamsCheckCheck: MenuCategory[] = [
+  {
+    id: "50-cent-main-dishes",
+    name: "Main Dishes",
+    items: [
+      {
+        id: "50-cent-fried-rice-small",
+        name: "Fried Rice & Chicken",
+        description: "Small",
+        price: 40,
+        category: "Fast Food",
+        subCategory: "Small",
+        image: eggFriedRice,
+      },
+      {
+        id: "50-cent-fried-rice-medium",
+        name: "Fried Rice & Chicken",
+        description: "Medium",
+        price: 50,
+        category: "Fast Food",
+        subCategory: "Medium",
+        image: eggFriedRice,
+      },
+      {
+        id: "50-cent-fried-rice-large",
+        name: "Fried Rice & Chicken",
+        description: "Large",
+        price: 60,
+        category: "Fast Food",
+        subCategory: "Large",
+        image: eggFriedRice,
+      },
+      {
+        id: "50-cent-fried-rice-jumbo-pack",
+        name: "Fried Rice & Chicken",
+        description: "Jumbo Pack",
+        price: 70,
+        category: "Fast Food",
+        subCategory: "Jumbo Pack",
+        image: eggFriedRice,
+      },
+    ],
+  },
+];

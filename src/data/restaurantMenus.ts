@@ -5,6 +5,7 @@ import { conceptMenu } from "./conceptMenu";
 import { kwayisibeaMenu } from "./kwayisibeaMenu";
 import { lizjaysMenu } from "./lizjaysMenu";
 import { rolldUpMenu } from "./rolldUpMenu";
+import { pamsCheckCheck } from "./pamsCheckCheck";
 
 export type MenuItem = {
   id: string;
@@ -32,6 +33,7 @@ export const restaurantMenus: Record<string, MenuCategory[]> = {
   "3": brackersInnMenu,
   "4": bloomBakesMenu,
   "5": rolldUpMenu,
+  "6": pamsCheckCheck,
   "50": fiftyCentMenu,
 };
 
@@ -49,7 +51,7 @@ export const restaurantMenusByName: Record<string, MenuCategory[]> = {
   "Boba Buzz": lizjaysMenu,
   "50 Cent": fiftyCentMenu,
   "Thebloom Boba Tea": fiftyCentMenu,
-  "Pam's Check Check": [],
+  "Pam's Check Check": pamsCheckCheck,
 };
 
 // --------------------------------------------------

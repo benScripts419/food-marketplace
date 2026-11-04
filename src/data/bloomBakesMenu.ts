@@ -14,7 +14,16 @@ export type MenuCategory = {
   items: MenuItem[];
 };
 
-const menuImage = require("../../assets/images/akrobite-logo.png");
+const bloomCupImage = {
+  uri: "https://images.unsplash.com/photo-1521597893803-7ff2abaa9e11?auto=format&fit=crop&w=900&q=80",
+};
+const fruitTeaImage = {
+  uri: "https://images.unsplash.com/photo-1546173159-315724a31696?auto=format&fit=crop&w=900&q=80",
+};
+const matchaImage = {
+  uri: "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&w=900&q=80",
+};
+const menuImage = bloomCupImage;
 const strawberryTea = require("../../assets/images/food/strawberry-tea.jpg");
 const vanillaTea = require("../../assets/images/food/vanilla-tea.jpg");
 const matchaTea = require("../../assets/images/food/matcha-tea.png");
@@ -287,7 +296,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 40,
         category: "Boba Tea",
         subCategory: "500ml",
-        image: chocolateTea,
+        image: fruitTeaImage,
       },
       {
         id: "bloom-passion-fruit-tea-700",
@@ -296,9 +305,9 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 50,
         category: "Boba Tea",
         subCategory: "700ml",
-        image: chocolateTea,
+        image: fruitTeaImage,
       },
-    
+
       {
         id: "bloom-strawberry-tea-500",
         name: "Strawberry",
@@ -306,7 +315,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 40,
         category: "Boba Tea",
         subCategory: "500ml",
-        image: chocolateTea,
+        image: fruitTeaImage,
       },
       {
         id: "bloom-strawberry-tea-700",
@@ -315,9 +324,9 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 50,
         category: "Boba Tea",
         subCategory: "700ml",
-        image: chocolateTea,
+        image: fruitTeaImage,
       },
-    
+
       {
         id: "bloom-mango-tea-500",
         name: "Mango",
@@ -325,7 +334,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 40,
         category: "Boba Tea",
         subCategory: "500ml",
-        image: chocolateTea,
+        image: fruitTeaImage,
       },
       {
         id: "bloom-mango-tea-700",
@@ -334,9 +343,9 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 50,
         category: "Boba Tea",
         subCategory: "700ml",
-        image: chocolateTea,
+        image: fruitTeaImage,
       },
-    
+
       {
         id: "bloom-water-melon-tea-500",
         name: "Water Melon",
@@ -344,7 +353,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 40,
         category: "Boba Tea",
         subCategory: "500ml",
-        image: chocolateTea,
+        image: fruitTeaImage,
       },
       {
         id: "bloom-water-melon-tea-700",
@@ -353,9 +362,9 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 50,
         category: "Boba Tea",
         subCategory: "700ml",
-        image: chocolateTea,
+        image: fruitTeaImage,
       },
-    
+
       {
         id: "bloom-blueberry-tea-500",
         name: "Blueberry",
@@ -363,7 +372,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 40,
         category: "Boba Tea",
         subCategory: "500ml",
-        image: chocolateTea,
+        image: fruitTeaImage,
       },
       {
         id: "bloom-blueberry-tea-700",
@@ -372,9 +381,9 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 50,
         category: "Boba Tea",
         subCategory: "700ml",
-        image: chocolateTea,
+        image: fruitTeaImage,
       },
-    
+
       {
         id: "bloom-dragon-fruit-tea-500",
         name: "Dragon Fruit",
@@ -382,7 +391,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 40,
         category: "Boba Tea",
         subCategory: "500ml",
-        image: chocolateTea,
+        image: fruitTeaImage,
       },
       {
         id: "bloom-dragon-fruit-tea-700",
@@ -391,9 +400,9 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 50,
         category: "Boba Tea",
         subCategory: "700ml",
-        image: chocolateTea,
+        image: fruitTeaImage,
       },
-    
+
       {
         id: "bloom-peach-tea-500",
         name: "Peach",
@@ -401,7 +410,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 40,
         category: "Boba Tea",
         subCategory: "500ml",
-        image: chocolateTea,
+        image: fruitTeaImage,
       },
       {
         id: "bloom-peach-tea-700",
@@ -410,8 +419,9 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 50,
         category: "Boba Tea",
         subCategory: "700ml",
-        image: chocolateTea,
-      },]
+        image: fruitTeaImage,
+      },
+    ],
   },
 
   // =====================================================
@@ -428,7 +438,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: menuImage,
+        image: matchaImage,
       },
       {
         id: "bloom-matcha-brown-sugar-700",
@@ -437,7 +447,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: menuImage,
+        image: matchaImage,
       },
 
       {
@@ -447,7 +457,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: menuImage,
+        image: matchaImage,
       },
       {
         id: "bloom-matcha-cookie-dough-700",
@@ -456,7 +466,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: menuImage,
+        image: matchaImage,
       },
 
       {
@@ -466,7 +476,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: menuImage,
+        image: matchaImage,
       },
       {
         id: "bloom-matcha-blueberry-700",
@@ -475,7 +485,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: menuImage,
+        image: matchaImage,
       },
 
       {
@@ -485,7 +495,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: menuImage,
+        image: matchaImage,
       },
       {
         id: "bloom-matcha-strawberry-700",
@@ -494,7 +504,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: menuImage,
+        image: matchaImage,
       },
 
       {
@@ -504,7 +514,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: menuImage,
+        image: matchaImage,
       },
       {
         id: "bloom-matcha-dragon-fruit-700",
@@ -513,7 +523,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: menuImage,
+        image: matchaImage,
       },
 
       {
@@ -523,7 +533,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: menuImage,
+        image: matchaImage,
       },
       {
         id: "bloom-matcha-coconut-700",
@@ -532,7 +542,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: menuImage,
+        image: matchaImage,
       },
 
       {
@@ -542,7 +552,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: menuImage,
+        image: matchaImage,
       },
       {
         id: "bloom-matcha-taro-700",
@@ -551,7 +561,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: menuImage,
+        image: matchaImage,
       },
 
       {
@@ -561,7 +571,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: menuImage,
+        image: matchaImage,
       },
       {
         id: "bloom-matcha-mango-700",
@@ -570,7 +580,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: menuImage,
+        image: matchaImage,
       },
 
       {
@@ -580,7 +590,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: menuImage,
+        image: matchaImage,
       },
       {
         id: "bloom-matcha-banana-700",
@@ -589,7 +599,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: menuImage,
+        image: matchaImage,
       },
 
       {
@@ -599,7 +609,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: menuImage,
+        image: matchaImage,
       },
       {
         id: "bloom-matcha-passion-fruit-700",
@@ -608,8 +618,9 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: menuImage,
+        image: matchaImage,
       },
     ],
   },
+
 ];

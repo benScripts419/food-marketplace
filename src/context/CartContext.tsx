@@ -16,6 +16,29 @@ const FREE_SELECTIONS_STORAGE_KEY = "@akrobite_free_item_selections";
 // Roll'd Up restaurant UUID
 const ROLLD_UP_RESTAURANT_ID = "0a7aae53-94c5-428c-88c5-3e6cd88ee911";
 
+const normalizeRestaurantName = (name?: string | null) =>
+  (name ?? "").trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+
+const isRollDUpRestaurant = (
+  restaurantId?: string | null,
+  restaurantName?: string | null,
+) => {
+  if (!restaurantId && !restaurantName) {
+    return false;
+  }
+
+  const normalizedId = restaurantId ?? "";
+  const normalizedName = normalizeRestaurantName(restaurantName);
+
+  return (
+    normalizedId === ROLLD_UP_RESTAURANT_ID ||
+    normalizedName.includes("rolldup") ||
+    normalizedName.includes("rolldupshawarma") ||
+    normalizedName.includes("rollupshawarma") ||
+    normalizedName.includes("rollup")
+  );
+};
+
 // Wednesday = 3
 const PROMOTION_DAY = 3;
 
@@ -40,6 +63,7 @@ export type CartItem = {
 type FreeItemSelection = {
   itemId: string;
   restaurantId: string;
+  restaurantName?: string;
 };
 
 type OrderItem = {
@@ -235,7 +259,9 @@ export function CartProvider({ children }: CartProviderProps) {
   const getFreeSelectionCount = useCallback(
     (selections: FreeItemSelection[], restaurantId: string) => {
       return selections.filter(
-        (selection) => selection.restaurantId === restaurantId,
+        (selection) =>
+          selection.restaurantId === restaurantId ||
+          isRollDUpRestaurant(selection.restaurantId, selection.restaurantName),
       ).length;
     },
     [],
@@ -248,11 +274,18 @@ export function CartProvider({ children }: CartProviderProps) {
       restaurantId: string,
     ) => {
       return items
-        .filter((item) => item.restaurantId === restaurantId)
+        .filter((item) =>
+          item.restaurantId === restaurantId ||
+          isRollDUpRestaurant(item.restaurantId, item.restaurantName),
+        )
         .reduce((total, item) => {
           const freeQuantity = selections.filter(
             (selection) =>
-              selection.restaurantId === restaurantId &&
+              (selection.restaurantId === restaurantId ||
+                isRollDUpRestaurant(
+                  selection.restaurantId,
+                  selection.restaurantName,
+                )) &&
               selection.itemId === item.id,
           ).length;
 
@@ -267,20 +300,30 @@ export function CartProvider({ children }: CartProviderProps) {
   // --------------------------------------------------
 
   const paidQualifyingItemCount = useMemo(() => {
-    return getPaidItemCount(
-      cartItems,
-      freeItemSelections,
-      ROLLD_UP_RESTAURANT_ID,
-    );
-  }, [cartItems, freeItemSelections, getPaidItemCount]);
+    return cartItems
+      .filter((item) =>
+        isRollDUpRestaurant(item.restaurantId, item.restaurantName),
+      )
+      .reduce((total, item) => {
+        const freeQuantity = freeItemSelections.filter(
+          (selection) =>
+            isRollDUpRestaurant(selection.restaurantId, selection.restaurantName) &&
+            selection.itemId === item.id,
+        ).length;
+
+        return total + Math.max(0, item.quantity - freeQuantity);
+      }, 0);
+  }, [cartItems, freeItemSelections]);
 
   // --------------------------------------------------
   // FREE ITEMS ALREADY SELECTED
   // --------------------------------------------------
 
   const selectedFreeItemCount = useMemo(() => {
-    return getFreeSelectionCount(freeItemSelections, ROLLD_UP_RESTAURANT_ID);
-  }, [freeItemSelections, getFreeSelectionCount]);
+    return freeItemSelections.filter((selection) =>
+      isRollDUpRestaurant(selection.restaurantId, selection.restaurantName),
+    ).length;
+  }, [freeItemSelections]);
 
   // --------------------------------------------------
   // NUMBER OF FREE ITEMS UNLOCKED
@@ -325,13 +368,16 @@ export function CartProvider({ children }: CartProviderProps) {
   const addToCart = useCallback(
     (item: Omit<CartItem, "quantity">) => {
       setCartItems((currentItems) => {
-        const isRollDUp = item.restaurantId === ROLLD_UP_RESTAURANT_ID;
+        const isRollDUp = isRollDUpRestaurant(
+          item.restaurantId,
+          item.restaurantName,
+        );
 
         const currentPaidCount = isRollDUp
           ? getPaidItemCount(
               currentItems,
               freeItemSelections,
-              ROLLD_UP_RESTAURANT_ID,
+              item.restaurantId,
             )
           : 0;
 
@@ -389,19 +435,19 @@ export function CartProvider({ children }: CartProviderProps) {
         return;
       }
 
-      if (item.restaurantId !== ROLLD_UP_RESTAURANT_ID) {
+      if (!isRollDUpRestaurant(item.restaurantId, item.restaurantName)) {
         return;
       }
 
       const currentPaidCount = getPaidItemCount(
         cartItems,
         freeItemSelections,
-        ROLLD_UP_RESTAURANT_ID,
+        item.restaurantId,
       );
       const unlockedCount = Math.floor(currentPaidCount / 3);
       const selectedCount = getFreeSelectionCount(
         freeItemSelections,
-        ROLLD_UP_RESTAURANT_ID,
+        item.restaurantId,
       );
 
       if (selectedCount >= unlockedCount) {
@@ -413,6 +459,7 @@ export function CartProvider({ children }: CartProviderProps) {
         {
           itemId: item.id,
           restaurantId: item.restaurantId,
+          restaurantName: item.restaurantName,
         },
       ]);
 
@@ -489,13 +536,16 @@ export function CartProvider({ children }: CartProviderProps) {
           return currentItems;
         }
 
-        const isRollDUp = restaurantId === ROLLD_UP_RESTAURANT_ID;
+        const isRollDUp = isRollDUpRestaurant(
+          currentItem.restaurantId,
+          currentItem.restaurantName,
+        );
 
         if (isRollDUp && isPromotionActive) {
           const currentPaidCount = getPaidItemCount(
             currentItems,
             freeItemSelections,
-            ROLLD_UP_RESTAURANT_ID,
+            restaurantId,
           );
 
           const newPaidCount = currentPaidCount + 1;

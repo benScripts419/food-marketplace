@@ -28,8 +28,8 @@ const categoryAliases: Record<string, string[]> = {
 
 const MAX_CONTENT_WIDTH = 1100;
 const GRID_GAP = 16;
-// Same background the restaurant menu uses behind these pictures.
-const PHOTO_BACKGROUND = "#f3f0e7";
+// Match the warm cream background used by the Bloom Bakes product shots.
+const PHOTO_BACKGROUND = "#F3EFE6";
 
 type Restaurant = {
   id: string;
@@ -260,7 +260,7 @@ export default function CategoryItemsScreen() {
               source={item.image}
               label={item.name}
               aspectRatio={1}
-              fit="contain"
+              fit="cover"
               backgroundColor={PHOTO_BACKGROUND}
             />
           </View>
@@ -291,7 +291,7 @@ export default function CategoryItemsScreen() {
             source={item.image}
             label={item.name}
             aspectRatio={1}
-            fit="contain"
+            fit="cover"
             backgroundColor={PHOTO_BACKGROUND}
           />
         </View>

@@ -43,6 +43,27 @@ type Restaurant = {
 
 const ROLLD_UP_RESTAURANT_ID = "0a7aae53-94c5-428c-88c5-3e6cd88ee911";
 
+const isRollDUpRestaurant = (
+  restaurantId?: string | null,
+  restaurantName?: string | null,
+) => {
+  if (!restaurantId && !restaurantName) {
+    return false;
+  }
+
+  const normalizedId = (restaurantId ?? "").trim();
+  const normalizedName = (restaurantName ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+
+  return (
+    normalizedId === ROLLD_UP_RESTAURANT_ID ||
+    normalizedName.includes("rolldup") ||
+    normalizedName.includes("rollup")
+  );
+};
+
 export default function RestaurantDetailScreen() {
   // --------------------------------------------------
   // ROUTE PARAMETERS
@@ -166,7 +187,11 @@ export default function RestaurantDetailScreen() {
   // --------------------------------------------------
 
   useEffect(() => {
-    if (!freeItemPromptVisible || restaurant?.id !== ROLLD_UP_RESTAURANT_ID) {
+    if (
+      !freeItemPromptVisible ||
+      !restaurant ||
+      !isRollDUpRestaurant(restaurant.id, restaurant.name)
+    ) {
       return;
     }
 
@@ -832,12 +857,13 @@ export default function RestaurantDetailScreen() {
 
                     <Image
                       source={item.image}
-                      className="rounded-xl bg-[#f3f0e7]"
+                      className="rounded-xl"
                       style={{
                         width: imageSize,
                         height: imageSize,
+                        backgroundColor: "#F3EFE6",
                       }}
-                      resizeMode="contain"
+                      resizeMode="cover"
                     />
 
                     {/* FOOD DETAILS */}

@@ -2,6 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Image, View } from "react-native";
 
+const DEFAULT_IMAGE_BACKGROUND = "#F3EFE6";
+
 // A picture in a box that keeps its shape on every screen size.
 // If the picture is missing or fails to load, an icon is shown instead,
 // and the address that failed is logged to the browser console.
@@ -10,7 +12,7 @@ export default function SafeImage({
   aspectRatio = 16 / 10,
   label,
   fit = "cover",
-  backgroundColor = "#F5F5F5",
+  backgroundColor = DEFAULT_IMAGE_BACKGROUND,
   radius = 0,
 }: {
   source: any;

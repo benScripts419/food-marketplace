@@ -47,8 +47,18 @@ export default function CartScreen() {
    * CHECK WHETHER ITEM BELONGS TO ROLL'D UP
    * --------------------------------------------------
    */
-  const isRollDUpItem = (restaurantId: string) => {
-    return restaurantId === ROLLD_UP_RESTAURANT_ID;
+  const isRollDUpItem = (restaurantId: string, restaurantName?: string) => {
+    const targetId =
+      cartItems.find(
+        (item) =>
+          item.restaurantId === restaurantId &&
+          item.restaurantName === restaurantName,
+      )?.restaurantId ?? restaurantId;
+
+    return (
+      targetId === ROLLD_UP_RESTAURANT_ID ||
+      (restaurantName ? /rolld?up/i.test(restaurantName) : false)
+    );
   };
 
   /*
@@ -142,9 +152,14 @@ export default function CartScreen() {
               </View>
 
               <Pressable
-                onPress={() =>
-                  router.push(`/restaurant/${ROLLD_UP_RESTAURANT_ID}`)
-                }
+                onPress={() => {
+                  const rollDUpRestaurantId =
+                    cartItems.find(
+                      (item) => /rolld?up/i.test(item.restaurantName ?? ""),
+                    )?.restaurantId ?? ROLLD_UP_RESTAURANT_ID;
+
+                  router.push(`/restaurant/${rollDUpRestaurantId}`);
+                }}
                 className="mt-4 h-11 items-center justify-center rounded-xl bg-primary"
               >
                 <Text className="text-sm font-bold text-white">
@@ -194,7 +209,10 @@ export default function CartScreen() {
 
           const isFreeItem = freeQuantity > 0;
 
-          const belongsToRollDUp = isRollDUpItem(item.restaurantId);
+          const belongsToRollDUp = isRollDUpItem(
+            item.restaurantId,
+            item.restaurantName,
+          );
 
           return (
             <View

@@ -60,6 +60,15 @@ const goatLightSoup = require("../../assets/images/food/goat-light-soup.jpg");
 const beansStew = require("../../assets/images/food/beans-stew.jpg");
 const palavaSauce = require("../../assets/images/food/palava-sauce.jpg");
 const porkPieces = require("../../assets/images/food/pork-pieces.jpg");
+const vegetarianSoup = require("../../assets/images/food/vegetarian-soup.jpg");
+const vegieSandwich = require("../../assets/images/food/vegie-sandwich.jpg");
+const beefSauce = require("../../assets/images/food/beef-sauce.jpg");
+const chickenKhebab = require("../../assets/images/food/chicken-khebab.jpg");
+const spicyPork = require("../../assets/images/food/spicy-pork.jpg");
+const chineseStirfry = require("../../assets/images/food/chinese-stirfry.jpg");
+const beefPepperSteak = require("../../assets/images/food/beef-peppersteak.jpg");
+const vegieArabiata = require("../../assets/images/food/vegie-arabiata.jpg");
+const gardeneggStew = require("../../assets/images/food/gardenegg-stew.jpg");
 
 const foodImage = require("@/assets/images/food/mixed-salad.jpg");
 
@@ -166,7 +175,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         name: "Vegetable Rice",
         description: "Only",
         price: 30,
-        category: "Side Orders",
+        category: "Vegetarian",
         image: vegetableRice,
       },
 
@@ -335,7 +344,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         name: "Fish Garden Egg Stew",
         price: 80,
         category: "Locals",
-        image: foodImage,
+        image: gardeneggStew,
       },
     ],
   },
@@ -413,21 +422,21 @@ export const kwayisibeaMenu: MenuCategory[] = [
         name: "Vegetarian Soup",
         price: 60,
         category: "Vegetarian",
-        image: foodImage,
+        image: vegetarianSoup,
       },
       {
         id: "kw-veg-2",
         name: "Veggie Sandwich",
         price: 70,
         category: "Vegetarian",
-        image: foodImage,
+        image: vegieSandwich,
       },
       {
         id: "kw-veg-3",
         name: "Penne Arrabiata",
         price: 70,
         category: "Vegetarian",
-        image: foodImage,
+        image: vegieArabiata,
       },
       {
         id: "kw-veg-4",
@@ -525,7 +534,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         description: "Shredded beef in brown vegetable sauce.",
         price: 140,
         category: "Pork, Beef & Grill",
-        image: foodImage,
+        image: beefSauce,
       },
       {
         id: "kw-grill-3",
@@ -533,7 +542,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         description: "Grilled tender beef fillet in peppercorn sauce.",
         price: 140,
         category: "Pork, Beef & Grill",
-        image: foodImage,
+        image: beefPepperSteak,
       },
       {
         id: "kw-grill-4",
@@ -541,50 +550,21 @@ export const kwayisibeaMenu: MenuCategory[] = [
         description: "Grilled pork pieces in chili sauce.",
         price: 140,
         category: "Pork, Beef & Grill",
-        image: foodImage,
+        image: spicyPork,
       },
       {
         id: "kw-grill-5",
         name: "Chinese Beef Stir Fry",
         price: 140,
         category: "Pork, Beef & Grill",
-        image: foodImage,
+        image: chineseStirfry,
       },
       {
         id: "kw-grill-6",
-        name: "Honey & Mustard Grilled Beef",
-        description: "Beef strips in vegetable sauce.",
-        price: 140,
-        category: "Pork, Beef & Grill",
-        image: foodImage,
-      },
-      {
-        id: "kw-grill-7",
-        name: "Chicken Kebab",
+        name: "Chicken Khebab",
         price: 70,
         category: "Pork, Beef & Grill",
-        image: foodImage,
-      },
-      {
-        id: "kw-grill-8",
-        name: "Beef Kebab",
-        price: 80,
-        category: "Pork, Beef & Grill",
-        image: foodImage,
-      },
-      {
-        id: "kw-grill-9",
-        name: "Squid Kebab",
-        price: 70,
-        category: "Pork, Beef & Grill",
-        image: foodImage,
-      },
-      {
-        id: "kw-grill-10",
-        name: "Oven Grilled Pork Chop",
-        price: 150,
-        category: "Pork, Beef & Grill",
-        image: foodImage,
+        image: chickenKhebab,
       },
     ],
   },

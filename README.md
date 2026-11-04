@@ -25,8 +25,10 @@ Supabase Project Settings > API.
 In Supabase Authentication > Providers, enable Google and Apple. Add these
 redirect URLs to Authentication > URL Configuration:
 
-- `foodmarketplace://auth/callback`
+- `food-marketplace://auth/callback`
 - `http://localhost:8081/auth/callback`
+
+This matches the Expo app scheme configured in [app.json](app.json).
 
 For Google, add the web, Android, and iOS OAuth client IDs in the Google
 provider settings. For Apple, configure the Apple Services ID, Team ID, Key

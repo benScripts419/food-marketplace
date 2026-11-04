@@ -20,6 +20,11 @@ const jollofRice = require("../../assets/images/food/jollof-rice.jpg");
 const assortedFriedRice = require("../../assets/images/food/assorted-fried-rice.jpg");
 const assortedJollofRice = require("../../assets/images/food/assorted-jollof-rice.jpg");
 const chickenShawarma = require("../../assets/images/food/chicken-shawarma.jpg");
+const vegetableRice = require("../../assets/images/food/vegetable-rice.jpg");
+const friedriceRedfish = require("../../assets/images/food/friedrice-redfish.jpg");
+const jollofFish = require("../../assets/images/food/jollof-fish.jpg");
+const potatoChipsChicken = require("../../assets/images/food/potatochips-chicken.jpg");
+const frenchFries = require("../../assets/images/food/french-fries.jpg");
 
 export const brackersInnMenu: MenuCategory[] = [
   // =====================================================
@@ -72,7 +77,7 @@ export const brackersInnMenu: MenuCategory[] = [
         price: 50,
         category: "Main Dishes",
         subCategory: "Large",
-        image: menuImage,
+        image: vegetableRice,
       },
       {
         id: "brackers-fried-rice-large",
@@ -118,7 +123,7 @@ export const brackersInnMenu: MenuCategory[] = [
         price: 70,
         category: "Main Dishes",
         subCategory: "Small Pack",
-        image: assortedFriedRice,
+        image: friedriceRedfish,
       },
       {
         id: "brackers-jollof-red-fish",
@@ -127,7 +132,7 @@ export const brackersInnMenu: MenuCategory[] = [
         price: 70,
         category: "Main Dishes",
         subCategory: "Small Pack",
-        image: assortedJollofRice,
+        image: jollofFish,
       },
       {
         id: "brackers-assorted-fried-rice-jumbo",
@@ -165,7 +170,7 @@ export const brackersInnMenu: MenuCategory[] = [
         description: "Potato chips served with chicken",
         price: 60,
         category: "Main Dishes",
-        image: menuImage,
+        image: potatoChipsChicken,
       },
 
       {
@@ -174,7 +179,7 @@ export const brackersInnMenu: MenuCategory[] = [
         description: "Potato chips",
         price: 40,
         category: "Main Dishes",
-        image: menuImage,
+        image: frenchFries,
       },
 
       {

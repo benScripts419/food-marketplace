@@ -54,6 +54,7 @@
   },
   "scripts": {
     "start": "expo start",
+    "build": "npx expo export --platform web",
     "seed:supabase": "tsx scripts/seed-supabase.ts",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",

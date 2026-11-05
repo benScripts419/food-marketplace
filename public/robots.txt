@@ -2,4 +2,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://ebenezer-donkor.space/sitemap.xml
+Sitemap: https://akrobite.com/sitemap.xml

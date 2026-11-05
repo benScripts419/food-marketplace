@@ -45,11 +45,11 @@ const beefShawarma = require("../../assets/images/food/beef-shawarma.jpg");
 const jollofOnly = require("../../assets/images/food/jollof-only.jpg");
 const chickenJollof = require("../../assets/images/food/chicken-jollof.jpg");
 const creamedPotatoes = require("../../assets/images/food/creamed-potatoes.jpg");
-const assortedBeefJollof = require("../../assets/images/food/jollof-beef.jpg");
-const assortedPorkJollof = require("../../assets/images/food/jollof-pork.jpg");
+const assortedBeefJollof = require("../../assets/images/food/jollof-beef.jpeg");
+const assortedPorkJollof = require("../../assets/images/food/jollof-pork.jpeg");
 const assortedFriedRice = require("../../assets/images/food/assorted-fried-rice.jpg");
-const assortedBeefFriedRice = require("../../assets/images/food/beef-friedrice.jpg");
-const assortedPorkFriedRice = require("../../assets/images/food/pork-friedrice.jpg");
+const assortedBeefFriedRice = require("../../assets/images/food/beef-friedrice.jpeg");
+const assortedPorkFriedRice = require("../../assets/images/food/pork-friedrice.jpeg");
 const banku = require("../../assets/images/food/banku.jpg");
 
 

@@ -27,13 +27,18 @@ async function createSessionFromUrl(url: string) {
 }
 
 export async function signInWithGoogle(): Promise<boolean> {
-  // Web: Supabase redirects the whole page, so there is nothing to navigate to here
   if (Platform.OS === "web") {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo },
     });
+
     if (error) throw error;
+
+    if (data?.url && typeof window !== "undefined") {
+      window.location.assign(data.url);
+    }
+
     return false;
   }
 

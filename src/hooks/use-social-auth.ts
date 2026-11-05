@@ -56,7 +56,7 @@ export function useSocialAuth() {
 if (Platform.OS === "web") {
   const webRedirectUri = new URL(
     "/auth/callback",
-    window.location.origin
+    window.location.origin,
   ).toString();
 
   const { data, error: oauthError } =
@@ -74,9 +74,12 @@ if (Platform.OS === "web") {
   }
 
   console.log("Web OAuth redirect:", webRedirectUri);
-  console.log("Opening Google OAuth:", Boolean(data.url));
+  console.log("Opening OAuth URL in the current browser:", Boolean(data.url));
 
-  // Supabase automatically redirects the browser on web.
+  if (typeof window !== "undefined") {
+    window.location.assign(data.url);
+  }
+
   return false;
 }
 

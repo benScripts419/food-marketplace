@@ -34,12 +34,18 @@ export default function RiderLoginScreen() {
       // WEB: Supabase sends this whole page to Google. Google returns to
       // /rider/callback, which finishes sign-in and checks the rider profile.
       if (Platform.OS === "web") {
-        const { error } = await supabase.auth.signInWithOAuth({
+        const redirectTo = `${window.location.origin}/rider/callback`;
+        const { data, error } = await supabase.auth.signInWithOAuth({
           provider: "google",
-          options: { redirectTo: `${window.location.origin}/rider/callback` },
+          options: { redirectTo },
         });
 
         if (error) throw error;
+
+        if (data?.url && typeof window !== "undefined") {
+          window.location.assign(data.url);
+        }
+
         return;
       }
 

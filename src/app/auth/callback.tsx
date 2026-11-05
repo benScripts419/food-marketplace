@@ -43,9 +43,27 @@ export default function AuthCallback() {
   const getParam = (value?: string | string[]) =>
     Array.isArray(value) ? value[0] : value;
 
-  const code = getParam(params.code);
+  const getHashParam = (key: string) => {
+    if (typeof window === "undefined") return undefined;
+
+    const hashParams = new URLSearchParams(
+      window.location.hash.startsWith("#")
+        ? window.location.hash.slice(1)
+        : window.location.hash,
+    );
+
+    return hashParams.get(key) ?? undefined;
+  };
+
+  const code =
+    getParam(params.code) ??
+    (typeof window !== "undefined" ? getHashParam("code") : undefined);
   const oauthError =
-    getParam(params.error_description) || getParam(params.error);
+    getParam(params.error_description) ||
+    getParam(params.error) ||
+    (typeof window !== "undefined"
+      ? getHashParam("error_description") || getHashParam("error")
+      : undefined);
 
   const callbackError = oauthError || sessionError;
 
@@ -75,21 +93,51 @@ export default function AuthCallback() {
 
       if (!active || redirected) return;
 
-      if (!error && !data.session && Platform.OS === "web" && code) {
-        handled.current = true;
+      if (typeof window !== "undefined") {
+        const hashParams = new URLSearchParams(
+          window.location.hash.startsWith("#")
+            ? window.location.hash.slice(1)
+            : window.location.hash,
+        );
 
-        const exchange = await supabase.auth.exchangeCodeForSession(code);
+        const accessToken = hashParams.get("access_token");
+        const refreshToken = hashParams.get("refresh_token");
 
-        if (!active) return;
+        if (!error && !data.session && Platform.OS === "web") {
+          if (accessToken && refreshToken) {
+            handled.current = true;
+            const setSession = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
 
-        if (exchange.error) {
-          console.error("OAuth code exchange failed:", exchange.error);
-          setSessionError(exchange.error.message);
-          return;
+            if (!active) return;
+
+            if (setSession.error) {
+              console.error("OAuth token set failed:", setSession.error);
+              setSessionError(setSession.error.message);
+              return;
+            }
+
+            ({ data, error } = await supabase.auth.getSession());
+            if (!active || redirected) return;
+          } else if (code) {
+            handled.current = true;
+
+            const exchange = await supabase.auth.exchangeCodeForSession(code);
+
+            if (!active) return;
+
+            if (exchange.error) {
+              console.error("OAuth code exchange failed:", exchange.error);
+              setSessionError(exchange.error.message);
+              return;
+            }
+
+            ({ data, error } = await supabase.auth.getSession());
+            if (!active || redirected) return;
+          }
         }
-
-        ({ data, error } = await supabase.auth.getSession());
-        if (!active || redirected) return;
       }
 
       if (error) {

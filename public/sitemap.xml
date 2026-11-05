@@ -1,18 +1,14 @@
 
-<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-  <!-- AkroBite homepage -->
   <url>
     <loc>https://ebenezer-donkor.space/</loc>
   </url>
 
-  <!-- Restaurant listing -->
   <url>
     <loc>https://ebenezer-donkor.space/restaurants</loc>
   </url>
 
-  <!-- Restaurant categories -->
   <url>
     <loc>https://ebenezer-donkor.space/categories</loc>
   </url>

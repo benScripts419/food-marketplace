@@ -4,11 +4,11 @@
     "slug": "food-marketplace",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/akrobite-logo.png",
     "scheme": "food-marketplace",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
+      "icon": "./assets/images/akrobite-logo.png",
       "usesAppleSignIn": true
     },
     "android": {
@@ -23,7 +23,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png",
+      "favicon": "./assets/images/akrobite-logo.png",
       "bundler": "metro",
       "name": "AkroBite"
     },

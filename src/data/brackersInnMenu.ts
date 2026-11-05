@@ -25,6 +25,8 @@ const friedriceRedfish = require("../../assets/images/food/friedrice-redfish.jpg
 const jollofFish = require("../../assets/images/food/jollof-fish.jpg");
 const potatoChipsChicken = require("../../assets/images/food/potatochips-chicken.jpg");
 const frenchFries = require("../../assets/images/food/french-fries.jpg");
+const chickenPack = require("../../assets/images/food/chicken-pack.jpg");
+const chickenStirfry = require("../../assets/images/food/chicken-stirfry.jpg");
 
 export const brackersInnMenu: MenuCategory[] = [
   // =====================================================
@@ -198,7 +200,7 @@ export const brackersInnMenu: MenuCategory[] = [
         description: "Chicken and vegetables mixed in sweet spicy sauce",
         price: 70,
         category: "Main Dishes",
-        image: menuImage,
+        image: chickenStirfry,
       },
 
       {
@@ -207,7 +209,7 @@ export const brackersInnMenu: MenuCategory[] = [
         description: "Six pieces of chicken",
         price: 50,
         category: "Main Dishes",
-        image: menuImage,
+        image: chickenPack,
       },
     ],
   },

@@ -45,7 +45,12 @@ const beefShawarma = require("../../assets/images/food/beef-shawarma.jpg");
 const jollofOnly = require("../../assets/images/food/jollof-only.jpg");
 const chickenJollof = require("../../assets/images/food/chicken-jollof.jpg");
 const creamedPotatoes = require("../../assets/images/food/creamed-potatoes.jpg");
-
+const assortedBeefJollof = require("../../assets/images/food/jollof-beef.jpg");
+const assortedPorkJollof = require("../../assets/images/food/jollof-pork.jpg");
+const assortedFriedRice = require("../../assets/images/food/assorted-fried-rice.jpg");
+const assortedBeefFriedRice = require("../../assets/images/food/beef-friedrice.jpg");
+const assortedPorkFriedRice = require("../../assets/images/food/pork-friedrice.jpg");
+const banku = require("../../assets/images/food/banku.jpg");
 
 
 
@@ -368,7 +373,7 @@ export const conceptMenu: MenuCategory[] = [
         price: 80,
         category: "Assorted",
         subCategory: "Beef",
-        image: kwMixedSalad,
+        image: assortedBeefJollof,
       },
       {
         id: "concept-assorted-3",
@@ -377,7 +382,7 @@ export const conceptMenu: MenuCategory[] = [
         price: 90,
         category: "Assorted",
         subCategory: "Chicken",
-        image: kwMixedSalad,
+        image: assortedPorkJollof,
       },
       {
         id: "concept-assorted-4",
@@ -386,7 +391,7 @@ export const conceptMenu: MenuCategory[] = [
         price: 80,
         category: "Assorted",
         subCategory: "Chicken",
-        image: kwMixedSalad,
+        image: assortedFriedRice,
       },
       {
         id: "concept-assorted-5",
@@ -395,7 +400,7 @@ export const conceptMenu: MenuCategory[] = [
         price: 80,
         category: "Assorted",
         subCategory: "Beef",
-        image: kwMixedSalad,
+        image: assortedBeefFriedRice,
       },
       {
         id: "concept-assorted-6",
@@ -404,7 +409,7 @@ export const conceptMenu: MenuCategory[] = [
         price: 90,
         category: "Assorted",
         subCategory: "Pork",
-        image: kwMixedSalad,
+        image: assortedPorkFriedRice,
       },
     ],
   },
@@ -480,7 +485,7 @@ export const conceptMenu: MenuCategory[] = [
         price: 150,
         category: "Locals",
         subCategory: "Medium",
-        image: kwMixedSalad,
+        image: banku,
       },
       {
         id: "concept-locals-2",
@@ -489,7 +494,7 @@ export const conceptMenu: MenuCategory[] = [
         price: 150,
         category: "Locals",
         subCategory: "Large",
-        image: kwMixedSalad,
+        image: banku,
       },
 
       {

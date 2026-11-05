@@ -236,6 +236,8 @@ export default function CategoryItemsScreen() {
       </>
     );
 
+    const isBloomBakesItem = item.restaurantName === "Bloom Bakes";
+
     if (compact) {
       return (
         <Pressable
@@ -260,7 +262,7 @@ export default function CategoryItemsScreen() {
               source={item.image}
               label={item.name}
               aspectRatio={1}
-              fit="cover"
+              fit={isBloomBakesItem ? "contain" : "cover"}
               backgroundColor={PHOTO_BACKGROUND}
             />
           </View>
@@ -291,7 +293,7 @@ export default function CategoryItemsScreen() {
             source={item.image}
             label={item.name}
             aspectRatio={1}
-            fit="cover"
+            fit={isBloomBakesItem ? "contain" : "cover"}
             backgroundColor={PHOTO_BACKGROUND}
           />
         </View>

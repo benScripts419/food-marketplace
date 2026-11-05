@@ -602,6 +602,8 @@ export default function RestaurantDetailScreen() {
       }
     : require("@/assets/images/akrobite-logo.png");
 
+  const useContainedProductImages = restaurant.name === "Bloom Bakes";
+
   // --------------------------------------------------
   // SCREEN
   // --------------------------------------------------
@@ -863,7 +865,7 @@ export default function RestaurantDetailScreen() {
                         height: imageSize,
                         backgroundColor: "#F3EFE6",
                       }}
-                      resizeMode="cover"
+                      resizeMode={useContainedProductImages ? "contain" : "cover"}
                     />
 
                     {/* FOOD DETAILS */}

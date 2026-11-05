@@ -25,7 +25,7 @@ const friedriceRedfish = require("../../assets/images/food/friedrice-redfish.jpg
 const jollofFish = require("../../assets/images/food/jollof-fish.jpg");
 const potatoChipsChicken = require("../../assets/images/food/potatochips-chicken.jpg");
 const frenchFries = require("../../assets/images/food/french-fries.jpg");
-const chickenPack = require("../../assets/images/food/chicken-pack.jpg");
+const chickenPack = require("../../assets/images/food/chicken-pack.jpeg");
 const chickenStirfry = require("../../assets/images/food/chicken-stirfry.jpg");
 
 export const brackersInnMenu: MenuCategory[] = [

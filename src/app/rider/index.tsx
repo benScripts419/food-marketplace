@@ -14,10 +14,13 @@ import {
 
 import { supabase } from "@/lib/supabase";
 
-const redirectUri = makeRedirectUri({
-  scheme: "food-marketplace",
-  path: "auth/callback",
-});
+const redirectUri =
+  Platform.OS === "web" && typeof window !== "undefined"
+    ? new URL("/rider/callback", window.location.origin).toString()
+    : makeRedirectUri({
+        scheme: "food-marketplace",
+        path: "auth/callback",
+      });
 
 WebBrowser.maybeCompleteAuthSession();
 

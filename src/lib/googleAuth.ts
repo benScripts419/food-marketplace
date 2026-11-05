@@ -7,7 +7,13 @@ import { supabase } from "@/lib/supabase";
 
 WebBrowser.maybeCompleteAuthSession();
 
-const redirectTo = makeRedirectUri();
+const redirectTo =
+  Platform.OS === "web" && typeof window !== "undefined"
+    ? new URL("/auth/callback", window.location.origin).toString()
+    : makeRedirectUri({
+        scheme: "food-marketplace",
+        path: "auth/callback",
+      });
 
 async function createSessionFromUrl(url: string) {
   const { params, errorCode } = QueryParams.getQueryParams(url);

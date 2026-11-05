@@ -8,10 +8,18 @@ import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 
 WebBrowser.maybeCompleteAuthSession();
 
-const redirectUri = makeRedirectUri({
-  scheme: "food-marketplace",
-  path: "auth/callback",
-});
+const getAuthRedirectUri = (path = "auth/callback") => {
+  if (Platform.OS === "web" && typeof window !== "undefined") {
+    return new URL(path, window.location.origin).toString();
+  }
+
+  return makeRedirectUri({
+    scheme: "food-marketplace",
+    path,
+  });
+};
+
+const redirectUri = getAuthRedirectUri();
 
 type SocialProvider = "google" | "apple";
 

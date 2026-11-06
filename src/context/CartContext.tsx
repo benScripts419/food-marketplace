@@ -1,11 +1,14 @@
 import { supabase } from "@/lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Notifications from "expo-notifications";
+import { Platform } from "react-native";
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -154,6 +157,7 @@ type CartProviderProps = {
 export function CartProvider({ children }: CartProviderProps) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const previousOrdersRef = useRef<Order[]>([]);
 
   const [freeItemSelections, setFreeItemSelections] = useState<
     FreeItemSelection[]
@@ -724,6 +728,7 @@ export function CartProvider({ children }: CartProviderProps) {
       const user = session?.user;
 
       if (!user) {
+        previousOrdersRef.current = [];
         setOrders([]);
         return;
       }
@@ -738,46 +743,79 @@ export function CartProvider({ children }: CartProviderProps) {
 
       if (error) {
         console.error("Failed to load orders:", error);
+        previousOrdersRef.current = [];
         setOrders([]);
         return;
       }
 
-      const orderRows = (data ?? []) as OrderRow[];
-      setOrders(
-        orderRows.map((row) => {
-          const items = (row.order_items ?? []).map((item) => ({
-            id: item.id,
-            name: item.name ?? item.item_name ?? "Menu item",
-            quantity: Number(item.quantity),
-            price: Number(item.price ?? item.unit_price ?? 0),
-          }));
-          const restaurantNames = [
-            ...new Set(
-              (row.order_items ?? [])
-                .map((item) => item.restaurant_name)
-                .filter((name): name is string => Boolean(name)),
-            ),
-          ];
+      const nextOrders = (data ?? []).map((row) => {
+        const items = (row.order_items ?? []).map((item) => ({
+          id: item.id,
+          name: item.name ?? item.item_name ?? "Menu item",
+          quantity: Number(item.quantity),
+          price: Number(item.price ?? item.unit_price ?? 0),
+        }));
+        const restaurantNames = [
+          ...new Set(
+            (row.order_items ?? [])
+              .map((item) => item.restaurant_name)
+              .filter((name): name is string => Boolean(name)),
+          ),
+        ];
 
-          return {
-            id: row.id,
-            status: row.status,
-            cancellationReason: row.cancellation_reason,
-            refundStatus: row.refund_status,
-            paymentStatus: row.payment_status,
-            adminConfirmed: Boolean(row.admin_confirmed_at),
-            createdAt: row.created_at,
-            restaurantName: restaurantNames.join(", ") || "Your order",
-            items,
-            subtotal: Number(row.subtotal),
-            deliveryFee: Number(row.delivery_fee),
-            serviceFee: Number(row.service_fee),
-            total: Number(row.total),
-          };
-        }),
+        return {
+          id: row.id,
+          status: row.status,
+          cancellationReason: row.cancellation_reason,
+          refundStatus: row.refund_status,
+          paymentStatus: row.payment_status,
+          adminConfirmed: Boolean(row.admin_confirmed_at),
+          createdAt: row.created_at,
+          restaurantName: restaurantNames.join(", ") || "Your order",
+          items,
+          subtotal: Number(row.subtotal),
+          deliveryFee: Number(row.delivery_fee),
+          serviceFee: Number(row.service_fee),
+          total: Number(row.total),
+        } satisfies Order;
+      });
+
+      const previousOrders = previousOrdersRef.current;
+      const previousOrderMap = new Map(
+        previousOrders.map((order) => [order.id, order]),
       );
+
+      const newlyChangedOrders = nextOrders.filter((nextOrder) => {
+        const previousOrder = previousOrderMap.get(nextOrder.id);
+        return Boolean(previousOrder && previousOrder.status !== nextOrder.status);
+      });
+
+      if (Platform.OS !== "web" && newlyChangedOrders.length > 0) {
+        const permission = await Notifications.getPermissionsAsync();
+
+        if (permission.status === "granted") {
+          for (const order of newlyChangedOrders.slice(0, 3)) {
+            const orderStatusText = order.status
+              .replace(/_/g, " ")
+              .replace(/\b\w/g, (char) => char.toUpperCase());
+
+            await Notifications.scheduleNotificationAsync({
+              content: {
+                title: `${order.restaurantName}: ${orderStatusText}`,
+                body: `Your order has been updated to ${orderStatusText}.`,
+                data: { orderId: order.id },
+              },
+              trigger: null,
+            });
+          }
+        }
+      }
+
+      previousOrdersRef.current = nextOrders;
+      setOrders(nextOrders);
     } catch (error) {
       console.error("Unexpected error loading orders:", error);
+      previousOrdersRef.current = [];
       setOrders([]);
     }
   }, []);

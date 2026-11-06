@@ -31,6 +31,18 @@ type ProfileOption = {
   onPress: () => void;
 };
 
+const SUPPORT_WHATSAPP_NUMBER = "0243571180";
+
+function toWhatsAppNumber(phone: string): string {
+  const digits = phone.replace(/\D/g, "");
+
+  if (digits.startsWith("00")) return digits.slice(2);
+  if (digits.startsWith("0")) return `233${digits.slice(1)}`;
+  if (digits.length === 9) return `233${digits}`;
+
+  return digits;
+}
+
 export default function ProfileScreen() {
   const { isAdmin, loading: loadingAdmin } = useIsAdmin();
   const [name, setName] = useState("Guest");
@@ -248,6 +260,26 @@ export default function ProfileScreen() {
     }
 
     router.replace("/login");
+  };
+
+  const openSupportWhatsApp = () => {
+    const whatsappUrl = `https://wa.me/${toWhatsAppNumber(SUPPORT_WHATSAPP_NUMBER)}?text=${encodeURIComponent("Hello AkroBite support, I need help with my order/account.")}`;
+    Linking.openURL(whatsappUrl).catch(() => {
+      Alert.alert(
+        "Unable to open WhatsApp",
+        "Please copy this number and send a message manually: 0243571180",
+      );
+    });
+  };
+
+  const openSupportCall = () => {
+    const telUrl = `tel:${SUPPORT_WHATSAPP_NUMBER}`;
+    Linking.openURL(telUrl).catch(() => {
+      Alert.alert(
+        "Unable to place a call",
+        "Please call this support number manually: 0243571180",
+      );
+    });
   };
 
   const options: ProfileOption[] = [
@@ -558,19 +590,47 @@ export default function ProfileScreen() {
             </View>
 
             <Text className="text-sm font-semibold text-text">
-              Need an order update?
+              Need support right away?
             </Text>
             <Text className="mt-1 text-sm leading-5 text-textSecondary">
-              Open an order to view its status and delivery tracking details.
+              Chat with our WhatsApp support team for help with orders, delivery,
+              account access, or any issue with your AkroBite experience.
             </Text>
+
+            <Pressable
+              onPress={() => {
+                setHelpModalVisible(false);
+                openSupportWhatsApp();
+              }}
+              className="mt-4 h-12 flex-row items-center justify-center rounded-xl bg-[#25D366]"
+            >
+              <Ionicons name="logo-whatsapp" size={18} color="#FFFFFF" />
+              <Text className="ml-2 font-bold text-white">
+                WhatsApp Support: 0243571180
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => {
+                setHelpModalVisible(false);
+                openSupportCall();
+              }}
+              className="mt-3 h-12 flex-row items-center justify-center rounded-xl border border-border bg-white"
+            >
+              <Ionicons name="call-outline" size={18} color="#171717" />
+              <Text className="ml-2 font-bold text-text">
+                Call Support: 0243571180
+              </Text>
+            </Pressable>
+
             <Pressable
               onPress={() => {
                 setHelpModalVisible(false);
                 router.push("/(tabs)/orders");
               }}
-              className="mt-4 h-12 items-center justify-center rounded-xl bg-primary"
+              className="mt-3 h-12 items-center justify-center rounded-xl border border-border bg-white"
             >
-              <Text className="font-bold text-white">Go to my orders</Text>
+              <Text className="font-bold text-text">Go to my orders</Text>
             </Pressable>
 
             <Text className="mt-5 text-xs leading-5 text-textSecondary">

@@ -209,8 +209,11 @@ export default function NotificationsScreen() {
       },
     ];
 
-    const orderNotifications: Notification[] = orders
-      .slice(0, 10)
+    const orderNotifications: Notification[] = [...orders]
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
       .map((order) => ({
         // The id includes the confirmation and refund state, so a change shows
         // up as a new unread notification.
@@ -336,6 +339,18 @@ export default function NotificationsScreen() {
           paddingBottom: 40,
         }}
       >
+        {notifications.length === 0 ? (
+          <View className="mt-8 items-center rounded-2xl border border-dashed border-border bg-surface px-6 py-10">
+            <Ionicons name="notifications-off-outline" size={32} color="#A3A3A3" />
+            <Text className="mt-3 text-center text-base font-bold text-text">
+              No notifications yet
+            </Text>
+            <Text className="mt-1 text-center text-sm text-textSecondary">
+              Your order updates and account alerts will appear here.
+            </Text>
+          </View>
+        ) : null}
+
         {notifications.map((notification) => {
           const unread = !readNotificationIds.includes(notification.id);
 

@@ -274,6 +274,24 @@ Deno.serve(async (req) => {
         payload.data && typeof payload.data === "object"
           ? (payload.data as Record<string, unknown>)
           : {};
+      const rawRefundStatus =
+        typeof refundData.status === "string"
+          ? refundData.status.toLowerCase()
+          : "";
+      const normalizedRefundStatus =
+        rawRefundStatus === "processed" ||
+        rawRefundStatus === "success" ||
+        rawRefundStatus === "completed"
+          ? "processed"
+          : rawRefundStatus === "pending" ||
+              rawRefundStatus === "processing" ||
+              rawRefundStatus === "queued"
+            ? "pending"
+            : rawRefundStatus === "failed" ||
+                rawRefundStatus === "cancelled" ||
+                rawRefundStatus === "reversed"
+              ? "failed"
+              : "unknown";
 
       if (!refundResponse.ok || payload.status !== true) {
         refundStatus = "failed";
@@ -281,14 +299,25 @@ Deno.serve(async (req) => {
           typeof payload.message === "string"
             ? payload.message
             : "Paystack did not accept the refund request.";
+      } else if (normalizedRefundStatus === "failed") {
+        refundStatus = "failed";
+        refundErrorMessage =
+          typeof refundData.message === "string"
+            ? refundData.message
+            : "Paystack rejected the refund request.";
+      } else if (normalizedRefundStatus === "unknown") {
+        refundStatus = "unknown";
+        refundErrorMessage =
+          "Paystack returned an unexpected refund result. The refund must be confirmed from Paystack before the order is considered refunded.";
       } else {
         refundAccepted = true;
-        refundStatus =
-          refundData.status === "processed" ? "processed" : "pending";
+        refundStatus = normalizedRefundStatus;
         refundReference =
           typeof refundData.refund_reference === "string"
             ? refundData.refund_reference
-            : null;
+            : typeof refundData.reference === "string"
+              ? refundData.reference
+              : null;
       }
     } catch (error) {
       console.error("Paystack refund request outcome is unknown:", error);
@@ -297,7 +326,9 @@ Deno.serve(async (req) => {
     }
 
     const refundMessage = refundAccepted
-      ? "A full refund has been initiated to your original payment method. Processing time depends on your payment provider."
+      ? refundStatus === "processed"
+        ? "A full refund has been processed to your original payment method. The money usually lands within a few business days depending on your payment provider."
+        : "A full refund has been requested and is still pending confirmation from Paystack. We will update this order once the refund is confirmed."
       : "We could not confirm that the automatic refund was accepted. AkroBite support will follow up.";
 
     const { error: refundRecordError } = await admin
@@ -314,10 +345,17 @@ Deno.serve(async (req) => {
     }
 
     if (refundAccepted) {
+      const paymentStatus =
+        refundStatus === "processed"
+          ? "refunded"
+          : refundStatus === "pending"
+            ? "refund_pending"
+            : "refund_failed";
+
       const { error: paymentUpdateError } = await admin
         .from("payments")
         .update({
-          status: refundStatus === "processed" ? "refunded" : "refund_pending",
+          status: paymentStatus,
           updated_at: new Date().toISOString(),
         })
         .eq("reference", orderRow.payment_reference);

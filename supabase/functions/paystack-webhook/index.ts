@@ -210,6 +210,7 @@ Deno.serve(async (req) => {
     // ------------------------------------------------------------------
     if (
       type === "refund.processed" ||
+      type === "refund.success" ||
       type === "refund.failed" ||
       type === "refund.pending" ||
       type === "refund.processing"
@@ -234,7 +235,7 @@ Deno.serve(async (req) => {
             : null;
 
       const patch =
-        type === "refund.processed"
+        type === "refund.processed" || type === "refund.success"
           ? {
               refund_status: "refunded",
               payment_status: "refunded",
@@ -242,8 +243,18 @@ Deno.serve(async (req) => {
               updated_at: now,
             }
           : type === "refund.failed"
-            ? { refund_status: "failed", updated_at: now }
-            : { refund_status: "processing", updated_at: now };
+            ? {
+                refund_status: "failed",
+                payment_status: "refund_failed",
+                refund_reference: refundReference,
+                updated_at: now,
+              }
+            : {
+                refund_status: "pending",
+                payment_status: "refund_pending",
+                refund_reference: refundReference,
+                updated_at: now,
+              };
 
       const { error } = await admin
         .from("orders")

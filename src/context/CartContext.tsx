@@ -1,6 +1,5 @@
 import { supabase } from "@/lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import {
   createContext,
@@ -792,27 +791,6 @@ export function CartProvider({ children }: CartProviderProps) {
         const previousOrder = previousOrderMap.get(nextOrder.id);
         return Boolean(previousOrder && previousOrder.status !== nextOrder.status);
       });
-
-      if (Platform.OS !== "web" && newlyChangedOrders.length > 0) {
-        const permission = await Notifications.getPermissionsAsync();
-
-        if (permission.status === "granted") {
-          for (const order of newlyChangedOrders.slice(0, 3)) {
-            const orderStatusText = order.status
-              .replace(/_/g, " ")
-              .replace(/\b\w/g, (char: string) => char.toUpperCase());
-
-            await Notifications.scheduleNotificationAsync({
-              content: {
-                title: `${order.restaurantName}: ${orderStatusText}`,
-                body: `Your order has been updated to ${orderStatusText}.`,
-                data: { orderId: order.id },
-              },
-              trigger: null,
-            });
-          }
-        }
-      }
 
       previousOrdersRef.current = nextOrders;
       setOrders(nextOrders);

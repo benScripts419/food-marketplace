@@ -24,15 +24,15 @@ const matchaImage = {
   uri: "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&w=900&q=80",
 };
 const menuImage = bloomCupImage;
-const strawberryTea = require("../../assets/images/food/strawberry-tea.jpg");
-const vanillaTea = require("../../assets/images/food/vanilla-tea.jpg");
+const strawberryTea = require("../../assets/images/food/strawberry-tea.png");
+const vanillaTea = require("../../assets/images/food/vanilla-tea.png");
 const matchaTea = require("../../assets/images/food/matcha-tea.png");
 const coconutTea = require("../../assets/images/food/coconut-milk-tea.jpg");
-const blueberryTea = require("../../assets/images/food/blueberry-tea.jpg");
+const blueberryTea = require("../../assets/images/food/blueberry-tea.png");
 const chocolateTea = require("../../assets/images/food/chocolate-milk-tea.jpg");
 const mangoTea = require("../../assets/images/food/mango-tea.jpg");
 const coffeeTea = require("../../assets/images/food/coffee-milk-tea.jpg");
-const cookiesAndCreamTea = require("../../assets/images/food/cookies-and-cream-tea.jpg");
+const cookiesAndCreamTea = require("../../assets/images/food/cookies-and-cream-tea.png");
 const bananaTea = require("../../assets/images/food/banana-tea.jpg");
 const taroTea = require("../../assets/images/food/taro-tea.png");
 const purpleBlueberryTea = require("../../assets/images/food/purple-blueberry-tea.png");

@@ -15,10 +15,10 @@ export type MenuCategory = {
 };
 
 const menuImage = require("../../assets/images/akrobite-logo.png");
-const strawberryTea = require("../../assets/images/food/strawberry-tea.jpg");
-const vanillaTea = require("../../assets/images/food/vanilla-tea.jpg");
+const strawberryTea = require("../../assets/images/food/strawberry-tea.png");
+const vanillaTea = require("../../assets/images/food/vanilla-tea.png");
 const coconutTea = require("../../assets/images/food/coconut-milk-tea.jpg");
-const blueberryTea = require("../../assets/images/food/blueberry-tea.jpg");
+const blueberryTea = require("../../assets/images/food/blueberry-tea.png");
 const chocolateTea = require("../../assets/images/food/chocolate-milk-tea.jpg");
 const taroTea = require("../../assets/images/food/taro-tea.png");
 const purpleBlueberryTea = require("../../assets/images/food/purple-blueberry-tea.png");

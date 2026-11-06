@@ -748,8 +748,11 @@ export function CartProvider({ children }: CartProviderProps) {
         return;
       }
 
-      const nextOrders = (data ?? []).map((row) => {
-        const items = (row.order_items ?? []).map((item) => ({
+      const nextOrders: Order[] = (data ?? []).map((row: OrderRow) => {
+        const orderItems: NonNullable<OrderRow["order_items"]> =
+          row.order_items ?? [];
+
+        const items = orderItems.map((item: NonNullable<OrderRow["order_items"]>[number]) => ({
           id: item.id,
           name: item.name ?? item.item_name ?? "Menu item",
           quantity: Number(item.quantity),
@@ -757,7 +760,7 @@ export function CartProvider({ children }: CartProviderProps) {
         }));
         const restaurantNames = [
           ...new Set(
-            (row.order_items ?? [])
+            orderItems
               .map((item) => item.restaurant_name)
               .filter((name): name is string => Boolean(name)),
           ),
@@ -797,7 +800,7 @@ export function CartProvider({ children }: CartProviderProps) {
           for (const order of newlyChangedOrders.slice(0, 3)) {
             const orderStatusText = order.status
               .replace(/_/g, " ")
-              .replace(/\b\w/g, (char) => char.toUpperCase());
+              .replace(/\b\w/g, (char: string) => char.toUpperCase());
 
             await Notifications.scheduleNotificationAsync({
               content: {

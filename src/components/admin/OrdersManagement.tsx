@@ -1414,6 +1414,67 @@ export default function OrdersManagement({
   const confirmCount = orders.filter(needsConfirmation).length;
   const unassignedCount = orders.filter(needsRider).length;
 
+  const activeOrders = orders.filter(
+    (order) => !CLOSED_STATUSES.includes(order.status.toLowerCase()),
+  );
+
+  const clearCurrentOrders = async () => {
+    if (activeOrders.length === 0) {
+      Alert.alert("No current orders", "There are no active orders to clear.");
+      return;
+    }
+
+    const ids = activeOrders.map((order) => order.id);
+
+    Alert.alert(
+      "Clear current orders?",
+      `This will remove ${activeOrders.length} active order(s) from the admin list and delete their related items. This cannot be undone.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Clear",
+          style: "destructive",
+          onPress: () => {
+            void (async () => {
+              try {
+                const deleteTables = [
+                  { table: "restaurant_payouts", key: "order_id" },
+                  { table: "order_items", key: "order_id" },
+                  { table: "order_assignments", key: "order_id" },
+                ] as const;
+
+                for (const target of deleteTables) {
+                  const { error } = await supabase
+                    .from(target.table)
+                    .delete()
+                    .in(target.key, ids);
+
+                  if (error) throw error;
+                }
+
+                const { error: orderError } = await supabase
+                  .from("orders")
+                  .delete()
+                  .in("id", ids);
+
+                if (orderError) throw orderError;
+
+                setFilter("all");
+                await loadOrders(false);
+                Alert.alert(
+                  "Current orders cleared",
+                  `${activeOrders.length} active order(s) were removed.`,
+                );
+              } catch (error) {
+                Alert.alert("Couldn't clear current orders", errorText(error));
+              }
+            })();
+          },
+        },
+      ],
+    );
+  };
+
   const visibleOrders = orders.filter((order) => {
     if (filter === "all") return true;
     if (filter === "assigned") return order.riderId !== null;
@@ -1499,13 +1560,34 @@ export default function OrdersManagement({
           })}
         </ScrollView>
 
-        <Pressable
-          accessibilityLabel="Refresh orders"
-          onPress={() => void loadOrders(false)}
-          className="ml-2 h-9 w-9 items-center justify-center"
-        >
-          <Ionicons name="refresh-outline" size={20} color="#E53935" />
-        </Pressable>
+        <View className="ml-2 flex-row items-center">
+          <Pressable
+            accessibilityLabel="Clear current orders"
+            onPress={() => void clearCurrentOrders()}
+            disabled={activeOrders.length === 0}
+            className={`mr-2 rounded-full border px-3 py-2 ${
+              activeOrders.length === 0
+                ? "border-gray-200 bg-gray-100"
+                : "border-red-200 bg-red-50"
+            }`}
+          >
+            <Text
+              className={`text-[10px] font-bold uppercase ${
+                activeOrders.length === 0 ? "text-gray-400" : "text-red-700"
+              }`}
+            >
+              Clear
+            </Text>
+          </Pressable>
+
+          <Pressable
+            accessibilityLabel="Refresh orders"
+            onPress={() => void loadOrders(false)}
+            className="h-9 w-9 items-center justify-center"
+          >
+            <Ionicons name="refresh-outline" size={20} color="#E53935" />
+          </Pressable>
+        </View>
       </View>
 
       {visibleOrders.length === 0 ? (

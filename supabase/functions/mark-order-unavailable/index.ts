@@ -157,8 +157,14 @@ Deno.serve(async (req) => {
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       return jsonResponse({ error: "Invalid request body." }, req, 400);
     }
-    const orderId = (body as Record<string, unknown>).order_id;
-    if (typeof orderId !== "string" || !orderId) {
+    const orderInput = (body as Record<string, unknown>).orderId ?? (body as Record<string, unknown>).order_id;
+    const orderId = typeof orderInput === "string" && orderInput.trim() ? orderInput.trim() : null;
+    const cancellationReason =
+      typeof (body as Record<string, unknown>).reason === "string"
+        ? (body as Record<string, unknown>).reason.trim() || "unavailable"
+        : "unavailable";
+
+    if (!orderId) {
       return jsonResponse({ error: "Order ID is required." }, req, 400);
     }
 
@@ -211,7 +217,7 @@ Deno.serve(async (req) => {
       .from("orders")
       .update({
         status: "cancelled",
-        cancellation_reason: "unavailable",
+        cancellation_reason: cancellationReason,
         refund_status: "processing",
         updated_at: new Date().toISOString(),
       })

@@ -30,3 +30,19 @@ export const supabase = createClient(
     },
   },
 );
+
+export async function logCurrentSupabaseSession() {
+  const { data, error } = await supabase.auth.getSession();
+
+  if (error) {
+    console.error("Supabase session debug failed:", error);
+    return null;
+  }
+
+  const token = data.session?.access_token ?? null;
+
+  console.log("Supabase auth session:", data.session);
+  console.log("Supabase JWT:", token);
+
+  return token;
+}

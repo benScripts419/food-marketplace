@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
-import { supabase } from "@/lib/supabase";
+import { logCurrentSupabaseSession, supabase } from "@/lib/supabase";
 
 type GateState = "checking" | "allowed" | "denied" | "error";
 
@@ -18,11 +18,17 @@ export default function AdminGate({ children }: { children: ReactNode }) {
       data: { session },
     } = await supabase.auth.getSession();
 
+    if (session?.access_token) {
+      console.log("Admin JWT:", session.access_token);
+    }
+
     // Not signed in: go to the login screen.
     if (!session) {
       router.replace("/login");
       return;
     }
+
+    await logCurrentSupabaseSession();
 
     const { data, error } = await supabase.rpc("is_admin");
 

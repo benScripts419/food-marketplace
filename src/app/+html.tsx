@@ -18,6 +18,44 @@ export default function Root({ children }: PropsWithChildren) {
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
+        {/* AkroBite SEO metadata */}
+        <title>AkroBite | Food Delivery in Akropong, Ghana</title>
+
+        <meta
+          name="description"
+          content="Order delicious food from restaurants and food joints in Akropong, Ghana. Discover local meals and enjoy convenient food delivery with AkroBite."
+        />
+
+        <meta name="robots" content="index, follow, max-image-preview:large" />
+
+        <meta name="theme-color" content="#E53935" />
+
+        {/* Canonical URL */}
+        <link rel="canonical" href="https://akrobite.com/" />
+
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="AkroBite" />
+        <meta
+          property="og:title"
+          content="AkroBite | Food Delivery in Akropong, Ghana"
+        />
+        <meta
+          property="og:description"
+          content="Discover restaurants, explore delicious meals and get food delivered in Akropong with AkroBite."
+        />
+        <meta property="og:url" content="https://akrobite.com/" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="AkroBite | Food Delivery in Akropong, Ghana"
+        />
+        <meta
+          name="twitter:description"
+          content="Order delicious food from restaurants and food joints in Akropong, Ghana."
+        />
 
         <ScrollViewStyleReset />
 

@@ -17,17 +17,24 @@ export type MenuCategory = {
 const menuImage = require("../../assets/images/akrobite-logo.png");
 const strawberryTea = require("../../assets/images/food/strawberry-tea.png");
 const vanillaTea = require("../../assets/images/food/vanilla-tea.png");
-const coconutTea = require("../../assets/images/food/coconut-milk-tea.jpg");
+const coconutTea = require("../../assets/images/food/coconut-milk-tea.png");
 const blueberryTea = require("../../assets/images/food/blueberry-tea.png");
-const chocolateTea = require("../../assets/images/food/chocolate-milk-tea.jpg");
+const chocolateTea = require("../../assets/images/food/chocolate-milk-tea.png");
 const taroTea = require("../../assets/images/food/taro-tea.png");
 const purpleBlueberryTea = require("../../assets/images/food/purple-blueberry-tea.png");
+const originalTea = require("../../assets/images/food/original-milk-tea.png");
 
 const sandwich = require("../../assets/images/food/sandwich.jpg");
 const burger = require("../../assets/images/food/burger.jpg");
 const samosa = require("../../assets/images/food/samosa.jpg");
 const springRolls = require("../../assets/images/food/spring-rolls.jpeg");
 const sandwichWithFries = require("../../assets/images/food/sandwich-fries.jpg");
+const allSeason = require("../../assets/images/food/all-season.png");
+const chickenPizza = require("../../assets/images/food/chicken-pizza.png");
+const beefPizza = require("../../assets/images/food/beef-pizza.png");
+const sausagePizza = require("../../assets/images/food/sausage-pizza.png");
+const margheritaPizza = require("../../assets/images/food/margherita-pizza.png");
+const pepperoniPizza = require("../../assets/images/food/pepperoni-pizza.png");
 
 export const lizjaysMenu: MenuCategory[] = [
   // =====================================================
@@ -176,7 +183,7 @@ export const lizjaysMenu: MenuCategory[] = [
         price: 50,
         category: "Boba Tea",
         subCategory: "700ml",
-        image: purpleBlueberryTea,
+        image: originalTea,
       },
     ],
   },
@@ -253,7 +260,7 @@ export const lizjaysMenu: MenuCategory[] = [
         price: 110,
         category: "Pizza",
         subCategory: "Small",
-        image: menuImage,
+        image: allSeason,
       },
       {
         id: "lizjay-all-season-pizza-medium",
@@ -262,7 +269,7 @@ export const lizjaysMenu: MenuCategory[] = [
         price: 130,
         category: "Pizza",
         subCategory: "Medium",
-        image: menuImage,
+        image: allSeason,
       },
 
       {
@@ -272,7 +279,7 @@ export const lizjaysMenu: MenuCategory[] = [
         price: 150,
         category: "Pizza",
         subCategory: "Large",
-        image: menuImage,
+        image: allSeason,
       },
 
       {
@@ -282,7 +289,7 @@ export const lizjaysMenu: MenuCategory[] = [
         price: 140,
         category: "Pizza",
         subCategory: "Large",
-        image: menuImage,
+        image: chickenPizza,
       },
       {
         id: "lizjay-chicken-pizza-medium",
@@ -291,7 +298,7 @@ export const lizjaysMenu: MenuCategory[] = [
         price: 120,
         category: "Pizza",
         subCategory: "Medium",
-        image: menuImage,
+        image: chickenPizza,
       },
 
       {
@@ -301,7 +308,7 @@ export const lizjaysMenu: MenuCategory[] = [
         price: 100,
         category: "Pizza",
         subCategory: "Small",
-        image: menuImage,
+        image: chickenPizza,
       },
 
       {
@@ -311,7 +318,7 @@ export const lizjaysMenu: MenuCategory[] = [
         price: 140,
         category: "Pizza",
         subCategory: "Large",
-        image: menuImage,
+        image: beefPizza,
       },
       {
         id: "lizjay-beef-pizza-medium",
@@ -320,7 +327,7 @@ export const lizjaysMenu: MenuCategory[] = [
         price: 120,
         category: "Pizza",
         subCategory: "Medium",
-        image: menuImage,
+        image: beefPizza,
       },
 
       {
@@ -330,7 +337,7 @@ export const lizjaysMenu: MenuCategory[] = [
         price: 100,
         category: "Pizza",
         subCategory: "Small",
-        image: menuImage,
+        image: beefPizza,
       },
 
       {
@@ -340,7 +347,7 @@ export const lizjaysMenu: MenuCategory[] = [
         price: 130,
         category: "Pizza",
         subCategory: "Large",
-        image: menuImage,
+        image: sausagePizza,
       },
       {
         id: "lizjay-sausage-pizza-medium",
@@ -349,7 +356,7 @@ export const lizjaysMenu: MenuCategory[] = [
         price: 110,
         category: "Pizza",
         subCategory: "Medium",
-        image: menuImage,
+        image: sausagePizza,
       },
 
       {
@@ -359,7 +366,7 @@ export const lizjaysMenu: MenuCategory[] = [
         price: 90,
         category: "Pizza",
         subCategory: "Small",
-        image: menuImage,
+        image: sausagePizza,
       },
 
       {
@@ -369,7 +376,7 @@ export const lizjaysMenu: MenuCategory[] = [
         price: 120,
         category: "Pizza",
         subCategory: "Large",
-        image: menuImage,
+        image: margheritaPizza,
       },
       {
         id: "lizjay-margarita-pizza-medium",
@@ -378,7 +385,7 @@ export const lizjaysMenu: MenuCategory[] = [
         price: 100,
         category: "Pizza",
         subCategory: "Medium",
-        image: menuImage,
+        image: margheritaPizza,
       },
 
       {
@@ -388,7 +395,7 @@ export const lizjaysMenu: MenuCategory[] = [
         price: 80,
         category: "Pizza",
         subCategory: "Small",
-        image: menuImage,
+        image: margheritaPizza,
       },
 
       {
@@ -398,7 +405,7 @@ export const lizjaysMenu: MenuCategory[] = [
         price: 140,
         category: "Pizza",
         subCategory: "Large",
-        image: menuImage,
+        image: pepperoniPizza,
       },
       {
         id: "lizjay-pepperoni-pizza-medium",
@@ -407,7 +414,7 @@ export const lizjaysMenu: MenuCategory[] = [
         price: 120,
         category: "Pizza",
         subCategory: "Medium",
-        image: menuImage,
+        image: pepperoniPizza,
       },
 
       {
@@ -417,7 +424,7 @@ export const lizjaysMenu: MenuCategory[] = [
         price: 100,
         category: "Pizza",
         subCategory: "Small",
-        image: menuImage,
+        image: pepperoniPizza,
       },
     ],
   },

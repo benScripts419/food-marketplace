@@ -13,8 +13,6 @@ export type MenuCategory = {
   items: MenuItem[];
 };
 
-// This file is inside src/data,
-// so ../../ reaches the project root.
 const kwMixedSalad = require("../../assets/images/food/mixed-salad.jpg");
 const greekSalad = require("../../assets/images/food/greek-salad.jpg");
 const chickenCeasarSalad = require("../../assets/images/food/chicken-ceasar-salad.jpeg");
@@ -38,9 +36,11 @@ const yamChips = require("../../assets/images/food/yam-chips.jpg");
 const akple = require("../../assets/images/food/akple.jpg");
 const allSeason = require("../../assets/images/food/all-season.png");
 const hawaiiPizza = require("../../assets/images/food/hawaii-pizza.png");
-const seafoodPizza = require("../../assets/images/food/seafood-pizza.jpeg");
+const seafoodPizza = require("../../assets/images/food/seafood-pizza.png");
 const chickenPizza = require("../../assets/images/food/chicken-pizza.png");
-const pepperoniPizza = require("../../assets/images/food/pepperoni-pizza.jpeg");
+const pepperoniPizza = require("../../assets/images/food/pepperoni-pizza.png");
+const margheritaPizza = require("../../assets/images/food/margherita-pizza.png");
+const tunaPizza = require("../../assets/images/food/tuna-pizza.png");
 const chickenKiev = require("../../assets/images/food/chicken-kiev.jpeg");
 const chickenCurry = require("../../assets/images/food/chicken-curry.jpeg");
 const chickenCordon = require("../../assets/images/food/chicken-cordon.jpg");
@@ -69,6 +69,7 @@ const chineseStirfry = require("../../assets/images/food/chinese-stirfry.jpg");
 const beefPepperSteak = require("../../assets/images/food/beef-peppersteak.jpg");
 const vegieArabiata = require("../../assets/images/food/vegie-arabiata.jpg");
 const gardeneggStew = require("../../assets/images/food/gardenegg-stew.jpg");
+
 
 const foodImage = require("@/assets/images/food/mixed-salad.jpg");
 
@@ -444,7 +445,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         description: "Cheese, tomato, oregano and olive oil.",
         price: 100,
         category: "Vegetarian",
-        image: foodImage,
+        image: margheritaPizza,
       },
     ],
   },
@@ -461,7 +462,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         description: "Cheese, tomato, oregano and olive oil.",
         price: 100,
         category: "Pizza",
-        image: foodImage,
+        image: margheritaPizza,
       },
       {
         id: "kw-pizza-2",
@@ -493,7 +494,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         description: "Tuna flakes, cheese and olive oil.",
         price: 130,
         category: "Pizza",
-        image: chickenPizza,
+        image: tunaPizza,
       },
       {
         id: "kw-pizza-6",

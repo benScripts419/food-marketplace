@@ -26,19 +26,30 @@ const matchaImage = {
 const menuImage = bloomCupImage;
 const strawberryTea = require("../../assets/images/food/strawberry-tea.png");
 const vanillaTea = require("../../assets/images/food/vanilla-tea.png");
-const matchaTea = require("../../assets/images/food/matcha-tea.png");
-const coconutTea = require("../../assets/images/food/coconut-milk-tea.jpg");
+const matchaTea = require("../../assets/images/food/matcha.png");
+const coconutTea = require("../../assets/images/food/coconut-milk-tea.png");
 const blueberryTea = require("../../assets/images/food/blueberry-tea.png");
-const chocolateTea = require("../../assets/images/food/chocolate-milk-tea.jpg");
-const mangoTea = require("../../assets/images/food/mango-tea.jpg");
-const coffeeTea = require("../../assets/images/food/coffee-milk-tea.jpg");
+const chocolateTea = require("../../assets/images/food/chocolate-milk-tea.png");
+const mangoTea = require("../../assets/images/food/mango-tea.png");
+const coffeeTea = require("../../assets/images/food/coffee-milk-tea.png");
 const cookiesAndCreamTea = require("../../assets/images/food/cookies-and-cream-tea.png");
-const bananaTea = require("../../assets/images/food/banana-tea.jpg");
+const bananaTea = require("../../assets/images/food/banana-tea.png");
 const taroTea = require("../../assets/images/food/taro-tea.png");
 const purpleBlueberryTea = require("../../assets/images/food/purple-blueberry-tea.png");
-const vanila = require("../../assets/images/food/vanilla.jpg");
-const cheese = require("../../assets/images/food/cheese.jpg");
-const bobaPearls = require("../../assets/images/food/boba-pearls.jpg");
+
+const bananaMatcha = require("../../assets/images/food/banana-matcha.png");
+const mangoMatcha = require("../../assets/images/food/mango-matcha.png");
+const blueberryMatcha = require("../../assets/images/food/blueberry-matcha.png");
+const strawberryMatcha = require("../../assets/images/food/strawberry-matcha.png");
+const coconutMatcha = require("../../assets/images/food/coconut-matcha.png");
+const brownSugarMatcha = require("../../assets/images/food/brownsugar-matcha.png");
+const taroMatcha = require("../../assets/images/food/taro-matcha.png");
+const passionFruitMatcha = require("../../assets/images/food/passionfruit-matcha.png");
+const dragonFruitMatcha = require("../../assets/images/food/dragonfruit-matcha.png");
+const cookieDoughMatcha = require("../../assets/images/food/cookiedough-matcha.png");
+
+
+
 
 
 
@@ -438,7 +449,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: matchaImage,
+        image: brownSugarMatcha,
       },
       {
         id: "bloom-matcha-brown-sugar-700",
@@ -447,7 +458,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: matchaImage,
+        image: brownSugarMatcha,
       },
 
       {
@@ -457,7 +468,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: matchaImage,
+        image: cookieDoughMatcha,
       },
       {
         id: "bloom-matcha-cookie-dough-700",
@@ -466,7 +477,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: matchaImage,
+        image: cookieDoughMatcha,
       },
 
       {
@@ -476,7 +487,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: matchaImage,
+        image: blueberryMatcha,
       },
       {
         id: "bloom-matcha-blueberry-700",
@@ -485,7 +496,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: matchaImage,
+        image: blueberryMatcha,
       },
 
       {
@@ -495,7 +506,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: matchaImage,
+        image: strawberryMatcha,
       },
       {
         id: "bloom-matcha-strawberry-700",
@@ -504,7 +515,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: matchaImage,
+        image: strawberryMatcha,
       },
 
       {
@@ -514,7 +525,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: matchaImage,
+        image: dragonFruitMatcha,
       },
       {
         id: "bloom-matcha-dragon-fruit-700",
@@ -523,7 +534,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: matchaImage,
+        image: dragonFruitMatcha,
       },
 
       {
@@ -533,7 +544,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: matchaImage,
+        image: coconutMatcha,
       },
       {
         id: "bloom-matcha-coconut-700",
@@ -542,7 +553,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: matchaImage,
+        image: coconutMatcha,
       },
 
       {
@@ -552,7 +563,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: matchaImage,
+        image: taroMatcha,
       },
       {
         id: "bloom-matcha-taro-700",
@@ -561,7 +572,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: matchaImage,
+        image: taroMatcha,
       },
 
       {
@@ -571,7 +582,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: matchaImage,
+        image: mangoMatcha,
       },
       {
         id: "bloom-matcha-mango-700",
@@ -580,7 +591,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: matchaImage,
+        image: mangoMatcha,
       },
 
       {
@@ -590,7 +601,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: matchaImage,
+        image: bananaMatcha,
       },
       {
         id: "bloom-matcha-banana-700",
@@ -599,7 +610,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: matchaImage,
+        image: bananaMatcha,
       },
 
       {
@@ -609,7 +620,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 60,
         category: "Matcha",
         subCategory: "500ml",
-        image: matchaImage,
+        image: passionFruitMatcha,
       },
       {
         id: "bloom-matcha-passion-fruit-700",
@@ -618,7 +629,7 @@ export const bloomBakesMenu: MenuCategory[] = [
         price: 70,
         category: "Matcha",
         subCategory: "700ml",
-        image: matchaImage,
+        image: passionFruitMatcha,
       },
     ],
   },

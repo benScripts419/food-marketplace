@@ -27,6 +27,10 @@ const potatoChipsChicken = require("../../assets/images/food/potatochips-chicken
 const frenchFries = require("../../assets/images/food/french-fries.jpg");
 const chickenPack = require("../../assets/images/food/chicken-pieces.jpeg");
 const chickenStirfry = require("../../assets/images/food/chicken-stirfry.jpeg");
+const allSeason = require("../../assets/images/food/all-season.png");
+const chickenPizza = require("../../assets/images/food/chicken-pizza.png");
+const beefPizza = require("../../assets/images/food/beef-pizza.png");
+const sausagePizza = require("../../assets/images/food/sausage-pizza.png");
 
 export const brackersInnMenu: MenuCategory[] = [
   // =====================================================
@@ -222,15 +226,7 @@ export const brackersInnMenu: MenuCategory[] = [
     name: "Pizza",
     items: [
       // BEEF
-      {
-        id: "brackers-beef-pizza-small",
-        name: "Beef Pizza",
-        description: "Small • Includes chicken, beef and sausage",
-        price: 120,
-        category: "Pizza",
-        subCategory: "Small",
-        image: menuImage,
-      },
+      
       {
         id: "brackers-beef-pizza-medium",
         name: "Beef Pizza",
@@ -238,7 +234,7 @@ export const brackersInnMenu: MenuCategory[] = [
         price: 150,
         category: "Pizza",
         subCategory: "Medium",
-        image: menuImage,
+        image: beefPizza,
       },
       {
         id: "brackers-beef-pizza-large",
@@ -247,7 +243,7 @@ export const brackersInnMenu: MenuCategory[] = [
         price: 170,
         category: "Pizza",
         subCategory: "Large",
-        image: menuImage,
+        image: beefPizza,
       },
       {
         id: "brackers-beef-pizza-family",
@@ -256,19 +252,11 @@ export const brackersInnMenu: MenuCategory[] = [
         price: 200,
         category: "Pizza",
         subCategory: "Family Size",
-        image: menuImage,
+        image: beefPizza,
       },
 
       // CHICKEN
-      {
-        id: "brackers-chicken-pizza-small",
-        name: "Chicken Pizza",
-        description: "Small • Includes chicken, beef and sausage",
-        price: 120,
-        category: "Pizza",
-        subCategory: "Small",
-        image: menuImage,
-      },
+      
       {
         id: "brackers-chicken-pizza-medium",
         name: "Chicken Pizza",
@@ -276,7 +264,7 @@ export const brackersInnMenu: MenuCategory[] = [
         price: 150,
         category: "Pizza",
         subCategory: "Medium",
-        image: menuImage,
+        image: chickenPizza,
       },
       {
         id: "brackers-chicken-pizza-large",
@@ -285,7 +273,7 @@ export const brackersInnMenu: MenuCategory[] = [
         price: 170,
         category: "Pizza",
         subCategory: "Large",
-        image: menuImage,
+        image: chickenPizza,
       },
       {
         id: "brackers-chicken-pizza-family",
@@ -294,19 +282,11 @@ export const brackersInnMenu: MenuCategory[] = [
         price: 200,
         category: "Pizza",
         subCategory: "Family Size",
-        image: menuImage,
+        image: chickenPizza,
       },
 
       // SAUSAGE
-      {
-        id: "brackers-sausage-pizza-small",
-        name: "Sausage Pizza",
-        description: "Small • Includes chicken, beef and sausage",
-        price: 120,
-        category: "Pizza",
-        subCategory: "Small",
-        image: menuImage,
-      },
+   
       {
         id: "brackers-sausage-pizza-medium",
         name: "Sausage Pizza",
@@ -314,7 +294,7 @@ export const brackersInnMenu: MenuCategory[] = [
         price: 150,
         category: "Pizza",
         subCategory: "Medium",
-        image: menuImage,
+        image: sausagePizza,
       },
       {
         id: "brackers-sausage-pizza-large",
@@ -323,7 +303,7 @@ export const brackersInnMenu: MenuCategory[] = [
         price: 170,
         category: "Pizza",
         subCategory: "Large",
-        image: menuImage,
+        image: sausagePizza,
       },
       {
         id: "brackers-sausage-pizza-family",
@@ -332,7 +312,7 @@ export const brackersInnMenu: MenuCategory[] = [
         price: 200,
         category: "Pizza",
         subCategory: "Family Size",
-        image: menuImage,
+        image: sausagePizza,
       },
 
       // ALL SEASON
@@ -343,7 +323,7 @@ export const brackersInnMenu: MenuCategory[] = [
         price: 150,
         category: "Pizza",
         subCategory: "Medium",
-        image: menuImage,
+        image: allSeason,
       },
       {
         id: "brackers-all-season-large",
@@ -352,7 +332,7 @@ export const brackersInnMenu: MenuCategory[] = [
         price: 170,
         category: "Pizza",
         subCategory: "Large",
-        image: menuImage,
+        image: allSeason,
       },
       {
         id: "brackers-all-season-family",
@@ -361,7 +341,7 @@ export const brackersInnMenu: MenuCategory[] = [
         price: 200,
         category: "Pizza",
         subCategory: "Family Size",
-        image: menuImage,
+        image: allSeason,
       },
     ],
   },

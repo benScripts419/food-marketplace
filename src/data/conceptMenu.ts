@@ -57,7 +57,14 @@ const porkNoodles = require("../../assets/images/food/pork-noodles.png");
 const bankuOkro = require("../../assets/images/food/banku-okro.png");
 const ebaAgushie = require("../../assets/images/food/eba-agushie.png");
 const akyeke = require("../../assets/images/food/akyeke.png");
-const loadedFries = require("../../assets/images/food/loaded-fries.jpg");
+const loadedFries = require("../../assets/images/food/loaded-fries.png");
+const shrimps = require("../../assets/images/food/shrimps.png");
+const lobsters = require("../../assets/images/food/lobsters.png");
+const snapper = require("../../assets/images/food/snapper.png");
+const prawns = require("../../assets/images/food/prawns.png");
+const seafoodTilapia = require("../../assets/images/food/seafood-tilapia.png");
+const banku3 = require("../../assets/images/food/banku-3.png");
+const yam = require("../../assets/images/food/yam.png");
 
 
 
@@ -343,7 +350,7 @@ export const conceptMenu: MenuCategory[] = [
         description: "3 Pieces",
         price: 30,
         category: "Side Orders",
-        image: kwMixedSalad,
+        image: banku3,
       },
       {
         id: "concept-sides-5",
@@ -351,7 +358,7 @@ export const conceptMenu: MenuCategory[] = [
         description: "Only",
         price: 40,
         category: "Side Orders",
-        image: kwMixedSalad,
+        image: yam,
       },
     ],
   },
@@ -554,35 +561,35 @@ export const conceptMenu: MenuCategory[] = [
         name: "Shrimps",
         price: 180,
         category: "Sea Foods",
-        image: kwMixedSalad,
+        image: shrimps,
       },
       {
         id: "concept-sea-foods-2",
         name: "Lobsters",
         price: 180,
         category: "Sea Foods",
-        image: kwMixedSalad,
+        image: lobsters,
       },
       {
         id: "concept-sea-foods-3",
         name: "Prawns",
         price: 180,
         category: "Sea Foods",
-        image: kwMixedSalad,
+        image: prawns,
       },
       {
         id: "concept-sea-foods-4",
         name: "Snapper",
         price: 120,
         category: "Sea Foods",
-        image: kwMixedSalad,
+        image: snapper,
       },
       {
         id: "concept-sea-foods-5",
         name: "Tilapia",
         price: 15,
         category: "Sea Foods",
-        image: kwMixedSalad,
+        image: seafoodTilapia,
       },
     ],
   },

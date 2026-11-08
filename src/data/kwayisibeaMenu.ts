@@ -69,9 +69,13 @@ const chineseStirfry = require("../../assets/images/food/chinese-stirfry.jpg");
 const beefPepperSteak = require("../../assets/images/food/beef-peppersteak.jpg");
 const vegieArabiata = require("../../assets/images/food/vegie-arabiata.jpg");
 const gardeneggStew = require("../../assets/images/food/gardenegg-stew.jpg");
+const beefBurger = require("../../assets/images/food/beef-burger.png");
+const cheeseBurger = require("../../assets/images/food/cheese-burger.png");
+const vegetableSpringRolls = require("../../assets/images/food/vegetable-springrolls.png");
+const beefSpringRolls = require("../../assets/images/food/beef-springrolls.png");
+const chickenBurger = require("../../assets/images/food/chicken-burger.png");
+const tunaSandwich = require("../../assets/images/food/tuna-sandwich.png");
 
-
-const foodImage = require("@/assets/images/food/mixed-salad.jpg");
 
 export const kwayisibeaMenu: MenuCategory[] = [
   // Starters
@@ -371,7 +375,7 @@ export const kwayisibeaMenu: MenuCategory[] = [
         description: "Tuna flakes, onions, mayonnaise and toasted bread.",
         price: 80,
         category: "Snacks",
-        image: foodImage,
+        image: tunaSandwich,
       },
       {
         id: "kw-snack-3",
@@ -379,35 +383,35 @@ export const kwayisibeaMenu: MenuCategory[] = [
         description: "Grilled beef patty in burger bun.",
         price: 80,
         category: "Snacks",
-        image: foodImage,
+        image: beefBurger,
       },
       {
         id: "kw-snack-4",
         name: "Vegetable Spring Rolls",
         price: 50,
         category: "Snacks",
-        image: foodImage,
+        image: vegetableSpringRolls,
       },
       {
         id: "kw-snack-5",
         name: "Beef Spring Rolls",
         price: 50,
         category: "Snacks",
-        image: foodImage,
+        image: beefSpringRolls,
       },
       {
         id: "kw-snack-7",
         name: "Spicy Chicken Burger",
         price: 100,
         category: "Snacks",
-        image: foodImage,
+        image: chickenBurger,
       },
       {
         id: "kw-snack-8",
         name: "Cheese Burger",
         price: 150,
         category: "Snacks",
-        image: foodImage,
+        image: cheeseBurger,
       },
     ],
   },

@@ -1,6 +1,12 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
 
 import CategoryFloatingTabs from "@/components/CategoryFloatingTabs";
 import { useCart } from "@/context/CartContext";
@@ -25,11 +31,16 @@ export default function PaymentCompleteScreen() {
 
   const { clearCart, refreshOrders } = useCart();
 
+  // Detect web platform
+  const isWeb = Platform.OS === "web";
+
   const reference = first(params.reference) ?? first(params.trxref) ?? "";
+
   const orderId = REFERENCE_PATTERN.exec(reference)?.[1] ?? null;
 
   const [message, setMessage] = useState<string | null>(null);
   const [checking, setChecking] = useState(true);
+
   const started = useRef(false);
 
   const check = async () => {
@@ -67,6 +78,7 @@ export default function PaymentCompleteScreen() {
             pathname: "/orders/[id]",
             params: { id: orderId },
           });
+
           return;
         }
       } catch (error) {
@@ -82,6 +94,7 @@ export default function PaymentCompleteScreen() {
     }
 
     setChecking(false);
+
     setMessage(
       lastError ||
         "Paystack has not confirmed this payment yet. If you completed it, wait a moment and try again.",
@@ -101,7 +114,11 @@ export default function PaymentCompleteScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* PAYMENT CONFIRMATION CONTENT */}
-      <View className="flex-1 items-center justify-center px-6 pb-24">
+      <View
+        className={`flex-1 items-center justify-center px-6 ${
+          isWeb ? "pb-6" : "pb-24"
+        }`}
+      >
         <View className="w-full max-w-[480px] items-center">
           {checking ? (
             <>
@@ -147,8 +164,8 @@ export default function PaymentCompleteScreen() {
         </View>
       </View>
 
-      {/* BOTTOM NAVIGATION */}
-      <CategoryFloatingTabs activeTab="Orders" />
+      {/* BOTTOM NAVIGATION: MOBILE APP ONLY */}
+      {!isWeb && <CategoryFloatingTabs activeTab="Orders" />}
     </View>
   );
 }

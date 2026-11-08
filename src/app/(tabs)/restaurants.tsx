@@ -54,14 +54,6 @@ const restaurantDisplayData: Record<
     offer: true,
   },
 
-  "Boba Buzz": {
-    rating: "4.5",
-    reviews: "0",
-    time: "15–25 min",
-    fee: "GH₵0",
-    offer: false,
-  },
-
   "Thebloom Boba Tea": {
     rating: "4.5",
     reviews: "0",

@@ -52,7 +52,7 @@ async function seed() {
     { aliases: ["Bloom Bakes"], categories: bloomBakesMenu },
     { aliases: ["Roll'd Up Shawarma"], categories: rolldUpMenu },
     {
-      aliases: ["Lizjay's Eatery", "Boba Buzz"],
+      aliases: ["Lizjay's Eatery"],
       categories: lizjaysMenu,
     },
     { aliases: ["50 Cent", "Thebloom Boba Tea"], categories: fiftyCentMenu },

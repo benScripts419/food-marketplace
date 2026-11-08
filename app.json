@@ -23,7 +23,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/akrobite-logo.png",
+      "favicon": "./assets/images/favicon.png",
       "bundler": "metro",
       "name": "AkroBite"
     },

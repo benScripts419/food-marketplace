@@ -865,7 +865,9 @@ export default function RestaurantDetailScreen() {
                         height: imageSize,
                         backgroundColor: "#F3EFE6",
                       }}
-                      resizeMode={useContainedProductImages ? "contain" : "cover"}
+                      resizeMode={
+                        useContainedProductImages ? "contain" : "cover"
+                      }
                     />
 
                     {/* FOOD DETAILS */}

@@ -51,6 +51,13 @@ const assortedFriedRice = require("../../assets/images/food/assorted-fried-rice.
 const assortedBeefFriedRice = require("../../assets/images/food/beef-friedrice.jpeg");
 const assortedPorkFriedRice = require("../../assets/images/food/pork-friedrice.jpeg");
 const banku = require("../../assets/images/food/banku.jpg");
+const munchoPlantano = require("../../assets/images/food/muncho-plantano.png");
+const beefNoodles = require("../../assets/images/food/beef-noodles.png");
+const porkNoodles = require("../../assets/images/food/pork-noodles.png");
+const bankuOkro = require("../../assets/images/food/banku-okro.png");
+const ebaAgushie = require("../../assets/images/food/eba-agushie.png");
+const akyeke = require("../../assets/images/food/akyeke.png");
+const loadedFries = require("../../assets/images/food/loaded-fries.jpg");
 
 
 
@@ -429,7 +436,7 @@ export const conceptMenu: MenuCategory[] = [
         price: 80,
         category: "Pastas & Noodles",
         subCategory: "Pork",
-        image: kwMixedSalad,
+        image: porkNoodles,
       },
       {
         id: "concept-special-2",
@@ -438,7 +445,7 @@ export const conceptMenu: MenuCategory[] = [
         price: 80,
         category: "Pastas & Noodles",
         subCategory: "Beef",
-        image: kwMixedSalad,
+        image: beefNoodles,
       },
 
       {
@@ -446,7 +453,7 @@ export const conceptMenu: MenuCategory[] = [
         name: "Loaded Fries",
         price: 100,
         category: "Pastas & Noodles",
-        image: kwMixedSalad,
+        image: loadedFries,
       },
 
       {
@@ -456,7 +463,7 @@ export const conceptMenu: MenuCategory[] = [
         price: 100,
         category: "Specials",
         subCategory: "Spicy",
-        image: kwMixedSalad,
+        image: munchoPlantano,
       },
       {
         id: "concept-special-5",
@@ -465,7 +472,7 @@ export const conceptMenu: MenuCategory[] = [
         price: 100,
         category: "Specials",
         subCategory: "Pork",
-        image: kwMixedSalad,
+        image: munchoPlantano,
       },
     ],
   },
@@ -504,7 +511,7 @@ export const conceptMenu: MenuCategory[] = [
         price: 100,
         category: "Locals",
         subCategory: "Oil",
-        image: kwMixedSalad,
+        image: bankuOkro,
       },
       {
         id: "concept-locals-4",
@@ -513,7 +520,7 @@ export const conceptMenu: MenuCategory[] = [
         price: 100,
         category: "Locals",
         subCategory: "Oiless",
-        image: kwMixedSalad,
+        image: bankuOkro,
       },
 
       {
@@ -521,7 +528,7 @@ export const conceptMenu: MenuCategory[] = [
         name: "Acheke with Tilapia",
         price: 150,
         category: "Locals",
-        image: kwMixedSalad,
+        image: akyeke,
       },
 
       {
@@ -529,7 +536,7 @@ export const conceptMenu: MenuCategory[] = [
         name: "Eba with Agushie",
         price: 100,
         category: "Locals",
-        image: kwMixedSalad,
+        image: ebaAgushie,
       },
     ],
   },

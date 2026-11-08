@@ -31,6 +31,7 @@ const allSeason = require("../../assets/images/food/all-season.png");
 const chickenPizza = require("../../assets/images/food/chicken-pizza.png");
 const beefPizza = require("../../assets/images/food/beef-pizza.png");
 const sausagePizza = require("../../assets/images/food/sausage-pizza.png");
+const sausageChicken = require("../../assets/images/food/sausage-chicken.png");
 
 export const brackersInnMenu: MenuCategory[] = [
   // =====================================================
@@ -195,7 +196,7 @@ export const brackersInnMenu: MenuCategory[] = [
           "Sausage, chicken, eggs, cabbage, carrot, onions and green pepper",
         price: 70,
         category: "Main Dishes",
-        image: menuImage,
+        image: sausageChicken,
       },
 
       {

@@ -5,19 +5,18 @@
     "slug": "food-marketplace",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/akrobite-logo.png",
+    "icon": "./assets/images/favicon.png",
     "scheme": "food-marketplace",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/images/akrobite-logo.png",
+      "icon": "./assets/images/favicon.png",
       "usesAppleSignIn": true
     },
     "android": {
       "package": "com.benscripts419.foodmarketplace",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
+        "foregroundImage": "./assets/images/favicon.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false

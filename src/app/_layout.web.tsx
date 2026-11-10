@@ -7,10 +7,12 @@ import { WebAuthProvider } from "@/context/WebAuthContext";
 import AuthRedirect from "../components/AuthRedirect";
 import { Stack } from "expo-router";
 import { View } from "react-native";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default function WebRootLayout() {
   return (
     <CartProvider>
+      <SpeedInsights />
       <FavoritesProvider>
         <WebAuthProvider>
           <AuthRedirect />

@@ -4,7 +4,6 @@ import AuthRedirect from "../components/AuthRedirect";
 import { CartProvider } from "@/context/CartContext";
 import { FavoritesProvider } from "@/context/FavoritesContext";
 import { Stack } from "expo-router";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 
 function MobileNotificationSetup() {
   return null;
@@ -14,7 +13,6 @@ export default function RootLayout() {
   return (
     <CartProvider>
       <FavoritesProvider>
-        <SpeedInsights />
         <AuthRedirect />
         <MobileNotificationSetup />
 

@@ -1,55 +1,11 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-/* =========================================================
-   PRICING (copied from the app's deliveryPricing.ts and
-   restaurantLocations.ts). Keep identical to the app.
-   ========================================================= */
+// Shared, KML-backed pricing: the same algorithm as the Expo checkout.
+import { calculateDeliveryFee } from "../_shared/deliveryPricing.ts";
 
 type Coordinates = { latitude: number; longitude: number };
 
-const DELIVERY_TIERS: { upToKm: number; fee: number }[] = [
-  { upToKm: 4, fee: 10 },
-  { upToKm: 8, fee: 20 },
-  { upToKm: 18, fee: 30 },
-  { upToKm: 25, fee: 40 },
-];
-
-const TOWN_EXTRA = { freeKm: 1, perKm: 2, maxExtra: 10 };
-
-const DELIVERY_PRICING = {
-  roadFactor: 1.3,
-  freeItemCount: 3,
-  extraItemFeeFirstTier: 5,
-  extraItemFeeOtherRate: 0.75,
-};
-
-const DELIVERY_TOWNS = [
-  { name: "Akropong", latitude: 5.972021, longitude: -0.094687 },
-  { name: "Dawu", latitude: 5.989076, longitude: -0.08478 },
-  { name: "Awukugua", latitude: 5.998624, longitude: -0.081479 },
-  { name: "Adukrom", latitude: 6.011594, longitude: -0.076847 },
-  { name: "Apirede", latitude: 6.037553, longitude: -0.079052 },
-  { name: "Mamfe", latitude: 5.938154, longitude: -0.119184 },
-  { name: "Mampong", latitude: 5.913498, longitude: -0.140385 },
-  { name: "Tutu", latitude: 5.891149, longitude: -0.157724 },
-  { name: "Aburi", latitude: 5.841302, longitude: -0.179539 },
-];
-
-const DELIVERY_AREA: [number, number][] = [
-  [-0.077489, 6.043998], [-0.083762, 6.044724], [-0.085526, 6.030166],
-  [-0.088744, 6.014522], [-0.101346, 5.99571], [-0.11047, 5.979903],
-  [-0.117134, 5.964661], [-0.127068, 5.947334], [-0.163763, 5.916559],
-  [-0.180281, 5.888196], [-0.210173, 5.837162], [-0.214549, 5.80653],
-  [-0.198153, 5.80293], [-0.175962, 5.80598], [-0.169378, 5.814172],
-  [-0.158315, 5.81406], [-0.151622, 5.833258], [-0.161006, 5.839138],
-  [-0.160007, 5.846046], [-0.143271, 5.85436], [-0.133588, 5.852664],
-  [-0.125236, 5.87377], [-0.083595, 5.909978], [-0.033566, 5.950053],
-  [-0.012487, 5.964611], [-0.002643, 5.981645], [-0.011426, 5.995887],
-  [-0.013632, 6.001676], [-0.007235, 6.008366], [0.00466, 6.0092],
-  [-0.020773, 6.038923], [-0.04973, 6.054796], [-0.066131, 6.061335],
-  [-0.074986, 6.048317],
-];
-
+// Trusted restaurant pickup coordinates from the existing AkroBite map.
 const RESTAURANT_LOCATIONS = [
   { name: "Kwayisibea Hotel", latitude: 5.953228, longitude: -0.102554 },
   { name: "50 cent", latitude: 5.969534, longitude: -0.090416 },
@@ -61,105 +17,6 @@ const RESTAURANT_LOCATIONS = [
   { name: "roll'd up", latitude: 5.969198, longitude: -0.090575 },
 ];
 
-function isValidCoordinate(p: Coordinates | null | undefined): p is Coordinates {
-  if (!p) return false;
-  const { latitude, longitude } = p;
-  return (
-    Number.isFinite(latitude) &&
-    Number.isFinite(longitude) &&
-    Math.abs(latitude) <= 90 &&
-    Math.abs(longitude) <= 180 &&
-    !(latitude === 0 && longitude === 0)
-  );
-}
-
-function haversineKm(a: Coordinates, b: Coordinates): number {
-  const R = 6371;
-  const rad = (d: number) => (d * Math.PI) / 180;
-  const dLat = rad(b.latitude - a.latitude);
-  const dLng = rad(b.longitude - a.longitude);
-  const h =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(rad(a.latitude)) * Math.cos(rad(b.latitude)) * Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(h));
-}
-
-function roadKm(a: Coordinates, b: Coordinates): number {
-  return Math.round(haversineKm(a, b) * DELIVERY_PRICING.roadFactor * 10) / 10;
-}
-
-function isInsideDeliveryArea(point: Coordinates): boolean {
-  let inside = false;
-  for (let i = 0, j = DELIVERY_AREA.length - 1; i < DELIVERY_AREA.length; j = i++) {
-    const [xi, yi] = DELIVERY_AREA[i];
-    const [xj, yj] = DELIVERY_AREA[j];
-    const crosses =
-      yi > point.latitude !== yj > point.latitude &&
-      point.longitude < ((xj - xi) * (point.latitude - yi)) / (yj - yi) + xi;
-    if (crosses) inside = !inside;
-  }
-  return inside;
-}
-
-function nearestTown(point: Coordinates) {
-  let best = DELIVERY_TOWNS[0];
-  let bestDistance = haversineKm(point, best);
-  for (const town of DELIVERY_TOWNS) {
-    const d = haversineKm(point, town);
-    if (d < bestDistance) {
-      best = town;
-      bestDistance = d;
-    }
-  }
-  return best;
-}
-
-function tierFor(distanceKm: number): { tier: number; fee: number } | null {
-  const index = DELIVERY_TIERS.findIndex((t) => distanceKm <= t.upToKm);
-  if (index === -1) return null;
-  return { tier: index + 1, fee: DELIVERY_TIERS[index].fee };
-}
-
-function roundUpToHalf(amount: number): number {
-  return Math.ceil(amount * 2) / 2;
-}
-
-function extraFeeFor(distanceFromTownKm: number): number {
-  const { freeKm, perKm, maxExtra } = TOWN_EXTRA;
-  const beyondFree = Math.max(0, distanceFromTownKm - freeKm);
-  return Math.min(maxExtra, roundUpToHalf(beyondFree * perKm));
-}
-
-function itemFeeFor(itemCount: number, tier: number, deliveryFee: number): number {
-  const { freeItemCount, extraItemFeeFirstTier, extraItemFeeOtherRate } = DELIVERY_PRICING;
-  const safeCount = Number.isFinite(itemCount) ? Math.max(0, Math.floor(itemCount)) : 0;
-  if (safeCount <= freeItemCount) return 0;
-  if (tier === 1) return extraItemFeeFirstTier;
-  return roundUpToHalf(deliveryFee * extraItemFeeOtherRate);
-}
-
-function calculateDeliveryFee(
-  restaurant: Coordinates | null | undefined,
-  customer: Coordinates | null | undefined,
-  itemCount: number,
-): { ok: true; fee: number; town: string } | { ok: false; reason: string } {
-  if (!isValidCoordinate(restaurant) || !isValidCoordinate(customer)) {
-    return { ok: false, reason: "missing_location" };
-  }
-  if (!isInsideDeliveryArea(customer)) {
-    return { ok: false, reason: "outside_area" };
-  }
-  const town = nearestTown(customer);
-  const distanceKm = roadKm(restaurant, town);
-  const match = tierFor(distanceKm);
-  if (!match) return { ok: false, reason: "too_far" };
-
-  const distanceFromTownKm = roadKm(customer, town);
-  const extraFee = extraFeeFor(distanceFromTownKm);
-  const distanceFee = match.fee + extraFee;
-  const itemFee = itemFeeFor(itemCount, match.tier, distanceFee);
-  return { ok: true, fee: distanceFee + itemFee, town: town.name };
-}
 
 function normaliseName(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -170,13 +27,6 @@ function getRestaurantLocation(restaurantName: string): Coordinates | null {
   if (!wanted) return null;
   const exact = RESTAURANT_LOCATIONS.find((r) => normaliseName(r.name) === wanted);
   if (exact) return { latitude: exact.latitude, longitude: exact.longitude };
-  if (wanted.length >= 4) {
-    const loose = RESTAURANT_LOCATIONS.find((r) => {
-      const known = normaliseName(r.name);
-      return wanted.includes(known) || known.includes(wanted);
-    });
-    if (loose) return { latitude: loose.latitude, longitude: loose.longitude };
-  }
   return null;
 }
 
@@ -890,20 +740,23 @@ Deno.serve(async (req) => {
       (count, item) => count + item.quantity,
       0,
     );
-    if (!Number.isSafeInteger(totalItemCount)) {
+    if (!Number.isSafeInteger(totalItemCount) || totalItemCount < 1) {
       return jsonResponse({ error: "Cart contains too many items." }, 400);
     }
 
     const groups = new Map<string, { name: string; quantity: number }>();
     for (const item of cartItems) {
       const group = groups.get(item.restaurantId) ?? {
-        name: restaurantMap.get(item.restaurantId)?.name ?? item.restaurantName,
+        name: restaurantMap.get(item.restaurantId)?.name ?? "",
         quantity: 0,
       };
       group.quantity += item.quantity;
       groups.set(item.restaurantId, group);
     }
 
+    // One quote per restaurant group, preserving the existing multi-pickup
+    // behavior and the extra-item threshold per pickup group.
+    // Pricing is authoritative here; never accept a fee from the client.
     let deliveryFee = 0;
     let deliveryTown = "";
     for (const group of groups.values()) {
@@ -929,7 +782,7 @@ Deno.serve(async (req) => {
     // The rider earns 80% of the delivery fee; AkroBite keeps 20%.
     const riderPayoutFee = Number((deliveryFee * 0.8).toFixed(2));
 
-    console.log("DELIVERY QUOTE", { deliveryFee, totalItemCount, SERVICE_FEE });
+    console.log("DELIVERY QUOTE", { deliveryFee, deliveryTown, totalItemCount, SERVICE_FEE });
 
     const serviceFee = SERVICE_FEE;
     const discountedFoodTotal = Number(

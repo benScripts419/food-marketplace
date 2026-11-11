@@ -11,9 +11,9 @@ import {
   View,
 } from "react-native";
 
+import { DELIVERY_GEOGRAPHY } from "@/lib/deliveryGeography";
 import {
   calculateDeliveryFee,
-  DELIVERY_TOWNS,
   type DeliveryQuote,
 } from "@/lib/deliveryPricing";
 import {
@@ -57,7 +57,7 @@ function problemFor(
   return "Choose the pickup point and your delivery location.";
 }
 
-const townPoints: PickupPoint[] = DELIVERY_TOWNS.map((town) => ({
+const townPoints: PickupPoint[] = DELIVERY_GEOGRAPHY.towns.map((town) => ({
   key: `town:${town.name}`,
   label: town.name,
   latitude: town.latitude,

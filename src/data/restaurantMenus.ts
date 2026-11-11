@@ -49,7 +49,6 @@ export const restaurantMenusByName: Record<string, MenuCategory[]> = {
   "Roll'd Up Shawarma": rolldUpMenu,
   "Lizjay's Eatery": lizjaysMenu,
   "50 Cent": fiftyCentMenu,
-  "Thebloom Boba Tea": fiftyCentMenu,
   "Pam's Check Check": pamsCheckCheck,
 };
 

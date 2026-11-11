@@ -10,6 +10,7 @@ export default function Root({ children }: PropsWithChildren) {
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
+        <link rel="icon" type="image/png" href="/favicon.png" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
 
         {/* Without this line, iPhone Safari draws the page about 980 px wide

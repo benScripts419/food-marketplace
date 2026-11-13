@@ -402,7 +402,13 @@ export default function RestaurantDetailScreen() {
       return;
     }
 
-    const applicableToppings = toppingsForItem(item, toppings);
+    const applicableToppings = toppingsForItem(
+      {
+        category: selectedMenuCategory?.name ?? item.category,
+        category_id: selectedMenuCategory?.id,
+      },
+      toppings,
+    );
 
     if (applicableToppings.length > 0) {
       setPickerItem(item);

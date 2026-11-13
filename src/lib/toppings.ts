@@ -33,36 +33,55 @@ export async function loadToppings(
   }));
 }
 
+
 function normalizeCategory(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-// Return toppings that apply to the selected item's category.
+type ToppingMenuItem = {
+  category?: string | null;
+  category_id?: string | null;
+  categoryId?: string | null;
+};
+
 export function toppingsForItem(
-  item: { category?: string | null },
+  item: ToppingMenuItem,
   toppings: Topping[],
 ): Topping[] {
   const itemCategory = normalizeCategory(item.category ?? "");
 
+  const itemCategoryId = normalizeCategory(
+    item.category_id ?? item.categoryId ?? "",
+  );
+
   return toppings.filter((topping) => {
     const allowedCategories = topping.applies_to_categories ?? [];
 
-    // An empty list means the topping applies to all categories.
-    if (allowedCategories.length === 0) return true;
+    // Preserve existing behavior:
+    // Empty assignments mean the topping applies to all categories.
+    if (allowedCategories.length === 0) {
+      return true;
+    }
 
     return allowedCategories.some((allowed) => {
       const allowedCategory = normalizeCategory(allowed);
 
       if (!allowedCategory) return false;
 
-      // Bloom Bakes' Tea toppings support Tea, Boba Tea,
-      // Bubble Tea, and Milk Series items.
+      // Match the actual Supabase category ID first.
+      if (
+        itemCategoryId &&
+        allowedCategory === itemCategoryId
+      ) {
+        return true;
+      }
+
+      // Preserve Bloom Bakes' existing Tea rules.
       if (
         allowedCategory === "tea" ||
         allowedCategory === "bobatea" ||
         allowedCategory === "bubbletea"
       ) {
-        // Do not apply Tea toppings to Matcha-only items.
         if (
           itemCategory.includes("matcha") &&
           !itemCategory.includes("boba") &&
@@ -78,7 +97,7 @@ export function toppingsForItem(
         );
       }
 
-      // Match other categories without case or punctuation differences.
+      // Match category names.
       return (
         itemCategory === allowedCategory ||
         itemCategory.includes(allowedCategory)
@@ -86,6 +105,7 @@ export function toppingsForItem(
     });
   });
 }
+
 
 // Give differently topped versions of the same item separate cart IDs.
 // The payment Edge Function verifies topping IDs and prices from the database.

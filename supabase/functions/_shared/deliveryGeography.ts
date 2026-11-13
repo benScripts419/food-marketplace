@@ -1064,6 +1064,11 @@ export const DELIVERY_GEOGRAPHY = {
       "longitude": -0.09468720391915597
     },
     {
+  name: "Abiriw",
+  latitude: 5.9813556,
+  longitude: -0.08295,
+},
+    {
       "name": "Dawu",
       "latitude": 5.989075789368642,
       "longitude": -0.0847795780197591
@@ -1093,11 +1098,11 @@ export const DELIVERY_GEOGRAPHY = {
       "latitude": 5.913498440561479,
       "longitude": -0.1403850010389474
     },
-    {
-      "name": "Tutu",
-      "latitude": 5.891149194783149,
-      "longitude": -0.1577236344289978
-    },
+   {
+  name: "Tutu",
+  latitude: 5.8759222,
+  longitude: -0.1653694,
+},
     {
       "name": "Aburi",
       "latitude": 5.841302283031127,

@@ -2,9 +2,9 @@ import { DELIVERY_GEOGRAPHY } from "./deliveryGeography";
 
 export type Coordinates = { latitude: number; longitude: number };
 export const DELIVERY_TIERS = [
-  { upToKm: 4, fee: 10 },
-  { upToKm: 8, fee: 20 },
-  { upToKm: 18, fee: 30 },
+  { upToKm: 4.8, fee: 11 },
+  { upToKm: 8, fee: 21 },
+  { upToKm: 18, fee: 31 },
   { upToKm: 25, fee: 40 },
 ] as const;
 export const TOWN_EXTRA = { freeKm: 1, perKm: 2, maxExtra: 10 } as const;
@@ -66,6 +66,49 @@ export function nearestTown(point: Coordinates) {
   return DELIVERY_GEOGRAPHY.towns.reduce((best, town) =>
     haversineKm(point, town) < haversineKm(point, best) ? town : best);
 }
+
+// Each KML community is its own pricing zone. An Abiriw pin was not included
+// in the original town pins, so use the polygon's representative point instead
+// of silently classifying Abiriw as Akropong or Dawu.
+export function townAnchorForZone(
+  zoneName: string,
+): Coordinates | null {
+  const town = DELIVERY_GEOGRAPHY.towns.find(
+    (t) => t.name.toLowerCase() === zoneName.toLowerCase(),
+  );
+
+  if (town) {
+    return {
+      latitude: town.latitude,
+      longitude: town.longitude,
+    };
+  }
+
+  const zone = DELIVERY_GEOGRAPHY.zones.find(
+    (z) => z.name.toLowerCase() === zoneName.toLowerCase(),
+  );
+
+  if (!zone) return null;
+
+  const points: readonly Pair[] = zone.polygon;
+
+  if (points.length === 0) return null;
+
+  const avg: Coordinates = {
+    longitude:
+      points.reduce((sum, p) => sum + p[0], 0) / points.length,
+    latitude:
+      points.reduce((sum, p) => sum + p[1], 0) / points.length,
+  };
+
+  if (inPolygon(avg, points)) return avg;
+
+  return {
+    longitude: points[0][0],
+    latitude: points[0][1],
+  };
+}
+
 export function tierFor(distanceKm: number): { tier: number; fee: number } | null {
   const index = DELIVERY_TIERS.findIndex(t => distanceKm <= t.upToKm);
   return index < 0 ? null : { tier: index + 1, fee: DELIVERY_TIERS[index].fee };
@@ -81,31 +124,100 @@ export function itemFeeFor(itemCount: number, tier: number, distanceFee: number)
   return tier === 1 ? DELIVERY_PRICING.extraItemFeeFirstTier
     : roundUpHalf(distanceFee * DELIVERY_PRICING.extraItemFeeOtherRate);
 }
+
 export function calculateDeliveryFee(
   restaurant: Coordinates | null | undefined,
   customer: Coordinates | null | undefined,
   itemCount: number,
 ): DeliveryQuote {
-  if (!valid(restaurant) || !valid(customer)) return { ok: false, reason: "missing_location" };
-  if (!isInsideDeliveryArea(customer)) return { ok: false, reason: "outside_area" };
-  const town = nearestTown(customer);
+  if (!valid(restaurant) || !valid(customer)) {
+    return { ok: false, reason: "missing_location" };
+  }
+
+  // Customer must be inside AkroBite's service area.
+  if (!isInsideDeliveryArea(customer)) {
+    return { ok: false, reason: "outside_area" };
+  }
+
+  // Identify the customer's town using the KML polygon.
+  // Do not classify customers using the nearest town pin.
+  const zone = deliveryZone(customer);
+
+  if (!zone) {
+    return { ok: false, reason: "outside_area" };
+  }
+
+  // Use the town reference point to determine the base tier.
+  const town = townAnchorForZone(zone);
+
+  if (!town) {
+    return { ok: false, reason: "outside_area" };
+  }
+
   const distanceKm = roadKm(restaurant, town);
   const tier = tierFor(distanceKm);
-  if (!tier) return { ok: false, reason: "too_far", distanceKm };
-  const distanceFromTownKm = roadKm(customer, town);
-  const extraFee = extraFeeFor(distanceFromTownKm);
-  const distanceFee = tier.fee + extraFee;
-  const itemFee = itemFeeFor(itemCount, tier.tier, distanceFee);
-  return { ok: true, town: town.name, zone: deliveryZone(customer), tier: tier.tier,
-    distanceKm, townFee: tier.fee, distanceFromTownKm, extraFee,
-    distanceFee, itemFee, fee: distanceFee + itemFee };
+
+  if (!tier) {
+    return { ok: false, reason: "too_far", distanceKm };
+  }
+
+  // Fixed fee across the entire KML town polygon.
+  // No additional customer-to-town distance surcharge.
+  const extraFee = 0;
+  const distanceFee = tier.fee;
+
+  // Preserve existing extra-item charges.
+  const itemFee = itemFeeFor(
+    itemCount,
+    tier.tier,
+    distanceFee,
+  );
+
+  const fee = distanceFee + itemFee;
+
+  return {
+    ok: true,
+    town: zone,
+    zone,
+    tier: tier.tier,
+    distanceKm,
+    townFee: tier.fee,
+    distanceFromTownKm: roadKm(customer, town),
+    extraFee,
+    distanceFee,
+    itemFee,
+    fee,
+  };
 }
-export function townPriceRanges(restaurant: Coordinates | null | undefined) {
+
+
+
+export function townPriceRanges(
+  restaurant: Coordinates | null | undefined,
+) {
   if (!valid(restaurant)) return [];
-  return DELIVERY_GEOGRAPHY.towns.flatMap(town => {
+
+  return DELIVERY_GEOGRAPHY.zones.flatMap((zone) => {
+    const town = townAnchorForZone(zone.name);
+
+    if (!town) return [];
+
     const distanceKm = roadKm(restaurant, town);
     const tier = tierFor(distanceKm);
-    return tier ? [{ town: town.name, tier: tier.tier, distanceKm,
-      minFee: tier.fee, maxFee: tier.fee + TOWN_EXTRA.maxExtra }] : [];
-  }).sort((a, b) => a.minFee - b.minFee || a.town.localeCompare(b.town));
+
+    if (!tier) return [];
+
+    return [{
+      town: zone.name,
+      tier: tier.tier,
+      distanceKm,
+      minFee: tier.fee,
+      maxFee: tier.fee,
+    }];
+  }).sort(
+    (a, b) =>
+      a.minFee - b.minFee ||
+      a.town.localeCompare(b.town)
+  );
 }
+

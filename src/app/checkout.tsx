@@ -92,7 +92,7 @@ export default function CheckoutScreen() {
     deliveryLocation && !deliveryQuote.ok ? deliveryQuote.message : null;
   const addressMessage = deliveryProblem ?? locationError;
 
-  const serviceFee = 7.5;
+  const serviceFee = 3.5;
   const total = cartTotal + deliveryFee + serviceFee;
 
   const updateDetail = (field: keyof CustomerDetails, value: string) => {

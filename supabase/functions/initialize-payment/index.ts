@@ -61,7 +61,7 @@ const corsHeaders = {
 const ROLLD_UP_RESTAURANT_ID = "0a7aae53-94c5-428c-88c5-3e6cd88ee911";
 
 // Must match `serviceFee` in the app's payment screen.
-const SERVICE_FEE = 7.5;
+const SERVICE_FEE = 3.5;
 
 type SelectedTopping = {
   id: string;

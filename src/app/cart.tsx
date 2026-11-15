@@ -18,7 +18,7 @@ export default function CartScreen() {
 
   // The delivery fee depends on where the customer is, so it is worked out
   // at checkout once their location is known (not here).
-  const serviceFee = cartItems.length > 0 ? 7.5 : 0;
+  const serviceFee = cartItems.length > 0 ? 3.5 : 0;
   const totalBeforeDelivery = cartTotal + serviceFee;
 
   // EMPTY CART

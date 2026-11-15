@@ -120,7 +120,7 @@ export default function PaymentScreen() {
   );
 
   const deliveryFee = deliveryQuote.ok ? deliveryQuote.fee : 0;
-  const serviceFee = cartItems.length > 0 ? 7.5 : 0;
+  const serviceFee = cartItems.length > 0 ? 3.5 : 0;
 
   // This is the screen estimate. The backend remains authoritative.
   const estimatedTotal = Number(

@@ -2,9 +2,9 @@ import { DELIVERY_GEOGRAPHY } from "./deliveryGeography.ts";
 
 export type Coordinates = { latitude: number; longitude: number };
 export const DELIVERY_TIERS = [
-  { upToKm: 4.8, fee: 11 },
-  { upToKm: 8, fee: 21 },
-  { upToKm: 18, fee: 31 },
+  { upToKm: 4.8, fee: 10 },
+  { upToKm: 8, fee: 20 },
+  { upToKm: 18, fee: 30 },
   { upToKm: 25, fee: 40 },
 ] as const;
 export const TOWN_EXTRA = { freeKm: 1, perKm: 2, maxExtra: 10 } as const;

@@ -11,7 +11,7 @@ export const restaurants = [
     offer: false,
   },
 
-  {
+  /* {
     id: "2",
     name: "Concept",
     image: require("../../assets/images/akrobite-logo.png"),
@@ -21,7 +21,7 @@ export const restaurants = [
     fee: "GH₵15",
     cuisine: "Pizza • Fast Food",
     offer: false,
-  },
+  }, 
   {
     id: "3",
     name: "Brackers Inn",
@@ -30,7 +30,7 @@ export const restaurants = [
     reviews: "0",
     time: "20–30 min",
     category: "Ghanaian • Pizza • Fast Food",
-  },
+  }, */
   {
     id: "4",
     name: "Bloom Bakes",
@@ -72,12 +72,12 @@ export const restaurants = [
     category: "Fast Food",
   },
 
-  {
+ /* {
     id: "8",
     name: "Pam's Check Check",
     rating: "4.5",
     reviews: "0",
     time: "15–25 min",
     category: "Fast Food",
-  },
+  }, */
 ];

@@ -19,16 +19,16 @@ const restaurantDisplayData: Record<
     reviews: "238",
     time: "20–30 min",
     fee: "GH₵10",
-    offer: true,
+    offer: false,
   },
 
-  Concept: {
+  /* Concept: {
     rating: "4.5",
     reviews: "125",
     time: "25–35 min",
     fee: "GH₵15",
     offer: false,
-  },
+  }, 
 
   "Brackers Inn": {
     rating: "4.5",
@@ -36,7 +36,7 @@ const restaurantDisplayData: Record<
     time: "20–30 min",
     fee: "GH₵0",
     offer: false,
-  },
+  }, */
 
   "Bloom Bakes": {
     rating: "4.5",
@@ -52,14 +52,6 @@ const restaurantDisplayData: Record<
     time: "20–30 min",
     fee: "GH₵8",
     offer: true,
-  },
-
-  "Thebloom Boba Tea": {
-    rating: "4.5",
-    reviews: "0",
-    time: "15–25 min",
-    fee: "GH₵0",
-    offer: false,
   },
 };
 

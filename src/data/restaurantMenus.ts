@@ -1,11 +1,11 @@
 import { fiftyCentMenu } from "./50centMenu";
 import { bloomBakesMenu } from "./bloomBakesMenu";
-import { brackersInnMenu } from "./brackersInnMenu";
-import { conceptMenu } from "./conceptMenu";
+// import { brackersInnMenu } from "./brackersInnMenu";
+// import { conceptMenu } from "./conceptMenu";
 import { kwayisibeaMenu } from "./kwayisibeaMenu";
 import { lizjaysMenu } from "./lizjaysMenu";
 import { rolldUpMenu } from "./rolldUpMenu";
-import { pamsCheckCheck } from "./pamsCheckCheck";
+// import { pamsCheckCheck } from "./pamsCheckCheck";
 
 export type MenuItem = {
   id: string;
@@ -29,11 +29,11 @@ export type MenuCategory = {
 
 export const restaurantMenus: Record<string, MenuCategory[]> = {
   "1": kwayisibeaMenu,
-  "2": conceptMenu,
-  "3": brackersInnMenu,
+  // "2": conceptMenu,
+  // "3": brackersInnMenu,
   "4": bloomBakesMenu,
   "5": rolldUpMenu,
-  "6": pamsCheckCheck,
+  // "6": pamsCheckCheck,
   "50": fiftyCentMenu,
 };
 
@@ -43,13 +43,13 @@ export const restaurantMenus: Record<string, MenuCategory[]> = {
 
 export const restaurantMenusByName: Record<string, MenuCategory[]> = {
   "Kwayisibea Hotel": kwayisibeaMenu,
-  "Concept": conceptMenu,
-  "Brackers Inn": brackersInnMenu,
+  // "Concept": conceptMenu,
+  // "Brackers Inn": brackersInnMenu,
   "Bloom Bakes": bloomBakesMenu,
   "Roll'd Up Shawarma": rolldUpMenu,
   "Lizjay's Eatery": lizjaysMenu,
   "50 Cent": fiftyCentMenu,
-  "Pam's Check Check": pamsCheckCheck,
+  // "Pam's Check Check": pamsCheckCheck,
 };
 
 // --------------------------------------------------

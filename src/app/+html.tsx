@@ -16,7 +16,6 @@ export default function Root({ children }: PropsWithChildren) {
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
-        <link rel="icon" type="image/png" href="/favicon.png" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
 
         <meta
@@ -24,9 +23,16 @@ export default function Root({ children }: PropsWithChildren) {
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
 
-        {/* AkroBite SEO metadata */}
+        {/* AkroBite site identity */}
         <title>AkroBite | Food Delivery in Akropong, Ghana</title>
 
+        <meta name="application-name" content="AkroBite" />
+        <meta name="apple-mobile-web-app-title" content="AkroBite" />
+
+        {/* Favicon */}
+        <link rel="icon" type="image/png" href="/favicon.png" />
+
+        {/* SEO */}
         <meta
           name="description"
           content="Order delicious food from restaurants and food joints in Akropong, Ghana. Discover local meals and enjoy convenient food delivery with AkroBite."
@@ -36,34 +42,39 @@ export default function Root({ children }: PropsWithChildren) {
 
         <meta name="theme-color" content="#E53935" />
 
-        {/* Canonical URL */}
+        {/* Canonical URL for homepage */}
         <link rel="canonical" href={websiteUrl} />
 
-        {/* Open Graph / Facebook */}
+        {/* Open Graph */}
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="AkroBite" />
+
         <meta
           property="og:title"
           content="AkroBite | Food Delivery in Akropong, Ghana"
         />
+
         <meta
           property="og:description"
           content="Discover restaurants, explore delicious meals and get food delivered in Akropong with AkroBite."
         />
+
         <meta property="og:url" content={websiteUrl} />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
+
         <meta
           name="twitter:title"
           content="AkroBite | Food Delivery in Akropong, Ghana"
         />
+
         <meta
           name="twitter:description"
           content="Order delicious food from restaurants and food joints in Akropong, Ghana."
         />
 
-        {/* Google Site Name Structured Data */}
+        {/* Google site name structured data */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -76,8 +87,9 @@ export default function Root({ children }: PropsWithChildren) {
         <style
           dangerouslySetInnerHTML={{
             __html: `
-              /* Safari must not resize text by itself. */
-              html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+              html {
+                -webkit-text-size-adjust: 100%;
+              }
 
               html, body {
                 margin: 0;
@@ -93,11 +105,18 @@ export default function Root({ children }: PropsWithChildren) {
                 overscroll-behavior-y: none;
               }
 
-              html, body, #root { height: 100%; }
-              #root { min-height: -webkit-fill-available; }
+              html, body, #root {
+                height: 100%;
+              }
+
+              #root {
+                min-height: -webkit-fill-available;
+              }
 
               @supports (height: 100dvh) {
-                html, body, #root { height: 100dvh; }
+                html, body, #root {
+                  height: 100dvh;
+                }
               }
 
               input, textarea, select {

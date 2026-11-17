@@ -167,7 +167,8 @@ function AdminContent() {
         .select(
           "id, user_id, name, phone, email, event_type, event_date, guests, location, details, status, created_at",
         )
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .eq("is_active", true);
 
       if (error) {
         console.error("Could not load catering requests:", error);
@@ -200,7 +201,8 @@ function AdminContent() {
         "id, request_id, type, title, message, is_read, email_status, email_sent_at, email_error, created_at",
       )
       .order("created_at", { ascending: false })
-      .limit(50);
+      .limit(50)
+      .eq("is_active", true);
 
     if (error) {
       console.error("Could not load admin notifications:", error);

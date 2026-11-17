@@ -79,7 +79,8 @@ export default function RestaurantCallTable() {
       const { data, error } = await supabase
         .from("restaurants")
         .select("id, name, phone, phone_numbers")
-        .order("name", { ascending: true });
+        .order("name", { ascending: true })
+        .eq("is_active", true);
 
       if (error) throw error;
 
@@ -183,6 +184,7 @@ export default function RestaurantCallTable() {
           phone: numbers[0] ?? null,
         })
         .eq("id", restaurant.id)
+        .eq("is_active", true)
         .select("id");
 
       if (error) throw error;

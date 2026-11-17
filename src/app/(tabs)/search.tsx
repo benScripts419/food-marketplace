@@ -28,7 +28,8 @@ export default function SearchScreen() {
       const { data, error } = await supabase
         .from("restaurants")
         .select("id, name, description, image_url, cuisine, category")
-        .order("name");
+        .order("name")
+        .eq("is_active", true);
 
       if (!isMounted) return;
 

@@ -91,6 +91,7 @@ export default function RiderDashboard() {
             available: value,
           })
           .eq("id", user.id)
+          .eq("is_active", true)
           .select("id, full_name, is_online, available")
           .single();
 

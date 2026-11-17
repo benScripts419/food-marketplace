@@ -106,7 +106,8 @@ export default function CategoryItemsScreen() {
 
       const { data, error } = await supabase
         .from("restaurants")
-        .select("id, name, description, image_url, cuisine, category");
+        .select("id, name, description, image_url, cuisine, category")
+        .eq("is_active", true);
 
       if (error) {
         console.error("Error fetching restaurants:", error);
